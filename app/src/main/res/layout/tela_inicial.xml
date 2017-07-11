@@ -8,18 +8,20 @@
     android:weightSum="1">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="417dp"
+        android:id="@+id/logoSan"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:src="@drawable/logo_san"
-        android:id="@+id/logo_san"
-        android:layout_margin="20dp" />
+        android:layout_margin="20dp"
+        android:layout_weight="0.90"
+        android:src="@mipmap/ic_launcher" />
 
     <ProgressBar
-        style="?android:attr/progressBarStyleSmallTitle"
-        android:layout_width="300dp"
-        android:layout_gravity="center"
         android:id="@+id/progressBar"
-        android:layout_height="60dp" />
+        style="?android:attr/progressBarStyleSmallTitle"
+        android:layout_width="match_parent"
+        android:layout_height="108dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp" />
 
 </LinearLayout>
