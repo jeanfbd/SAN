@@ -33,7 +33,7 @@ public class TelaInicial extends Activity {
                 }catch (InterruptedException e){
                     e.printStackTrace();
                 }finally {
-                    Intent intent = new Intent(TelaInicial.this, Home.class);
+                    Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
                     startActivity(intent);
                 }
 
