@@ -183,7 +183,7 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
 
             marker.position(newPosition);
             marker.title(street);
-            marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
+            marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo_star));
 
             mMap.addMarker(marker);
             mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
