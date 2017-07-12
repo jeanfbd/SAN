@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginBottom="20dp"
+    android:orientation="vertical"
     android:weightSum="1">
 
     <ImageView
@@ -12,16 +12,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="20dp"
         android:layout_weight="0.90"
-        android:src="@mipmap/ic_launcher" />
+        android:adjustViewBounds="false"
+        android:src="@mipmap/ic_logo_san"/>
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleSmallTitle"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="108dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="20dp" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:elevation="20dp"
+        android:orientation="horizontal">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleSmallTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="0.70"
+            android:minHeight="60dp"
+            android:visibility="visible" />
+    </LinearLayout>
 
 </LinearLayout>
