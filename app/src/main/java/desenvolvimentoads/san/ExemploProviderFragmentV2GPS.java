@@ -114,6 +114,7 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
                     markerOption.position(arg0).icon(BitmapDescriptorFactory.fromResource(image));
                     test = googleMap.addMarker(markerOption);
                     test.setDraggable(true);
+                    test.setTitle(getStreet(arg0));
                     zoomMarker(arg0, googleMap);
 
 
@@ -158,8 +159,17 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(caragua);
-        marker.title("Marker Sidney");
-        marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
+        Geocoder geocoder = new Geocoder(this.getContext());
+        try {
+            List myLocation = geocoder.getFromLocation(caragua.latitude, caragua.longitude, 1);
+            Address address = (Address)myLocation.get(0);
+            marker.title(address.getLocality());
+            marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
 
         mMap.addMarker(marker);
         zoomMarker(marker.getPosition(), mMap);
@@ -280,5 +290,31 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
                 .tilt(30)                   // Sets the tilt of the camera to 30 degrees
                 .build();                   // Creates a CameraPosition from the builder
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    public String getStreet(LatLng location) {
+        String street = "";
+        //Classe que fornece a localização da cidade
+        Geocoder geocoder = new Geocoder(this.getContext());
+        List myLocation = null;
+
+        try {
+            //Obtendo os dados do endereço
+            myLocation = geocoder.getFromLocation(location.latitude, location.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Log.d("My Location", myLocation.toString());
+        if (myLocation != null && myLocation.size() > 0) {
+            Address address = (Address) myLocation.get(0);
+            //Pega nome da cidade
+            String city = address.getLocality();
+            //Pega nome da rua
+            street = address.getAddressLine(0);
+        }else{
+            street = "Endereço não encontrado";
+        }
+
+        return street;
     }
 }
