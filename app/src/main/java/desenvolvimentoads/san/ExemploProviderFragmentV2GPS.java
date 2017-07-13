@@ -2,12 +2,14 @@ package desenvolvimentoads.san;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -45,6 +48,7 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
     private static final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 0;
 
     private AlertDialog alerta;
+    private int image = R.mipmap.ic_maker_amarelo_star;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,6 +98,10 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
 
             mMap.getUiSettings().setZoomControlsEnabled(true);
 
+            mMap.setMinZoomPreference(10);
+
+//            mMap.setMapStyle();
+
 
 
             googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -102,12 +110,12 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
                 public void onMapLongClick(LatLng arg0) {
                     // TODO Auto-generated method stub
                     dialogAdd();
+                    MarkerOptions markerOption = new MarkerOptions();
+                    markerOption.position(arg0).icon(BitmapDescriptorFactory.fromResource(image));
+                    test = googleMap.addMarker(markerOption);
+                    test.setDraggable(true);
+                    zoomMarker(arg0, googleMap);
 
-                        MarkerOptions markerOption = new MarkerOptions();
-                        markerOption.position(arg0).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
-                        test = googleMap.addMarker(markerOption);
-                        LatLng position = test.getPosition();
-                        test.setDraggable(true);
 
                 }
             });
@@ -146,15 +154,15 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
 
         //Metodo carrega após o mapa estiver pronto usar o timeready da tela inicial
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
+        LatLng caragua = new LatLng(-23.6202800, -45.4130600);
 
         MarkerOptions marker = new MarkerOptions();
-        marker.position(sydney);
+        marker.position(caragua);
         marker.title("Marker Sidney");
         marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
 
         mMap.addMarker(marker);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+        zoomMarker(marker.getPosition(), mMap);
     }
 
     @Override
@@ -166,8 +174,6 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
     @Override
     public void onLocationChanged(Location location) {
         Toast.makeText(getActivity(), "Posição Alterada", Toast.LENGTH_LONG).show();
-
-        newMarker(location);
     }
 
     @Override
@@ -220,12 +226,20 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
     }
 
     private void dialogAdd() {
+
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
         //-pegamos nossa instancia da classe
         LayoutInflater li = LayoutInflater.from(getContext());
 
         //inflamos o layout alerta.xml na view
         View view = li.inflate(R.layout.dialogadd, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Criar Marcador");
+        builder.setView(view);
+        alerta = builder.create();
+        alerta.show();
+
         //definimos para o botão do layout um clickListener
         view.findViewById(R.id.btConfirm).setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
@@ -239,10 +253,32 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
             }
         });
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Titulo");
-        builder.setView(view);
-        alerta = builder.create();
-        alerta.show();
+        view.findViewById(R.id.yellow_star).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                image = R.mipmap.ic_maker_amarelo_star;
+            }
+        });
+
+        view.findViewById(R.id.orange_star).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                image = R.mipmap.ic_maker_laranja_star;
+            }
+        });
+
+        view.findViewById(R.id.red_star).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                image = R.mipmap.ic_maker_vermelho_star;
+            }
+        });
+    }
+
+    public void zoomMarker(LatLng arg0, GoogleMap googleMap){
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(arg0)               // Sets the center of the map
+                .zoom(17)                   // Sets the zoom
+                .bearing(90)                // Sets the orientation of the camera to east
+                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+                .build();                   // Creates a CameraPosition from the builder
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 }
