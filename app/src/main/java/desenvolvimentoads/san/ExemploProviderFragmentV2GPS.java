@@ -12,7 +12,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,6 +25,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
@@ -30,12 +35,16 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
 
     private GoogleMap mMap;
 
+    Marker test = null;
+
     private LocationManager locationManager;
 
     private static final String TAG = "ExemploProFragmentV2";
 
 
     private static final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 0;
+
+    private AlertDialog alerta;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,8 +55,6 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
     @Override
     public void onResume() {
         super.onResume();
-
-        //Ativa o GPS
         //Ativa o GPS
         try {
             locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -75,7 +82,7 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
 
         try {
 
@@ -86,6 +93,25 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
             mMap.setOnMapClickListener(this);
 
             mMap.getUiSettings().setZoomControlsEnabled(true);
+
+
+
+            googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+
+                @Override
+                public void onMapLongClick(LatLng arg0) {
+                    // TODO Auto-generated method stub
+                    dialogAdd();
+
+                        MarkerOptions markerOption = new MarkerOptions();
+                        markerOption.position(arg0).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
+                        test = googleMap.addMarker(markerOption);
+                        LatLng position = test.getPosition();
+                        test.setDraggable(true);
+
+                }
+            });
+
 
             if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
                     PackageManager.PERMISSION_GRANTED &&
@@ -134,6 +160,7 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
     @Override
     public void onMapClick(LatLng latLng) {
         Toast.makeText(getContext(), "Coordenadas: "+latLng.toString(), Toast.LENGTH_LONG).show();
+
     }
 
     @Override
@@ -190,7 +217,32 @@ public class ExemploProviderFragmentV2GPS extends SupportMapFragment implements 
         } else {
             Log.d("geolocation", "endereço não localizado");
         }
+    }
 
+    private void dialogAdd() {
+        //LayoutInflater é utilizado para inflar nosso layout em uma view.
+        //-pegamos nossa instancia da classe
+        LayoutInflater li = LayoutInflater.from(getContext());
 
+        //inflamos o layout alerta.xml na view
+        View view = li.inflate(R.layout.dialogadd, null);
+        //definimos para o botão do layout um clickListener
+        view.findViewById(R.id.btConfirm).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                alerta.dismiss();
+            }
+        });
+
+        view.findViewById(R.id.btCancel).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                alerta.dismiss();
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Titulo");
+        builder.setView(view);
+        alerta = builder.create();
+        alerta.show();
     }
 }

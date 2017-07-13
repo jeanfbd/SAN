@@ -1,0 +1,60 @@
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:stretchColumns="*"
+    android:shrinkColumns="*"
+    android:background="#ffffff">
+
+    <!-- Linha 1 com 3 colunas -->
+    <TableRow
+        android:id="@+id/tableRow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="40dp">
+
+
+        <ImageView
+            android:id="@+id/yellow_star"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:gravity="center"
+            android:src="@mipmap/ic_maker_amarelo_star" />
+
+        <ImageView
+            android:id="@+id/orange_star"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:src="@mipmap/ic_maker_laranja_star" />
+
+        <ImageView
+            android:id="@+id/red_star"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:src="@mipmap/ic_maker_vermelho_star" />
+    </TableRow>
+
+    <TableLayout android:layout_marginTop="60dp">
+        <!-- Linha 2 com 2 colunas -->
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/btConfirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confirmar" />
+
+            <Button
+                android:id="@+id/btCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancelar" />
+        </TableRow>
+    </TableLayout>
+</TableLayout>
