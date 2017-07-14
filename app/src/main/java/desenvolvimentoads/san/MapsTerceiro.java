@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.Image;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -113,6 +114,25 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     // TODO Auto-generated method stub
                     dialogAdd(arg0);
 
+                }
+            });
+
+            googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                @Override
+                public void onMarkerDragStart(Marker marker) {
+                    Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+
+                @Override
+                public void onMarkerDrag(Marker marker) {
+                    Snackbar.make(getView(), "Confirme a posição do marcador", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+
+                @Override
+                public void onMarkerDragEnd(Marker marker) {
+                    dialogDrag(marker);
                 }
             });
 
@@ -230,97 +250,132 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
+    private void dialogDrag(final Marker marker) {
+        //LayoutInflater é utilizado para inflar nosso layout em uma view.
+        //-pegamos nossa instancia da classe
+        LayoutInflater li = LayoutInflater.from(getContext());
 
-        private void dialogAdd(final LatLng latLng) {
+        //inflamos o layout alerta.xml na view
+        final View view = li.inflate(R.layout.confirm_drag, null);
 
-            //LayoutInflater é utilizado para inflar nosso layout em uma view.
-            //-pegamos nossa instancia da classe
-            LayoutInflater li = LayoutInflater.from(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Alterar Posição");
+        final Button confirm = (Button)  view.findViewById(R.id.btConfirm);
 
-            //inflamos o layout alerta.xml na view
-            final View view = li.inflate(R.layout.dialogadd, null);
+        Button cancel = (Button)  view.findViewById(R.id.btCancel);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Criar Marcador");
-            final Button confirm = (Button)  view.findViewById(R.id.btConfirm);
+        confirm.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                alerta.dismiss();
+                marker.setDraggable(false);
+                marker.setTitle(getStreet(marker.getPosition()));
+                Snackbar.make(getView(), "Confirmado posição!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
 
-            Button cancel = (Button)  view.findViewById(R.id.btCancel);
-
-            confirm.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View arg0) {
-                    alerta.dismiss();
-
-
-                    MarkerOptions markerOption = new MarkerOptions();
-                    markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
-                    marcador = googleMapFinal.addMarker(markerOption);
-                    marcador.setDraggable(true);
-                    marcador.setTitle(getStreet(latLng));
-                    zoomMarker(latLng, googleMapFinal);
-
-
-                }
-            });
-
-            cancel.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View arg0) {
-
-                    alerta.dismiss();
+        cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                alerta.dismiss();
+            }
+        });
+        builder.setView(view);
+        alerta = builder.create();
+        alerta.show();
+    }
 
 
+    private void dialogAdd(final LatLng latLng) {
 
-                }
-            });
+        //LayoutInflater é utilizado para inflar nosso layout em uma view.
+        //-pegamos nossa instancia da classe
+        LayoutInflater li = LayoutInflater.from(getContext());
 
-            confirm.setVisibility(View.INVISIBLE);
+        //inflamos o layout alerta.xml na view
+        final View view = li.inflate(R.layout.dialogadd, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Criar Marcador");
+        final Button confirm = (Button)  view.findViewById(R.id.btConfirm);
+
+        Button cancel = (Button)  view.findViewById(R.id.btCancel);
+
+        confirm.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                alerta.dismiss();
 
 
-            ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
-
-            amarelo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    image = R.mipmap.ic_maker_amarelo_star;
-                    confirm.setVisibility(View.VISIBLE);
-                }
-            });
+                MarkerOptions markerOption = new MarkerOptions();
+                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
+                marcador = googleMapFinal.addMarker(markerOption);
+                marcador.setDraggable(true);
+                marcador.setTitle(getStreet(latLng));
+                //colocar função de drag quando cadastrar o marker
+                zoomMarker(latLng, googleMapFinal);
 
 
-            ImageView laranja = (ImageView) view.findViewById(R.id.orange_star);
+            }
+        });
 
-            laranja.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    image = R.mipmap.ic_maker_laranja_star;
-                    confirm.setVisibility(View.VISIBLE);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
 
-                }
-            });
-
-            ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
-
-            vermelho.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    image = R.mipmap.ic_maker_vermelho_star;
-                    confirm.setVisibility(View.VISIBLE);
-
-                }
-            });
-
-            builder.setView(view);
-
-            alerta = builder.create();
-
-            alerta.show();
+                alerta.dismiss();
 
 
 
+            }
+        });
+
+        confirm.setVisibility(View.INVISIBLE);
+
+
+        ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
+
+        amarelo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                image = R.mipmap.ic_maker_amarelo_star;
+                confirm.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+        ImageView laranja = (ImageView) view.findViewById(R.id.orange_star);
+
+        laranja.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                image = R.mipmap.ic_maker_laranja_star;
+                confirm.setVisibility(View.VISIBLE);
+
+            }
+        });
+
+        ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
+
+        vermelho.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                image = R.mipmap.ic_maker_vermelho_star;
+                confirm.setVisibility(View.VISIBLE);
+
+            }
+        });
+
+        builder.setView(view);
+
+        alerta = builder.create();
+
+        alerta.show();
 
 
 
 
-        }
+
+
+
+    }
 
 
     public void zoomMarker(LatLng arg0, GoogleMap googleMap){
