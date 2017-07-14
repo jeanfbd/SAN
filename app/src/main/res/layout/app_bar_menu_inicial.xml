@@ -20,6 +20,35 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_menu_inicial" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:clickable="true"
+        app:backgroundTint="@android:color/holo_blue_bright"
+        app:elevation="5dp"
+        app:fabSize="mini"
+        app:layout_anchor="@+id/include"
+        app:layout_anchorGravity="bottom|center"
+        app:rippleColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:srcCompat="@mipmap/ic_maker_vermelho" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fabCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:clickable="true"
+        app:backgroundTint="@android:color/holo_blue_bright"
+        app:elevation="5dp"
+        app:fabSize="mini"
+        app:layout_anchor="@+id/include"
+        app:layout_anchorGravity="bottom|center"
+        app:srcCompat="@android:drawable/ic_delete" />
+
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_menu_inicial" />
 
 </android.support.design.widget.CoordinatorLayout>

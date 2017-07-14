@@ -23,6 +23,7 @@ public class TelaInicial extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tela_inicial);
 
+        /*
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
 
         Thread timerThread = new Thread(){
@@ -63,6 +64,12 @@ public class TelaInicial extends Activity {
 
         timerThread.start();
         timerBar.start();
+
+        */
+
+        Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
+        startActivity(intent);
+
     }
 
     @Override

@@ -1,6 +1,8 @@
 package desenvolvimentoads.san;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -12,12 +14,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MenuInicial extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FragmentManager fragmentManager;
-
+    static FloatingActionButton fab;
+    static FloatingActionButton fab2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,9 +43,60 @@ public class MenuInicial extends AppCompatActivity
 
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.add(R.id.container, new MapsFragment(), "MapsFragment");
+        fragmentTransaction.add(R.id.container, new MapsPrincipal(), "MapsPrincipal");
 
         fragmentTransaction.commitAllowingStateLoss();
+
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setVisibility(View.VISIBLE);
+
+
+        fab2 = (FloatingActionButton) findViewById(R.id.fabCancel);
+        fab2.setVisibility(View.GONE);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Snackbar.make(view, "Click no mapa para criar um marcador ou click novamente para Cancelar", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                changeMind();
+
+                MapsPrincipal.flagOne();
+
+            }
+        });
+
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Snackbar.make(view, "Criação do novo marcador Cancelada", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                changeMind();
+
+                MapsPrincipal.flagTwo();
+            }
+        });
+
+    }
+
+
+    public static void changeMind(){
+
+        if(fab.isShown()){
+            fab.setVisibility(View.GONE);
+            fab2.setVisibility(View.VISIBLE);
+        }
+
+        else {
+            fab.setVisibility(View.VISIBLE);
+            fab2.setVisibility(View.GONE);
+
+        }
+
+
     }
 
     @Override
@@ -85,14 +140,14 @@ public class MenuInicial extends AppCompatActivity
         switch (id){
             case R.id.nav_all_marker:
 
-                showFragment(new MapsFragment(), "Mapsfragment");
+                showFragment(new MapsPrincipal(), "Mapsfragment");
                 break;
             case R.id.nav_user_marker:
 
-                showFragment(new ExemploProviderFragmentV1(), "ExemploProviderV1");
+                showFragment(new MapsSegundo(), "ExemploProviderV1");
                 break;
             case R.id.nav_user_disable:
-                showFragment(new ExemploProviderFragmentV2GPS(), "ExemploProviderV2GPS");
+                showFragment(new MapsTerceiro(), "ExemploProviderV2GPS");
                 break;
         }
 
@@ -108,4 +163,7 @@ public class MenuInicial extends AppCompatActivity
 
         fragmentTransaction.commit();
     }
+
+
+
 }
