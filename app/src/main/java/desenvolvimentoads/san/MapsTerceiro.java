@@ -2,6 +2,7 @@ package desenvolvimentoads.san;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.location.Address;
 import android.location.Criteria;
@@ -30,6 +31,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -41,7 +44,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private GoogleMap mMap;
     private GoogleMap googleMapFinal;
+    private Circle circle;
+
     Marker marcador = null;
+    LatLng inicial = null;
 
     private LocationManager locationManager;
 
@@ -120,6 +126,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
                 @Override
                 public void onMarkerDragStart(Marker marker) {
+                    inicial = marker.getPosition();
                     Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
@@ -269,6 +276,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 alerta.dismiss();
                 marker.setDraggable(false);
                 marker.setTitle(getStreet(marker.getPosition()));
+                removeCircle(circle);
+                CreateCircle(marker);
                 Snackbar.make(getView(), "Confirmado posição!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -311,7 +320,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 marcador.setDraggable(true);
                 marcador.setTitle(getStreet(latLng));
                 //colocar função de drag quando cadastrar o marker
+                CreateCircle(marcador);
                 zoomMarker(latLng, googleMapFinal);
+
+
 
 
             }
@@ -412,5 +424,30 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
 
         return street;
+    }
+
+    public void CreateCircle (Marker marker){
+        circle = mMap.addCircle(new CircleOptions()
+                .center(new LatLng(marker.getPosition().latitude, marker.getPosition().longitude))
+                .radius(10)
+                .strokeWidth(10)
+                .strokeColor(Color.argb(128, 173,216,230))
+                .fillColor(Color.argb(24, 30,144,255))
+                .clickable(true));
+
+        googleMapFinal.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+
+            @Override
+            public void onCircleClick(Circle circle) {
+                // Flip the r, g and b components of the circle's
+                // stroke color.
+                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+                circle.setStrokeColor(strokeColor);
+            }
+        });
+    }
+
+    public void removeCircle(Circle circ){
+        circ.remove();
     }
 }
