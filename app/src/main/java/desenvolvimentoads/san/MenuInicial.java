@@ -140,14 +140,17 @@ public class MenuInicial extends AppCompatActivity
         switch (id){
             case R.id.nav_all_marker:
 
-                showFragment(new MapsPrincipal(), "Mapsfragment");
+                showFragment(new MapsPrincipal(), "Todos Marcadores");
+                setTitle("Todos Marcadores");
                 break;
             case R.id.nav_user_marker:
 
-                showFragment(new MapsSegundo(), "ExemploProviderV1");
+                showFragment(new MapsSegundo(), "Marcadores do Usuário");
+                setTitle("Marcadores do Usuário");
                 break;
             case R.id.nav_user_disable:
-                showFragment(new MapsTerceiro(), "ExemploProviderV2GPS");
+                showFragment(new MapsTerceiro(), "Marcadores Inativos do sistema");
+                setTitle("Marcadores Inativos do sistema");
                 break;
         }
 
