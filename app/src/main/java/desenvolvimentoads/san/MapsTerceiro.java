@@ -1,5 +1,6 @@
 package desenvolvimentoads.san;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -39,6 +40,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener{
 
@@ -48,6 +51,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     Marker marcador = null;
     LatLng inicial = null;
+    private int waited = 0;
 
     private LocationManager locationManager;
 
@@ -109,7 +113,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             mMap.setMinZoomPreference(10);
 
-//            mMap.setMapStyle();
+            //Estilos de mapas
+            //mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            //mMap.setMapStyle();
 
 
 
@@ -120,6 +126,26 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     // TODO Auto-generated method stub
                     dialogAdd(arg0);
 
+                }
+            });
+
+            googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                @Override
+                public View getInfoWindow(Marker marker) {
+                    return null;
+                }
+
+                @Override
+                public View getInfoContents(Marker marker) {
+                    return null;
+                }
+            });
+
+            googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                @Override
+                public void onInfoWindowClick(Marker marker) {
+                    Toast.makeText(getContext(), "Info window clicked",Toast.LENGTH_LONG).show();
+                    marker.showInfoWindow();
                 }
             });
 
@@ -316,16 +342,14 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 MarkerOptions markerOption = new MarkerOptions();
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
-                marcador = googleMapFinal.addMarker(markerOption);
-                marcador.setDraggable(true);
-                marcador.setTitle(getStreet(latLng));
+                Marker newMarker = googleMapFinal.addMarker(markerOption);
+                newMarker.setDraggable(true);
+                newMarker.setTitle(getStreet(latLng));
                 //colocar função de drag quando cadastrar o marker
-                CreateCircle(marcador);
+                CreateCircle(newMarker);
                 zoomMarker(latLng, googleMapFinal);
-
-
-
-
+                LiveThread liveThread = new LiveThread();
+                liveThread.liveMarkerCount(15, newMarker, getActivity());
             }
         });
 
@@ -449,5 +473,32 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public void removeCircle(Circle circ){
         circ.remove();
+    }
+
+    public void liveMarkerCount(final int timeSeconds, final Marker marker){//
+        Thread thread = new Thread() {
+            public void run() {
+                while (waited <= timeSeconds) {
+                    try {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                marker.setSnippet("Tempo de Duração: "+(timeSeconds - waited));
+                                marker.showInfoWindow();
+                                if (waited == timeSeconds){
+                                    marker.setSnippet(null);
+                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
+                                }
+                            }
+                        });
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    waited++;
+                }
+            }
+        };
+        thread.start();
     }
 }
