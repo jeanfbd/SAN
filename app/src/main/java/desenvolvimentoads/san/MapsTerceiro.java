@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
 import android.location.Address;
 import android.location.Criteria;
@@ -19,11 +20,14 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -137,7 +141,27 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 @Override
                 public View getInfoContents(Marker marker) {
-                    return null;
+                    LinearLayout info = new LinearLayout(getContext());
+                    info.setOrientation(LinearLayout.VERTICAL);
+
+                    ImageView imageView = new ImageView(getContext());
+                    imageView.setImageResource(image);
+
+                    TextView title = new TextView(getContext());
+                    title.setTextColor(Color.BLACK);
+                    title.setGravity(Gravity.CENTER);
+                    title.setTypeface(null, Typeface.BOLD);
+                    title.setText(marker.getTitle());
+
+                    TextView snippet = new TextView(getContext());
+                    snippet.setTextColor(Color.GRAY);
+                    snippet.setText(marker.getSnippet());
+
+                    info.addView(imageView);
+                    info.addView(title);
+                    info.addView(snippet);
+
+                    return info;
                 }
             });
 
