@@ -56,7 +56,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         mMap = googleMap;
 
         mMap.setOnMapClickListener(this);
-
+        mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         //Metodo carrega após o mapa estiver pronto usar o timeready da tela inicial
         // Add a marker in Sydney and move the camera
@@ -155,35 +155,51 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         confirm.setVisibility(View.INVISIBLE);
 
 
-        ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
+        final ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
+        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+
+
+
+
+        final ImageView laranja = (ImageView) view.findViewById(R.id.orange_star);
+        laranja.setImageResource(R.mipmap.ic_maker_laranja);
+
+
+        final ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
+        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
 
         amarelo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               image = R.mipmap.ic_maker_amarelo_star;
+                image = R.mipmap.ic_maker_amarelo_star;
+                amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
+                laranja.setImageResource(R.mipmap.ic_maker_laranja);
+                vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
                 confirm.setVisibility(View.VISIBLE);
             }
         });
-
-
-        ImageView laranja = (ImageView) view.findViewById(R.id.orange_star);
 
         laranja.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 image = R.mipmap.ic_maker_laranja_star;
+                amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+                laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
+                vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
                 confirm.setVisibility(View.VISIBLE);
 
             }
         });
-
-        ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
-
         vermelho.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 image = R.mipmap.ic_maker_vermelho_star;
+                amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+                laranja.setImageResource(R.mipmap.ic_maker_laranja);
+                vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
                 confirm.setVisibility(View.VISIBLE);
+
+
 
             }
         });

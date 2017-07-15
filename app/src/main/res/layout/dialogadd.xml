@@ -1,10 +1,9 @@
-<TableLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:stretchColumns="*"
+    android:background="#ffffff"
     android:shrinkColumns="*"
-    android:background="#ffffff">
+    android:stretchColumns="*">
 
     <!-- Linha 1 com 3 colunas -->
     <TableRow
