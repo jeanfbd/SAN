@@ -42,10 +42,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
+
+import desenvolvimentoads.san.DAO.MarkerDAO;
+import desenvolvimentoads.san.Helper.DateHelper;
 
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener{
 
@@ -71,6 +77,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
+        //banco();
     }
 
     @Override
@@ -363,17 +370,21 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
 
+                desenvolvimentoads.san.Model.Marker markerClass = new desenvolvimentoads.san.Model.Marker(1,latLng.latitude, latLng.longitude,getStreet(latLng), 10, image);
+                MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
+                markerDAO.saveMarker(markerClass);
+                markerDAO.closeConection();
 
-                MarkerOptions markerOption = new MarkerOptions();
-                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
-                Marker newMarker = googleMapFinal.addMarker(markerOption);
-                newMarker.setDraggable(true);
-                newMarker.setTitle(getStreet(latLng));
-                //colocar função de drag quando cadastrar o marker
-                CreateCircle(newMarker);
-                zoomMarker(latLng, googleMapFinal);
-                LiveThread liveThread = new LiveThread();
-                liveThread.liveMarkerCount(15, newMarker, getActivity());
+//                MarkerOptions markerOption = new MarkerOptions();
+//                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
+//                Marker newMarker = googleMapFinal.addMarker(markerOption);
+//                newMarker.setDraggable(true);
+//                newMarker.setTitle(getStreet(latLng));
+//                //colocar função de drag quando cadastrar o marker
+//                CreateCircle(newMarker);
+//                zoomMarker(latLng, googleMapFinal);
+//                LiveThread liveThread = new LiveThread();
+//                liveThread.liveMarkerCount(15, newMarker, getActivity());
             }
         });
 
@@ -524,5 +535,44 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }
         };
         thread.start();
+    }
+
+    private void banco() {
+
+        File f = new File("/data/data/desenvolvimentoads/databases/san.db");
+        FileInputStream fis=null;
+        FileOutputStream fos=null;
+
+        try
+        {
+            fis=new FileInputStream(f);
+            fos=new FileOutputStream("/mnt/sdcard/db_dump.db");
+            while(true)
+            {
+                int i=fis.read();
+                if(i!=-1)
+                {fos.write(i);}
+                else
+                {break;}
+            }
+            fos.flush();
+            Toast.makeText(getContext(), "DB dump OK", Toast.LENGTH_LONG).show();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "DB dump ERROR", Toast.LENGTH_LONG).show();
+        }
+        finally
+        {
+            try
+            {
+                fos.close();
+                fis.close();
+            }
+            catch(IOException ioe)
+            {}
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 package desenvolvimentoads.san;
 
 import android.app.Activity;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
@@ -43,6 +44,11 @@ public class LiveThread {
             }
         };
         thread.start();
+
+//        if (thread.isAlive()){
+//            marker.setVisible(false);
+//            Toast.makeText(activity, "Terminou a Thread",Toast.LENGTH_LONG).show();
+//        }
     }
 
     public String getSystemDate() {
