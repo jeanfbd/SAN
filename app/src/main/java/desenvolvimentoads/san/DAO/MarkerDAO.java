@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,7 +39,7 @@ public class MarkerDAO {
      * Variavel estatica que armazenam a query de criacao da tabela marker no banco de dados
      */
     public static final String CREATE_TABLE_MARKER = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "("
-            + ID + " INTEGER NOT NULL  PRIMARY KEY AUTOINCREMENT, "
+            + ID + " INTEGER  PRIMARY KEY AUTOINCREMENT, "
             + IDUSER + " INTEGER NOT NULL, "
             + LATITUDE + " DOUBLE NOT NULL, "
             + LONGITUDE + " DOUBLE NOT NULL, "
@@ -48,7 +49,7 @@ public class MarkerDAO {
             + CREATIONDATE + " DATETIME NOT NULL, "
             + DRAGGABLE + " BOOLEAN NOT NULL DEFAULT 1, "
             + STATUS + " BOOLEAN NOT NULL DEFAULT 1"
-            + ")";
+            + ");";
 
     /**
      * Variavel estatica que armazenam a query de exclusao da tabela marker no banco de dados
@@ -89,8 +90,22 @@ public class MarkerDAO {
     }
 
     public List<Marker> getAllMarkersActive() {
-        String queryReturnAllActive = "SELECT * FROM " + TABLE_NAME + "WHERE " + STATUS + "= TRUE";
+        String queryReturnAllActive = "SELECT * FROM " + TABLE_NAME + " WHERE " + STATUS + "= TRUE";
         Cursor cursor = dataBase.rawQuery(queryReturnAllActive, null);
+        List<Marker> markers = markerCreateCursor(cursor);
+        return markers;
+    }
+
+    public List<Marker> getPerLatLng(double latitude, double longitude) {
+        String queryReturnPerLatLng = "SELECT * FROM " + TABLE_NAME + " WHERE " + LATITUDE + " = " + latitude + " AND "+ LONGITUDE + " = " + longitude;
+        Cursor cursor = dataBase.rawQuery(queryReturnPerLatLng, null);
+        List<Marker> markers = markerCreateCursor(cursor);
+        return markers;
+    }
+
+    public List<Marker> getPerCreationDate(String date) {
+        String queryReturnPerLatLng = "SELECT * FROM " + TABLE_NAME + " WHERE " + CREATIONDATE + " = " + date;
+        Cursor cursor = dataBase.rawQuery(queryReturnPerLatLng, null);
         List<Marker> markers = markerCreateCursor(cursor);
         return markers;
     }
@@ -109,6 +124,7 @@ public class MarkerDAO {
                 String.valueOf(marker.getId())
         };
         dataBase.update(TABLE_NAME, values, ID + " = ?", replaceValues);
+        Log.d("Status de"+marker.getId(), String.valueOf(marker.isStatus()));
     }
 
     public void closeConection() {
@@ -120,6 +136,7 @@ public class MarkerDAO {
         List<Marker> markers = new ArrayList<>();
         if (cursor == null)
             return markers;
+
         try {
             if (cursor.moveToFirst()) {
                 do {
@@ -160,7 +177,7 @@ public class MarkerDAO {
 
     private ContentValues contentValuesMarker(Marker marker){
         ContentValues values = new ContentValues();
-        values.put(ID, marker.getId());
+        //values.put(ID, marker.getId());
         values.put(IDUSER, marker.getIdUser());
         values.put(LATITUDE, marker.getLatitude());
         values.put(LONGITUDE, marker.getLongitude());
@@ -168,19 +185,19 @@ public class MarkerDAO {
         values.put(LIFETIME, marker.getLifeTime());
         values.put(IMAGE, marker.getImage());
         values.put(CREATIONDATE, marker.getCreationDate());
-        values.put(DRAGGABLE, marker.isDraggable());
-        values.put(STATUS, marker.isStatus());
-
-        Log.d(ID, String.valueOf(marker.getId()));
-        Log.d(IDUSER, String.valueOf(marker.getIdUser()));
-        Log.d(LATITUDE, String.valueOf(marker.getLatitude()));
-        Log.d(LONGITUDE, String.valueOf(marker.getLongitude()));
-        Log.d(TITLE, String.valueOf(marker.getTitle()));
-        Log.d(LIFETIME, String.valueOf(marker.getLifeTime()));
-        Log.d(IMAGE, String.valueOf(marker.getImage()));
-        Log.d(CREATIONDATE, String.valueOf(marker.getCreationDate()));
-        Log.d(DRAGGABLE, String.valueOf(marker.isDraggable()));
-        Log.d(STATUS, String.valueOf(marker.isStatus()));
+        //values.put(DRAGGABLE, marker.isDraggable());
+//        //values.put(STATUS, marker.isStatus());
+//
+//        Log.d(ID, String.valueOf(marker.getId()));
+//        Log.d(IDUSER, String.valueOf(marker.getIdUser()));
+//        Log.d(LATITUDE, String.valueOf(marker.getLatitude()));
+//        Log.d(LONGITUDE, String.valueOf(marker.getLongitude()));
+//        Log.d(TITLE, String.valueOf(marker.getTitle()));
+//        Log.d(LIFETIME, String.valueOf(marker.getLifeTime()));
+//        Log.d(IMAGE, String.valueOf(marker.getImage()));
+//        Log.d(CREATIONDATE, String.valueOf(marker.getCreationDate()));
+//        Log.d(DRAGGABLE, String.valueOf(marker.isDraggable()));
+//        Log.d(STATUS, String.valueOf(marker.isStatus()));
 
         return values;
     }

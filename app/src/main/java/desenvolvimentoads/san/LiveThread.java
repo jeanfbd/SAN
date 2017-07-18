@@ -1,72 +1,47 @@
 package desenvolvimentoads.san;
 
 import android.app.Activity;
-import android.widget.Toast;
-
+import android.util.Log;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
+import desenvolvimentoads.san.DAO.MarkerDAO;
+import desenvolvimentoads.san.Helper.DateHelper;
 /**
  * Created by jeanf on 15/07/2017.
  */
 
 public class LiveThread {
-    private int waited = 0;
-
-    public void liveMarkerCount(final int timeSeconds, final Marker marker, final Activity activity) {//
-        final String systemDate = getSystemDate();
-        Thread thread = new Thread() {
-            public void run() {
-                while (waited <= timeSeconds) {
-                    try {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                marker.setSnippet("Data Registro: "+(systemDate)+"\n"+
-                                                  "Tempo de Duração: "+(timeSeconds - waited));
-                                marker.showInfoWindow();
-                                if (waited == timeSeconds) {
-                                    marker.setSnippet(null);
-                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
+    public void liveMarkerCount(final Marker marker, final desenvolvimentoads.san.Model.Marker markerClass, final Activity activity) {//
+        final MarkerDAO markerDAO = MarkerDAO.getInstance(activity);
+        if (markerClass.getLifeTime() != 0 && markerClass.isStatus()){
+            new Thread() {
+                public void run() {
+                    while (markerClass.getLifeTime() != 0) {
+                        try {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    markerClass.setLifeTime(markerClass.getLifeTime() - 1);
+                                    markerDAO.update(markerClass);
+//                                marker.setSnippet("Data Registro: "+(markerClass.getCreationDate())+"\n"+
+//                                                  "Tempo de Duração: "+(markerClass.getLifeTime() - waited));
+                                    marker.setSnippet("Data Registro: "+(DateHelper.dateBRFormat(markerClass.getCreationDate()))+"\n"+
+                                            "Tempo de Duração: "+(markerClass.getLifeTime()));
+                                    if (markerClass.getLifeTime() == 0) {
+                                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
+                                        markerClass.setStatus(false);
+                                        markerDAO.update(markerClass);
+                                        marker.setVisible(markerClass.isStatus());
+                                    }
                                 }
-                            }
-                        });
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                            });
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    waited++;
                 }
-            }
-        };
-        thread.start();
-
-//        if (thread.isAlive()){
-//            marker.setVisible(false);
-//            Toast.makeText(activity, "Terminou a Thread",Toast.LENGTH_LONG).show();
-//        }
+            }.start();
+        }
     }
-
-    public String getSystemDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
-        // OU
-        SimpleDateFormat dateFormat_hora = new SimpleDateFormat("HH:mm:ss");
-
-        Date data = new Date();
-
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(data);
-        Date data_atual = cal.getTime();
-
-        String data_completa = dateFormat.format(data_atual);
-
-        String hora_atual = dateFormat_hora.format(data_atual);
-
-        return data_completa;
-    }
-
 }

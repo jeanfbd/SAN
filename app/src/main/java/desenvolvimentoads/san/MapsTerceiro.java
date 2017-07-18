@@ -3,6 +3,7 @@ package desenvolvimentoads.san;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
@@ -58,9 +60,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     private GoogleMap mMap;
     private GoogleMap googleMapFinal;
     private Circle circle;
-
-    Marker marcador = null;
-    LatLng inicial = null;
+    private LatLng inicial = null;
     private int waited = 0;
 
     private LocationManager locationManager;
@@ -77,13 +77,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
-        //banco();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        //Ativa o GPS
         try {
             locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,0,this);
@@ -97,7 +95,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         super.onPause();
         locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
-
     }
 
     /**
@@ -117,12 +114,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
             googleMapFinal = googleMap;
             mMap = googleMap;
-
             mMap.setOnMapClickListener(this);
-
             mMap.getUiSettings().setZoomControlsEnabled(true);
-
             mMap.setMinZoomPreference(10);
+            loadMarkers();
 
             //Estilos de mapas
             //mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
@@ -135,6 +130,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 @Override
                 public void onMapLongClick(LatLng arg0) {
                     // TODO Auto-generated method stub
+                    inicial = arg0;
                     dialogAdd(arg0);
 
                 }
@@ -175,7 +171,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
                 public void onInfoWindowClick(Marker marker) {
-                    Toast.makeText(getContext(), "Info window clicked",Toast.LENGTH_LONG).show();
                     marker.showInfoWindow();
                 }
             });
@@ -183,7 +178,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
                 @Override
                 public void onMarkerDragStart(Marker marker) {
-                    inicial = marker.getPosition();
+                    Log.d("Marker: ", String.valueOf(marker.getPosition()));
                     Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
@@ -231,28 +226,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }catch (SecurityException ex){
             Log.e(TAG, "Erro", ex);
         }
-
-        //Metodo carrega após o mapa estiver pronto usar o timeready da tela inicial
-        // Add a marker in Sydney and move the camera
         LatLng caragua = new LatLng(-23.6202800, -45.4130600);
-
-        MarkerOptions marker = new MarkerOptions();
-        marker.position(caragua);
-        Geocoder geocoder = new Geocoder(this.getContext());
-        try {
-            List myLocation = geocoder.getFromLocation(caragua.latitude, caragua.longitude, 1);
-            Address address = (Address)myLocation.get(0);
-            marker.title(address.getLocality());
-            marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-
-        mMap.addMarker(marker);
-        zoomMarker(marker.getPosition(), mMap);
+        zoomMarker(caragua,googleMapFinal);
     }
+
+
 
     @Override
     public void onMapClick(LatLng latLng) {
@@ -280,39 +258,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         Toast.makeText(getActivity(), "Provider Desabilitado", Toast.LENGTH_LONG).show();
     }
 
-    private void newMarker(Location location){
-
-        LatLng newPosition = new LatLng(location.getLatitude(), location.getLongitude());
-        MarkerOptions marker = new MarkerOptions();
-
-        //Classe que fornece a localização da cidade
-        Geocoder geocoder = new Geocoder(this.getContext());
-        List myLocation = null;
-
-        try {
-            //Obtendo os dados do endereço
-            myLocation = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //Log.d("My Location", myLocation.toString());
-        if ( myLocation != null && myLocation.size() > 0) {
-            Address address = (Address)myLocation.get(0);
-            //Pega nome da cidade
-            String city = address.getLocality();
-            //Pega nome da rua
-            String street = address.getAddressLine(0);
-
-            marker.position(newPosition);
-            marker.title(street);
-            marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo_star));
-
-            mMap.addMarker(marker);
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-        } else {
-            Log.d("geolocation", "endereço não localizado");
-        }
-    }
 
     private void dialogDrag(final Marker marker) {
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
@@ -331,8 +276,22 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 alerta.dismiss();
-                marker.setDraggable(false);
-                marker.setTitle(getStreet(marker.getPosition()));
+                Log.d("Latitude: ", String.valueOf(inicial.latitude));
+                Log.d("Logitude: ", String.valueOf(inicial.longitude));
+                MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
+                List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getPerLatLng(inicial.latitude, inicial.longitude);
+                desenvolvimentoads.san.Model.Marker markerClass = markers.get(0);
+                markerClass.setDraggable(false);
+                markerClass.setLatitude(marker.getPosition().latitude);
+                markerClass.setLongitude(marker.getPosition().longitude);
+                markerClass.setTitle(getStreet(marker.getPosition()));
+                markerDAO.update(markerClass);
+
+
+                marker.setDraggable(markerClass.isDraggable());
+                marker.setTitle(markerClass.getTitle());
+
+
                 removeCircle(circle);
                 CreateCircle(marker);
                 Snackbar.make(getView(), "Confirmado posição!", Snackbar.LENGTH_LONG)
@@ -349,7 +308,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         alerta = builder.create();
         alerta.show();
     }
-
 
     private void dialogAdd(final LatLng latLng) {
 
@@ -373,28 +331,25 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 desenvolvimentoads.san.Model.Marker markerClass = new desenvolvimentoads.san.Model.Marker(1,latLng.latitude, latLng.longitude,getStreet(latLng), 10, image);
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
                 markerDAO.saveMarker(markerClass);
-                markerDAO.closeConection();
 
-//                MarkerOptions markerOption = new MarkerOptions();
-//                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
-//                Marker newMarker = googleMapFinal.addMarker(markerOption);
-//                newMarker.setDraggable(true);
-//                newMarker.setTitle(getStreet(latLng));
-//                //colocar função de drag quando cadastrar o marker
-//                CreateCircle(newMarker);
-//                zoomMarker(latLng, googleMapFinal);
-//                LiveThread liveThread = new LiveThread();
-//                liveThread.liveMarkerCount(15, newMarker, getActivity());
+                Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                        .position(new LatLng(markerClass.getLatitude(), markerClass.getLongitude()))
+                        .title(markerClass.getTitle())
+                        .draggable(markerClass.isDraggable())
+                        .icon(BitmapDescriptorFactory.fromResource(markerClass.getImage()))
+                        .visible(markerClass.isStatus())
+                );
+
+                marker.setDraggable(markerClass.isDraggable());
+                CreateCircle(marker);
+                zoomMarker(marker.getPosition(), googleMapFinal);
+                new LiveThread().liveMarkerCount( marker, markerClass, getActivity());
             }
         });
 
         cancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-
                 alerta.dismiss();
-
-
-
             }
         });
 
@@ -439,13 +394,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         alerta = builder.create();
 
         alerta.show();
-
-
-
-
-
-
-
     }
 
 
@@ -510,69 +458,26 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         circ.remove();
     }
 
-    public void liveMarkerCount(final int timeSeconds, final Marker marker){//
-        Thread thread = new Thread() {
-            public void run() {
-                while (waited <= timeSeconds) {
-                    try {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                marker.setSnippet("Tempo de Duração: "+(timeSeconds - waited));
-                                marker.showInfoWindow();
-                                if (waited == timeSeconds){
-                                    marker.setSnippet(null);
-                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
-                                }
-                            }
-                        });
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    waited++;
-                }
-            }
-        };
-        thread.start();
+    public void loadMarkers(){
+        MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
+        List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getAllMarkers();
+        List<Marker> listMarkers = new ArrayList<Marker>();
+        int count = 0;
+        for (desenvolvimentoads.san.Model.Marker m : markers ){
+            Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                    .position(new LatLng(m.getLatitude(), m.getLongitude()))
+                    .title(m.getTitle())
+                    .draggable(m.isDraggable())
+                    .icon(BitmapDescriptorFactory.fromResource(m.getImage()))
+                    .visible(m.isStatus())
+            );
+            listMarkers.add(marker);
+        }
+        for (Marker m: listMarkers){
+            new LiveThread().liveMarkerCount(m, markers.get(count), getActivity());
+            count++;
+
+        }
     }
 
-    private void banco() {
-
-        File f = new File("/data/data/desenvolvimentoads/databases/san.db");
-        FileInputStream fis=null;
-        FileOutputStream fos=null;
-
-        try
-        {
-            fis=new FileInputStream(f);
-            fos=new FileOutputStream("/mnt/sdcard/db_dump.db");
-            while(true)
-            {
-                int i=fis.read();
-                if(i!=-1)
-                {fos.write(i);}
-                else
-                {break;}
-            }
-            fos.flush();
-            Toast.makeText(getContext(), "DB dump OK", Toast.LENGTH_LONG).show();
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            Toast.makeText(getContext(), "DB dump ERROR", Toast.LENGTH_LONG).show();
-        }
-        finally
-        {
-            try
-            {
-                fos.close();
-                fis.close();
-            }
-            catch(IOException ioe)
-            {}
-        }
-
-    }
 }

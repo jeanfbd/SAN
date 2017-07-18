@@ -26,7 +26,7 @@ public class DateHelper {
             return null;
         Date date = null;
         try {
-            DateFormat formatter = new SimpleDateFormat("YYYY-mm-dd HH:MM:SS");
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             date = (Date)formatter.parse(dateString);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -34,7 +34,8 @@ public class DateHelper {
         return date;
     }
 
-    public static String dateBRFormat(Date date){
+    public static String dateBRFormat(String stringDate){
+        Date date = stringToDate(stringDate);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
         String dateBR = dateFormat.format(date);
         return dateBR;

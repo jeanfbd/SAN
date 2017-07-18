@@ -43,8 +43,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     private int image =  R.mipmap.ic_maker_amarelo_star;
     private AlertDialog alerta;
     private LocationManager locationManager;
-    private double latitude;
-    private double longitude;
+    private double latitude = -23.6202800;
+    private double longitude = -45.4130600;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,13 +78,13 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
        final Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
+//        longitude = location.getLongitude();
+        //latitude = location.getLatitude();
 
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
+                //longitude = location.getLongitude();
+                //latitude = location.getLatitude();
 
             }
 
