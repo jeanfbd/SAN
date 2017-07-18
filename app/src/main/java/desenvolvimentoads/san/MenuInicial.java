@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 public class MenuInicial extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -123,11 +124,18 @@ public class MenuInicial extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
 
+        if (id == R.id.denunciar) {
+            Toast.makeText(this, "Perdeu playboy",Toast.LENGTH_LONG).show();
+
+
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 

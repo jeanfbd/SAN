@@ -1,10 +1,18 @@
 package desenvolvimentoads.san;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +42,10 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     Marker marcador = null;
     private int image =  R.mipmap.ic_maker_amarelo_star;
     private AlertDialog alerta;
+    private LocationManager locationManager;
+    private double latitude;
+    private double longitude;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +72,55 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         mMap.getUiSettings().setZoomControlsEnabled(true);
         //Metodo carrega após o mapa estiver pronto usar o timeready da tela inicial
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
+
+
+
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+       final Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+
+        LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+
+            }
+
+            public void onProviderEnabled(String provider) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+            }
+
+            public void onProviderDisabled(String provider) {}
+        };
+
+
+        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+
+
+        }
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+
+
+
+         LatLng sydney = new LatLng(latitude, longitude);
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(sydney);
@@ -71,10 +131,29 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
 
 
-
-
-
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
+            @Override
+            public boolean onMyLocationButtonClick()
+            {   LatLng hue = new LatLng(latitude, longitude);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(hue));
+                return false;
+            }
+        });
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
+            @Override
+            public boolean onMyLocationButtonClick()
+            {   LatLng hue = new LatLng(latitude, longitude);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(hue));
+                return true;
+            }
+        });
     }
+
+
+
+
+
+
 
     @Override
     public void onMapClick(LatLng latLng) {

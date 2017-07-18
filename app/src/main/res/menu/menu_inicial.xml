@@ -3,10 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_favorite"
-        android:icon="@mipmap/ic_maker_cinza"
-        android:title="action_favorite"
-        app:showAsAction="ifRoom"/>
+        android:id="@+id/denunciar"
+        android:title="Denunciar"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_settings"
