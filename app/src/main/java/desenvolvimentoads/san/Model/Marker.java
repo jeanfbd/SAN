@@ -1,6 +1,7 @@
 package desenvolvimentoads.san.Model;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import desenvolvimentoads.san.Helper.DateHelper;
 
@@ -10,8 +11,12 @@ import desenvolvimentoads.san.Helper.DateHelper;
 
 public class Marker {
 
+
+
+    private static AtomicInteger count = new AtomicInteger(0);
     private int id;
     private int idUser;
+    private String idMarker;
     private double latitude;
     private double longitude;
     private String title;
@@ -33,7 +38,21 @@ public class Marker {
      * @param lifeTime Responsavel por armazenar o tempo de vida do marcador
      * @param image Responsavel por armazenar a referencia da imagem do marcador
      */
+    public Marker(int idUser, String idMarker, double latitude, double longitude, String title, int lifeTime, int image, boolean draggable, boolean status) {
+        this.idUser = idUser;
+        this.idMarker = idMarker;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.title = title;
+        this.lifeTime = lifeTime;
+        this.image = image;
+        this.creationDate = DateHelper.getSystemDate();
+        this.draggable = draggable;
+        this.status = status;
+    }
+
     public Marker(int idUser, double latitude, double longitude, String title, int lifeTime, int image) {
+        this.id = count.incrementAndGet();
         this.idUser = idUser;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -44,6 +63,7 @@ public class Marker {
         this.draggable = true;
         this.status = true;
     }
+
 
     public int getId() {
         return id;
@@ -59,6 +79,14 @@ public class Marker {
 
     public void setIdUser(int idUser) {
         this.idUser = idUser;
+    }
+
+    public String getIdMarker() {
+        return idMarker;
+    }
+
+    public void setIdMarker(String idMarker) {
+        this.idMarker = idMarker;
     }
 
     public double getLatitude() {

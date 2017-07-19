@@ -59,9 +59,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private GoogleMap mMap;
     private GoogleMap googleMapFinal;
-    private Circle circle;
+    private static Circle circle;
     private LatLng inicial = null;
-    private int waited = 0;
 
     private LocationManager locationManager;
 
@@ -178,7 +177,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
                 @Override
                 public void onMarkerDragStart(Marker marker) {
-                    Log.d("Marker: ", String.valueOf(marker.getPosition()));
                     Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
@@ -276,23 +274,22 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 alerta.dismiss();
-                Log.d("Latitude: ", String.valueOf(inicial.latitude));
-                Log.d("Logitude: ", String.valueOf(inicial.longitude));
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-                List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getPerLatLng(inicial.latitude, inicial.longitude);
+                List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getPerMarker(marker.getId());
                 desenvolvimentoads.san.Model.Marker markerClass = markers.get(0);
+
                 markerClass.setDraggable(false);
                 markerClass.setLatitude(marker.getPosition().latitude);
                 markerClass.setLongitude(marker.getPosition().longitude);
                 markerClass.setTitle(getStreet(marker.getPosition()));
                 markerDAO.update(markerClass);
 
-
+                Toast.makeText(getActivity(), "Draggable: "+markerClass.isDraggable(), Toast.LENGTH_LONG).show();
                 marker.setDraggable(markerClass.isDraggable());
                 marker.setTitle(markerClass.getTitle());
 
 
-                removeCircle(circle);
+                removeCircle();
                 CreateCircle(marker);
                 Snackbar.make(getView(), "Confirmado posição!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
@@ -328,9 +325,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                desenvolvimentoads.san.Model.Marker markerClass = new desenvolvimentoads.san.Model.Marker(1,latLng.latitude, latLng.longitude,getStreet(latLng), 10, image);
+                desenvolvimentoads.san.Model.Marker markerClass = new desenvolvimentoads.san.Model.Marker(1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-                markerDAO.saveMarker(markerClass);
+
 
                 Marker marker = googleMapFinal.addMarker(new MarkerOptions()
                         .position(new LatLng(markerClass.getLatitude(), markerClass.getLongitude()))
@@ -339,7 +336,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         .icon(BitmapDescriptorFactory.fromResource(markerClass.getImage()))
                         .visible(markerClass.isStatus())
                 );
-
+                markerClass.setIdMarker(marker.getId());
+                markerDAO.saveMarker(markerClass);
                 marker.setDraggable(markerClass.isDraggable());
                 CreateCircle(marker);
                 zoomMarker(marker.getPosition(), googleMapFinal);
@@ -412,14 +410,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         //Classe que fornece a localização da cidade
         Geocoder geocoder = new Geocoder(this.getContext());
         List myLocation = null;
-
         try {
             //Obtendo os dados do endereço
             myLocation = geocoder.getFromLocation(location.latitude, location.longitude, 1);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Log.d("My Location", myLocation.toString());
         if (myLocation != null && myLocation.size() > 0) {
             Address address = (Address) myLocation.get(0);
             //Pega nome da cidade
@@ -454,13 +450,14 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         });
     }
 
-    public void removeCircle(Circle circ){
-        circ.remove();
+    public static void removeCircle(){
+        if (circle != null)
+            circle.remove();
     }
 
     public void loadMarkers(){
         MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-        List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getAllMarkers();
+        List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getAllMarkersActive();
         List<Marker> listMarkers = new ArrayList<Marker>();
         int count = 0;
         for (desenvolvimentoads.san.Model.Marker m : markers ){
@@ -476,8 +473,23 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         for (Marker m: listMarkers){
             new LiveThread().liveMarkerCount(m, markers.get(count), getActivity());
             count++;
-
         }
     }
 
+    public int getTimeLive(int idImage){
+        int timeLife = 0;
+        switch (idImage){
+            case R.mipmap.ic_maker_amarelo_star:
+                timeLife = 10;
+                break;
+            case R.mipmap.ic_maker_laranja_star:
+                timeLife = 20;
+                break;
+            case R.mipmap.ic_maker_vermelho_star:
+                timeLife = 30;
+                break;
+        }
+
+        return timeLife;
+    }
 }
