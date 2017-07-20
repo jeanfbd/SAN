@@ -1,39 +1,39 @@
 package desenvolvimentoads.san;
 
 import android.app.Activity;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 
 import desenvolvimentoads.san.DAO.MarkerDAO;
 import desenvolvimentoads.san.Helper.DateHelper;
+import desenvolvimentoads.san.Model.MarkerBD;
 
 /**
  * Created by jeanf on 15/07/2017.
  */
 
 public class LiveThread {
-    public void liveMarkerCount(final Marker marker, final desenvolvimentoads.san.Model.Marker markerClass, final Activity activity) {//
+    public void liveMarkerCount(final Marker marker, final MarkerBD markerBDClass, final Activity activity) {//
         final MarkerDAO markerDAO = MarkerDAO.getInstance(activity);
         new Thread() {
             public void run() {
-                while (markerClass.getLifeTime() != 0) {
+                while (markerBDClass.getLifeTime() != 0) {
                     try {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                markerClass.setLifeTime(markerClass.getLifeTime() - 1);
-                                markerDAO.update(markerClass);//
-                                marker.setSnippet("Data Registro: " + (DateHelper.dateBRFormat(markerClass.getCreationDate())) + "\n" +
-                                        "Tempo de Duração: " + (markerClass.getLifeTime()));
-                                if (markerClass.getLifeTime() == 0) {
+                                markerBDClass.setLifeTime(markerBDClass.getLifeTime() - 1);
+                                markerDAO.update(markerBDClass);//
+                                marker.setSnippet("Data Registro: " + (DateHelper.dateBRFormat(markerBDClass.getCreationDate())) + "\n" +
+                                        "Tempo de Duração: " + (markerBDClass.getLifeTime()));
+                                if (markerBDClass.getLifeTime() == 0) {
                                     marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
-                                    markerClass.setStatus(false);
-                                    markerClass.setDraggable(false);
-                                    markerDAO.update(markerClass);
-                                    marker.setVisible(markerClass.isStatus());
-                                    marker.setDraggable(markerClass.isDraggable());
+                                    markerBDClass.setStatus(false);
+                                    markerBDClass.setDraggable(false);
+                                    markerDAO.update(markerBDClass);
+                                    marker.setVisible(markerBDClass.isStatus());
+                                    marker.setDraggable(markerBDClass.isDraggable());
                                     MapsTerceiro.removeCircle();
                                 }
                             }

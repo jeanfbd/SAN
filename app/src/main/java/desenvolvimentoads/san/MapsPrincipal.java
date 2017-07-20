@@ -7,19 +7,16 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.BooleanResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -31,7 +28,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener{
@@ -45,6 +41,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     private LocationManager locationManager;
     private double latitude = -23.6202800;
     private double longitude = -45.4130600;
+    MarkerDialog test = new MarkerDialog();
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +62,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+
         googleMapFinal = googleMap;
         mMap = googleMap;
 
@@ -124,7 +124,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(sydney);
-        marker.title("Marker Sidney");
+        marker.title("MarkerBD Sidney");
         marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
 
         mMap.addMarker(marker);
@@ -147,6 +147,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
                 return true;
             }
         });
+
+
     }
 
 
@@ -159,9 +161,9 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     public void onMapClick(LatLng latLng) {
 
         if(marcadorON){
+            test.dialogAdd(latLng,this.getContext(), googleMapFinal);
 
-
-            dialogAdd(latLng);
+            // dialogAdd(latLng);
 
 
         }
@@ -308,6 +310,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     }
 
     public String getStreet(LatLng location) {
+
         String street = "";
         //Classe que fornece a localização da cidade
         Geocoder geocoder = new Geocoder(this.getContext());
@@ -332,4 +335,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
         return street;
     }
+
+
+
+
 }

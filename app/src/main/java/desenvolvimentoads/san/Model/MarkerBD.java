@@ -9,7 +9,7 @@ import desenvolvimentoads.san.Helper.DateHelper;
  * Created by jeanf on 17/07/2017.
  */
 
-public class Marker {
+public class MarkerBD {
 
 
 
@@ -26,7 +26,7 @@ public class Marker {
     private boolean draggable;
     private boolean status;
 
-    public Marker(){
+    public MarkerBD(){
 
     }
 
@@ -38,7 +38,7 @@ public class Marker {
      * @param lifeTime Responsavel por armazenar o tempo de vida do marcador
      * @param image Responsavel por armazenar a referencia da imagem do marcador
      */
-    public Marker(int idUser, String idMarker, double latitude, double longitude, String title, int lifeTime, int image, boolean draggable, boolean status) {
+    public MarkerBD(int idUser, String idMarker, double latitude, double longitude, String title, int lifeTime, int image, boolean draggable, boolean status) {
         this.idUser = idUser;
         this.idMarker = idMarker;
         this.latitude = latitude;
@@ -51,7 +51,7 @@ public class Marker {
         this.status = status;
     }
 
-    public Marker(int idUser, double latitude, double longitude, String title, int lifeTime, int image) {
+    public MarkerBD(int idUser, double latitude, double longitude, String title, int lifeTime, int image) {
         this.id = count.incrementAndGet();
         this.idUser = idUser;
         this.latitude = latitude;

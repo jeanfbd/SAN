@@ -1,29 +1,22 @@
 package desenvolvimentoads.san;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.Icon;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.Image;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -43,17 +36,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 import desenvolvimentoads.san.DAO.MarkerDAO;
-import desenvolvimentoads.san.Helper.DateHelper;
+import desenvolvimentoads.san.Model.MarkerBD;
 
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener{
 
@@ -189,7 +177,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 @Override
                 public void onMarkerDragEnd(Marker marker) {
-                    dialogDrag(marker);
+                 dialogDrag(marker);
                 }
             });
 
@@ -275,18 +263,18 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-                List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getPerMarker(marker.getId());
-                desenvolvimentoads.san.Model.Marker markerClass = markers.get(0);
+                List<MarkerBD> markerBDs = markerDAO.getPerMarker(marker.getId());
+                MarkerBD markerBDClass = markerBDs.get(0);
 
-                markerClass.setDraggable(false);
-                markerClass.setLatitude(marker.getPosition().latitude);
-                markerClass.setLongitude(marker.getPosition().longitude);
-                markerClass.setTitle(getStreet(marker.getPosition()));
-                markerDAO.update(markerClass);
+                markerBDClass.setDraggable(false);
+                markerBDClass.setLatitude(marker.getPosition().latitude);
+                markerBDClass.setLongitude(marker.getPosition().longitude);
+                markerBDClass.setTitle(getStreet(marker.getPosition()));
+                markerDAO.update(markerBDClass);
 
-                Toast.makeText(getActivity(), "Draggable: "+markerClass.isDraggable(), Toast.LENGTH_LONG).show();
-                marker.setDraggable(markerClass.isDraggable());
-                marker.setTitle(markerClass.getTitle());
+                Toast.makeText(getActivity(), "Draggable: "+ markerBDClass.isDraggable(), Toast.LENGTH_LONG).show();
+                marker.setDraggable(markerBDClass.isDraggable());
+                marker.setTitle(markerBDClass.getTitle());
 
 
                 removeCircle();
@@ -325,23 +313,23 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                desenvolvimentoads.san.Model.Marker markerClass = new desenvolvimentoads.san.Model.Marker(1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
+                MarkerBD markerBDClass = new MarkerBD(1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
 
 
                 Marker marker = googleMapFinal.addMarker(new MarkerOptions()
-                        .position(new LatLng(markerClass.getLatitude(), markerClass.getLongitude()))
-                        .title(markerClass.getTitle())
-                        .draggable(markerClass.isDraggable())
-                        .icon(BitmapDescriptorFactory.fromResource(markerClass.getImage()))
-                        .visible(markerClass.isStatus())
+                        .position(new LatLng(markerBDClass.getLatitude(), markerBDClass.getLongitude()))
+                        .title(markerBDClass.getTitle())
+                        .draggable(markerBDClass.isDraggable())
+                        .icon(BitmapDescriptorFactory.fromResource(markerBDClass.getImage()))
+                        .visible(markerBDClass.isStatus())
                 );
-                markerClass.setIdMarker(marker.getId());
-                markerDAO.saveMarker(markerClass);
-                marker.setDraggable(markerClass.isDraggable());
+                markerBDClass.setIdMarker(marker.getId());
+                markerDAO.saveMarker(markerBDClass);
+                marker.setDraggable(markerBDClass.isDraggable());
                 CreateCircle(marker);
                 zoomMarker(marker.getPosition(), googleMapFinal);
-                new LiveThread().liveMarkerCount( marker, markerClass, getActivity());
+                new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
             }
         });
 
@@ -457,10 +445,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public void loadMarkers(){
         MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-        List<desenvolvimentoads.san.Model.Marker> markers = markerDAO.getAllMarkersActive();
+        List<MarkerBD> markerBDs = markerDAO.getAllMarkersActive();
         List<Marker> listMarkers = new ArrayList<Marker>();
         int count = 0;
-        for (desenvolvimentoads.san.Model.Marker m : markers ){
+        for (MarkerBD m : markerBDs){
             Marker marker = googleMapFinal.addMarker(new MarkerOptions()
                     .position(new LatLng(m.getLatitude(), m.getLongitude()))
                     .title(m.getTitle())
@@ -471,7 +459,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             listMarkers.add(marker);
         }
         for (Marker m: listMarkers){
-            new LiveThread().liveMarkerCount(m, markers.get(count), getActivity());
+            new LiveThread().liveMarkerCount(m, markerBDs.get(count), getActivity());
             count++;
         }
     }

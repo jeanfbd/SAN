@@ -102,7 +102,7 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(sydney);
-        marker.title("Marker Sidney");
+        marker.title("MarkerBD Sidney");
         marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
 
         mMap.addMarker(marker);

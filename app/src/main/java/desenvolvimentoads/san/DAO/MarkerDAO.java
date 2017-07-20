@@ -5,15 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import desenvolvimentoads.san.Helper.DateHelper;
 import desenvolvimentoads.san.Helper.PersistenceHelper;
-import desenvolvimentoads.san.Model.Marker;
+import desenvolvimentoads.san.Model.MarkerBD;
 
 /**
  * Created by jeanf on 17/07/2017.
@@ -23,7 +20,7 @@ public class MarkerDAO {
     /**
      * Variaveis estaticas que armazenam no nome e campos da tabela marker no banco de dados
      */
-    public static final String TABLE_NAME = "Marker";
+    public static final String TABLE_NAME = "MarkerBD";
     public static final String ID = "id";
     public static final String IDUSER = "idUser";
     public static final String IDMARKER = "idMarker";
@@ -75,75 +72,75 @@ public class MarkerDAO {
         dataBase = persistenceHelper.getWritableDatabase();
     }
 
-    public void saveMarker(Marker marker) {
-        ContentValues values = contentValuesMarker(marker);
+    public void saveMarker(MarkerBD markerBD) {
+        ContentValues values = contentValuesMarker(markerBD);
         Log.d(TABLE_NAME, CREATE_TABLE_MARKER);
         dataBase.insert(TABLE_NAME, null, values);
     }
 
-    public List<Marker> getAllMarkers() {
+    public List<MarkerBD> getAllMarkers() {
         String queryReturnAll = "SELECT * FROM " + TABLE_NAME;
         Cursor cursor = dataBase.rawQuery(queryReturnAll, null);
-        List<Marker> markers = markerCreateCursor(cursor);
-        return markers;
+        List<MarkerBD> markerBDs = markerCreateCursor(cursor);
+        return markerBDs;
     }
 
-    public List<Marker> getAllMarkersActive() {
+    public List<MarkerBD> getAllMarkersActive() {
         String queryReturnAllActive = "SELECT * FROM " + TABLE_NAME + " WHERE " + STATUS + " = 1";
         Cursor cursor = dataBase.rawQuery(queryReturnAllActive, null);
-        List<Marker> markers = markerCreateCursor(cursor);
-        return markers;
+        List<MarkerBD> markerBDs = markerCreateCursor(cursor);
+        return markerBDs;
     }
 
-    public List<Marker> getPerLatLng(double latitude, double longitude) {
+    public List<MarkerBD> getPerLatLng(double latitude, double longitude) {
         String queryReturnPerLatLng = "SELECT * FROM " + TABLE_NAME + " WHERE " + LATITUDE + " = " + latitude + " AND "+ LONGITUDE + " = " + longitude;
         Cursor cursor = dataBase.rawQuery(queryReturnPerLatLng, null);
-        List<Marker> markers = markerCreateCursor(cursor);
-        return markers;
+        List<MarkerBD> markerBDs = markerCreateCursor(cursor);
+        return markerBDs;
     }
 
-    public List<Marker> getPerCreationDate(String date) {
+    public List<MarkerBD> getPerCreationDate(String date) {
         String queryReturnPerCreationDate = "SELECT * FROM " + TABLE_NAME + " WHERE " + CREATIONDATE + " = " + date;
         Cursor cursor = dataBase.rawQuery(queryReturnPerCreationDate, null);
-        List<Marker> markers = markerCreateCursor(cursor);
-        return markers;
+        List<MarkerBD> markerBDs = markerCreateCursor(cursor);
+        return markerBDs;
     }
 
-    public List<Marker> getPerMarker(String idMarker) {
+    public List<MarkerBD> getPerMarker(String idMarker) {
         String queryReturnPerMarker = "SELECT * FROM " + TABLE_NAME + " WHERE " + IDMARKER + " = '" +idMarker+"'";
         Cursor cursor = dataBase.rawQuery(queryReturnPerMarker, null);
-        List<Marker> markers = markerCreateCursor(cursor);
-        return markers;
+        List<MarkerBD> markerBDs = markerCreateCursor(cursor);
+        return markerBDs;
     }
 
-    public void delete(Marker marker) {
-        ContentValues values = contentValuesMarker(marker);
+    public void delete(MarkerBD markerBD) {
+        ContentValues values = contentValuesMarker(markerBD);
         String[] replaceValues = {
-                String.valueOf(marker.getIdMarker())
+                String.valueOf(markerBD.getIdMarker())
         };
         dataBase.update(TABLE_NAME, values, IDMARKER + " = ?", replaceValues);
     }
 
-    public void update(Marker marker) {
-        ContentValues values = contentValuesMarker(marker);
+    public void update(MarkerBD markerBD) {
+        ContentValues values = contentValuesMarker(markerBD);
         String[] replaceValues = {
-                String.valueOf(marker.getId())
+                String.valueOf(markerBD.getId())
         };
-        Log.d("ID", "update: "+marker.getId());
+        Log.d("ID", "update: "+ markerBD.getId());
         dataBase.update(TABLE_NAME, values, ID + " = ?", replaceValues);
     }
 
-    public void updateQuery(Marker marker){
+    public void updateQuery(MarkerBD markerBD){
         String query = "UPDATE "+TABLE_NAME+" SET "
-                +LATITUDE+" = "+marker.getLatitude()+", "
-                +LONGITUDE+" = "+marker.getLongitude()+", "
-                +TITLE+" = '"+marker.getTitle()+"', "
-                +LIFETIME+" = "+marker.getLifeTime()+", "
-                +IMAGE+" = "+marker.getImage()+", "
-                +CREATIONDATE+" = '"+marker.getCreationDate()+"', "
-                +DRAGGABLE+" = "+(marker.isDraggable() ? 1 : 0)+", "
-                +STATUS+" = "+(marker.isStatus() ? 1 : 0)+
-                " WHERE "+IDMARKER+" = "+marker.getIdMarker()+";";
+                +LATITUDE+" = "+ markerBD.getLatitude()+", "
+                +LONGITUDE+" = "+ markerBD.getLongitude()+", "
+                +TITLE+" = '"+ markerBD.getTitle()+"', "
+                +LIFETIME+" = "+ markerBD.getLifeTime()+", "
+                +IMAGE+" = "+ markerBD.getImage()+", "
+                +CREATIONDATE+" = '"+ markerBD.getCreationDate()+"', "
+                +DRAGGABLE+" = "+(markerBD.isDraggable() ? 1 : 0)+", "
+                +STATUS+" = "+(markerBD.isStatus() ? 1 : 0)+
+                " WHERE "+IDMARKER+" = "+ markerBD.getIdMarker()+";";
 
         Log.d("Query", query);
         dataBase.execSQL(query);
@@ -171,10 +168,10 @@ public class MarkerDAO {
             dataBase.close();
     }
 
-    private List<Marker> markerCreateCursor(Cursor cursor) {
-        List<Marker> markers = new ArrayList<>();
+    private List<MarkerBD> markerCreateCursor(Cursor cursor) {
+        List<MarkerBD> markerBDs = new ArrayList<>();
         if (cursor == null)
-            return markers;
+            return markerBDs;
 
         try {
             if (cursor.moveToFirst()) {
@@ -204,31 +201,31 @@ public class MarkerDAO {
                     boolean draggable = (cursor.getInt(indexDraggable) == 1);
                     boolean status = (cursor.getInt(indexStatus) == 1);
 
-                    Marker marker = new Marker(idUser, idMarker, latitude, longitude, title, lifeTime, image, draggable, status);
+                    MarkerBD markerBD = new MarkerBD(idUser, idMarker, latitude, longitude, title, lifeTime, image, draggable, status);
 
-                    markers.add(marker);
+                    markerBDs.add(markerBD);
 
                 }while(cursor.moveToNext());
             }
         }finally {
             cursor.close();
         }
-        return markers;
+        return markerBDs;
     }
 
-    private ContentValues contentValuesMarker(Marker marker){
+    private ContentValues contentValuesMarker(MarkerBD markerBD){
         ContentValues values = new ContentValues();
-        values.put(ID, marker.getId());
-        values.put(IDUSER, marker.getIdUser());
-        values.put(IDMARKER, marker.getIdMarker());
-        values.put(LATITUDE, marker.getLatitude());
-        values.put(LONGITUDE, marker.getLongitude());
-        values.put(TITLE, marker.getTitle());
-        values.put(LIFETIME, marker.getLifeTime());
-        values.put(IMAGE, marker.getImage());
-        values.put(CREATIONDATE, marker.getCreationDate());
-        values.put(DRAGGABLE, (marker.isDraggable() ? 1 : 0));
-        values.put(STATUS, (marker.isStatus() ? 1 : 0));
+        values.put(ID, markerBD.getId());
+        values.put(IDUSER, markerBD.getIdUser());
+        values.put(IDMARKER, markerBD.getIdMarker());
+        values.put(LATITUDE, markerBD.getLatitude());
+        values.put(LONGITUDE, markerBD.getLongitude());
+        values.put(TITLE, markerBD.getTitle());
+        values.put(LIFETIME, markerBD.getLifeTime());
+        values.put(IMAGE, markerBD.getImage());
+        values.put(CREATIONDATE, markerBD.getCreationDate());
+        values.put(DRAGGABLE, (markerBD.isDraggable() ? 1 : 0));
+        values.put(STATUS, (markerBD.isStatus() ? 1 : 0));
 
         return values;
     }
