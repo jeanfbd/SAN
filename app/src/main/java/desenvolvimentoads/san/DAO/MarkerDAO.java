@@ -20,7 +20,7 @@ public class MarkerDAO {
     /**
      * Variaveis estaticas que armazenam no nome e campos da tabela marker no banco de dados
      */
-    public static final String TABLE_NAME = "MarkerBD";
+    public static final String TABLE_NAME = "Marker";
     public static final String ID = "id";
     public static final String IDUSER = "idUser";
     public static final String IDMARKER = "idMarker";
@@ -37,7 +37,7 @@ public class MarkerDAO {
      * Variavel estatica que armazenam a query de criacao da tabela marker no banco de dados
      */
     public static final String CREATE_TABLE_MARKER = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "("
-            + ID + " INTEGER PRIMARY KEY NOT NULL, "
+            + ID + " INTEGER NOT NULL  PRIMARY KEY AUTOINCREMENT, "
             + IDUSER + " INTEGER NOT NULL, "
             + IDMARKER + " INTEGER NULL, "
             + LATITUDE + " DOUBLE NOT NULL, "
@@ -55,8 +55,7 @@ public class MarkerDAO {
      */
     public static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
-
-    private SQLiteDatabase dataBase = null;
+    private static SQLiteDatabase dataBase = null;
 
     private static MarkerDAO instance;
 
@@ -107,9 +106,13 @@ public class MarkerDAO {
     }
 
     public List<MarkerBD> getPerMarker(String idMarker) {
-        String queryReturnPerMarker = "SELECT * FROM " + TABLE_NAME + " WHERE " + IDMARKER + " = '" +idMarker+"'";
+        String queryReturnPerMarker = "SELECT * FROM " + TABLE_NAME + " WHERE " + IDMARKER + " = '"+idMarker+"'";
         Cursor cursor = dataBase.rawQuery(queryReturnPerMarker, null);
         List<MarkerBD> markerBDs = markerCreateCursor(cursor);
+        Log.d("Query: ",queryReturnPerMarker);
+        for (MarkerBD m: markerBDs){
+           Log.d("idClasse", String.valueOf(m.getId()));
+        }
         return markerBDs;
     }
 
@@ -121,12 +124,12 @@ public class MarkerDAO {
         dataBase.update(TABLE_NAME, values, IDMARKER + " = ?", replaceValues);
     }
 
-    public void update(MarkerBD markerBD) {
+    public void update(final MarkerBD markerBD) {
         ContentValues values = contentValuesMarker(markerBD);
         String[] replaceValues = {
                 String.valueOf(markerBD.getId())
         };
-        Log.d("ID", "update: "+ markerBD.getId());
+        Log.d("ID", String.valueOf(markerBD.getId()));
         dataBase.update(TABLE_NAME, values, ID + " = ?", replaceValues);
     }
 
@@ -146,7 +149,7 @@ public class MarkerDAO {
         dataBase.execSQL(query);
     }
 
-    public int lastQueryId(){
+    public static int lastQueryId(){
         int lastId=-1;
         try{
             Cursor cursor=dataBase.rawQuery("SELECT MAX(id) FROM "+TABLE_NAME, new String [] {});
@@ -201,7 +204,7 @@ public class MarkerDAO {
                     boolean draggable = (cursor.getInt(indexDraggable) == 1);
                     boolean status = (cursor.getInt(indexStatus) == 1);
 
-                    MarkerBD markerBD = new MarkerBD(idUser, idMarker, latitude, longitude, title, lifeTime, image, draggable, status);
+                    MarkerBD markerBD = new MarkerBD(id, idUser, idMarker, latitude, longitude, title, lifeTime, image, draggable, status);
 
                     markerBDs.add(markerBD);
 

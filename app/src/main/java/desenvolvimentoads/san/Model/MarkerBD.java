@@ -1,8 +1,11 @@
 package desenvolvimentoads.san.Model;
 
+import android.util.Log;
+
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import desenvolvimentoads.san.DAO.MarkerDAO;
 import desenvolvimentoads.san.Helper.DateHelper;
 
 /**
@@ -11,9 +14,6 @@ import desenvolvimentoads.san.Helper.DateHelper;
 
 public class MarkerBD {
 
-
-
-    private static AtomicInteger count = new AtomicInteger(0);
     private int id;
     private int idUser;
     private String idMarker;
@@ -38,7 +38,8 @@ public class MarkerBD {
      * @param lifeTime Responsavel por armazenar o tempo de vida do marcador
      * @param image Responsavel por armazenar a referencia da imagem do marcador
      */
-    public MarkerBD(int idUser, String idMarker, double latitude, double longitude, String title, int lifeTime, int image, boolean draggable, boolean status) {
+    public MarkerBD(int id, int idUser, String idMarker, double latitude, double longitude, String title, int lifeTime, int image, boolean draggable, boolean status) {
+        this.id = id;
         this.idUser = idUser;
         this.idMarker = idMarker;
         this.latitude = latitude;
@@ -51,8 +52,9 @@ public class MarkerBD {
         this.status = status;
     }
 
-    public MarkerBD(int idUser, double latitude, double longitude, String title, int lifeTime, int image) {
-        this.id = count.incrementAndGet();
+    public MarkerBD(int id, int idUser, double latitude, double longitude, String title, int lifeTime, int image) {
+        this.id = id;
+        Log.d("Criação ID:", String.valueOf(id));
         this.idUser = idUser;
         this.latitude = latitude;
         this.longitude = longitude;

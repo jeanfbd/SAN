@@ -265,6 +265,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
                 List<MarkerBD> markerBDs = markerDAO.getPerMarker(marker.getId());
                 MarkerBD markerBDClass = markerBDs.get(0);
+                Log.d("ID Classe", String.valueOf(markerBDClass.getId()));
 
                 markerBDClass.setDraggable(false);
                 markerBDClass.setLatitude(marker.getPosition().latitude);
@@ -313,9 +314,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                MarkerBD markerBDClass = new MarkerBD(1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
+                MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId()+1),1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
 
+                Log.d("Id Construtor", String.valueOf(markerBDClass.getId()));
 
                 Marker marker = googleMapFinal.addMarker(new MarkerOptions()
                         .position(new LatLng(markerBDClass.getLatitude(), markerBDClass.getLongitude()))
@@ -326,10 +328,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 );
                 markerBDClass.setIdMarker(marker.getId());
                 markerDAO.saveMarker(markerBDClass);
+                markerDAO.getPerMarker(marker.getId());
                 marker.setDraggable(markerBDClass.isDraggable());
                 CreateCircle(marker);
                 zoomMarker(marker.getPosition(), googleMapFinal);
-                new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
+                //new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
             }
         });
 
@@ -456,10 +459,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     .icon(BitmapDescriptorFactory.fromResource(m.getImage()))
                     .visible(m.isStatus())
             );
+            Log.d("idClasse", String.valueOf(m.getId()));
             listMarkers.add(marker);
         }
         for (Marker m: listMarkers){
-            new LiveThread().liveMarkerCount(m, markerBDs.get(count), getActivity());
+            //new LiveThread().liveMarkerCount(m, markerBDs.get(count), getActivity());
             count++;
         }
     }
