@@ -39,9 +39,11 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     private int image =  R.mipmap.ic_maker_amarelo_star;
     private AlertDialog alerta;
     private LocationManager locationManager;
-    private double latitude = -23.6202800;
     private double longitude = -45.4130600;
+    private double latitude = -23.6202800;
+
     MarkerDialog test = new MarkerDialog();
+    Geocoder geocoder2;
 
 
     @Override
@@ -62,6 +64,39 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+        geocoder2 = new Geocoder(getContext());
+        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                marker.showInfoWindow();
+            }
+        });
+
+
+        googleMap = test.setListenerDragDiag(googleMap, marcador, getContext());
+
+
+       /* googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+                Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+                Snackbar.make(getView(), "Confirme a posição do marcador", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                test.dialogDrag(marker, getContext());
+
+            }
+        });
+*/
 
 
         googleMapFinal = googleMap;
@@ -118,13 +153,26 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
 
+        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+
+            @Override
+            public void onMapLongClick(LatLng arg0) {
+                // TODO Auto-generated method stub
+
+                test.dialogAdd(arg0,getContext(), googleMapFinal, geocoder2);
+
+            }
+        });
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+       Location loc = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
+        LatLng sydney = new LatLng(loc.getLatitude(),loc.getLongitude());
+        // LatLng sydney = new LatLng(latitude, longitude);
 
 
-         LatLng sydney = new LatLng(latitude, longitude);
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(sydney);
-        marker.title("MarkerBD Sidney");
         marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
 
         mMap.addMarker(marker);
@@ -161,9 +209,9 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     public void onMapClick(LatLng latLng) {
 
         if(marcadorON){
-            test.dialogAdd(latLng,this.getContext(), googleMapFinal);
+            test.dialogAdd(latLng,this.getContext(), googleMapFinal, geocoder2);
 
-            // dialogAdd(latLng);
+          //  dialogAdd(latLng);
 
 
         }

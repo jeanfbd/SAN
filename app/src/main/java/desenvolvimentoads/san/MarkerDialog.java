@@ -1,6 +1,7 @@
 package desenvolvimentoads.san;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.app.AlertDialog;
@@ -26,13 +27,14 @@ import java.util.List;
  */
 
 public class MarkerDialog {
-   Marker marcador;
+
+    Marker marcador;
     AlertDialog alerta;
     private int image = R.mipmap.ic_maker_amarelo_star;
     private static Circle circle;
 
 
-    public void dialogAdd(final LatLng latLng, final Context c, final GoogleMap googleMapFinal) {
+    public void dialogAdd(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g) {
 
 
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
@@ -51,15 +53,16 @@ public class MarkerDialog {
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 alerta.dismiss();
-               MapsPrincipal.marcadorON =false;
+                MapsPrincipal.marcadorON = false;
                 MenuInicial.changeMind();
 
                 MarkerOptions markerOption = new MarkerOptions();
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
                 googleMapFinal.addMarker(markerOption);
                 marcador = googleMapFinal.addMarker(markerOption);
-                //    googleMapFinal.setDraggable(true);
-                marcador.setTitle(getStreet(latLng,c));
+                marcador.setTitle(getStreet(latLng, c, g));
+                CreateCircle(latLng, googleMapFinal);
+                marcador.setDraggable(true);
                 zoomMarker(latLng, googleMapFinal);
 
 
@@ -70,7 +73,7 @@ public class MarkerDialog {
             public void onClick(View arg0) {
 
                 alerta.dismiss();
-                MapsPrincipal.marcadorON =false;
+                MapsPrincipal.marcadorON = false;
                 MenuInicial.changeMind();
 
 
@@ -82,8 +85,6 @@ public class MarkerDialog {
 
         final ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
         amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-
-
 
 
         final ImageView laranja = (ImageView) view.findViewById(R.id.orange_star);
@@ -125,7 +126,6 @@ public class MarkerDialog {
                 confirm.setVisibility(View.VISIBLE);
 
 
-
             }
         });
 
@@ -136,12 +136,9 @@ public class MarkerDialog {
         alerta.show();
 
 
-
-
-
     }
 
-    public void zoomMarker(LatLng arg0, GoogleMap googleMap){
+    public void zoomMarker(LatLng arg0, GoogleMap googleMap) {
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(arg0)               // Sets the center of the map
                 .zoom(17)                   // Sets the zoom
@@ -151,17 +148,19 @@ public class MarkerDialog {
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
-    public String getStreet(LatLng location, Context c) {
+    public String getStreet(LatLng location, Context c, Geocoder g) {
         String street = "";
         //Classe que fornece a localização da cidade
 
-        Geocoder geocoder = new Geocoder(c);
+        // Geocoder geocoder = new Geocoder(c);
+        Geocoder geocoder = g;
         List myLocation = null;
 
         try {
             //Obtendo os dados do endereço
             myLocation = geocoder.getFromLocation(location.latitude, location.longitude, 1);
-            System.out.println(myLocation);
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -172,30 +171,27 @@ public class MarkerDialog {
             String city = address.getLocality();
             //Pega nome da rua
             street = address.getAddressLine(0);
-        }else{
+        } else {
             street = "Endereço não encontrado";
         }
 
         return street;
     }
 
-    public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c){
+    public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c) {
         googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {
-                for (int i =0; i <100; i++){
-                    System.out.println("fffffffffffffff");
-                }
 
 
-              //  Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
-            //            .setAction("Action", null).show();
+                //  Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
+                //            .setAction("Action", null).show();
             }
 
             @Override
             public void onMarkerDrag(Marker marker) {
-         //       Snackbar.make(getView(), "Confirme a posição do marcador", Snackbar.LENGTH_LONG)
-        //                .setAction("Action", null).show();
+                //       Snackbar.make(getView(), "Confirme a posição do marcador", Snackbar.LENGTH_LONG)
+                //                .setAction("Action", null).show();
             }
 
             @Override
@@ -208,7 +204,7 @@ public class MarkerDialog {
         return googleMap;
     }
 
-    private void dialogDrag(final Marker marker, final Context c) {
+    public void dialogDrag(final Marker marker, final Context c) {
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
         //-pegamos nossa instancia da classe
         LayoutInflater li = LayoutInflater.from(c);
@@ -218,9 +214,9 @@ public class MarkerDialog {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle("Alterar Posição");
-        final Button confirm = (Button)  view.findViewById(R.id.btConfirm);
+        final Button confirm = (Button) view.findViewById(R.id.btConfirm);
 
-        Button cancel = (Button)  view.findViewById(R.id.btCancel);
+        Button cancel = (Button) view.findViewById(R.id.btCancel);
 
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
@@ -238,6 +234,34 @@ public class MarkerDialog {
         alerta.show();
     }
 
+    public void CreateCircle(LatLng latLng, GoogleMap googleMap) {
+        circle = googleMap.addCircle(new CircleOptions()
+                .center(latLng)
+                .radius(10)
+                .strokeWidth(10)
+                .strokeColor(Color.argb(128, 173, 216, 230))
+                .fillColor(Color.argb(24, 30, 144, 255))
+                .clickable(true));
 
+        googleMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+
+            @Override
+            public void onCircleClick(Circle circle) {
+                // Flip the r, g and b components of the circle's
+                // stroke color.
+                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+                circle.setStrokeColor(strokeColor);
+            }
+        });
+
+
+
+    }
+
+    public static void removeCircle() {
+        if (circle != null)
+            circle.remove();
+    }
 
 }
+
