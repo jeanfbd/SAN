@@ -1,6 +1,7 @@
 package desenvolvimentoads.san;
 
 import android.app.Activity;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
@@ -14,20 +15,22 @@ import desenvolvimentoads.san.Model.MarkerBD;
  */
 
 public class LiveThread {
+    int timeLife = 0;
+
     public void liveMarkerCount(final Marker marker, final MarkerBD markerBDClass, final Activity activity) {//
         final MarkerDAO markerDAO = MarkerDAO.getInstance(activity);
         new Thread() {
             public void run() {
-                while (markerBDClass.getLifeTime() != 0) {
+                while (getTimeLife(markerBDClass) != 0) {
                     try {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                markerBDClass.setLifeTime(markerBDClass.getLifeTime() - 1);
+                                markerBDClass.setLifeTime(getTimeLife(markerBDClass) - 1);
                                 markerDAO.update(markerBDClass);//
                                 marker.setSnippet("Data Registro: " + (DateHelper.dateBRFormat(markerBDClass.getCreationDate())) + "\n" +
                                         "Tempo de Duração: " + (markerBDClass.getLifeTime()));
-                                if (markerBDClass.getLifeTime() == 0) {
+                                if (getTimeLife(markerBDClass) == 0) {
                                     marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
                                     markerBDClass.setStatus(false);
                                     markerBDClass.setDraggable(false);
@@ -45,5 +48,10 @@ public class LiveThread {
                 }
             }
         }.start();
+    }
+
+    public int getTimeLife(MarkerBD markerBD){
+        Log.d("LifeTime", String.valueOf(timeLife));
+        return timeLife = MarkerDAO.QueryGetTimeLife(markerBD.getId());
     }
 }

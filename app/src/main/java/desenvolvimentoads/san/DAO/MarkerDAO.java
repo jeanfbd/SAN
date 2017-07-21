@@ -116,6 +116,14 @@ public class MarkerDAO {
         return markerBDs;
     }
 
+    public MarkerBD getPerIdClass(int id) {
+        String queryReturnPerIdClass = "SELECT * FROM " + TABLE_NAME + " WHERE " + ID + " = '"+id+"'";
+        Cursor cursor = dataBase.rawQuery(queryReturnPerIdClass, null);
+        List<MarkerBD> markerBDs = markerCreateCursor(cursor);
+        Log.d("Query: ",queryReturnPerIdClass);
+        return markerBDs.get(0);
+    }
+
     public void delete(MarkerBD markerBD) {
         ContentValues values = contentValuesMarker(markerBD);
         String[] replaceValues = {
@@ -163,6 +171,23 @@ public class MarkerDAO {
         }
         catch(Exception e){
             return -1;
+        }
+    }
+
+    public static int QueryGetTimeLife(final int id){
+        int timeLife=-1;
+        try{
+            Cursor cursor=dataBase.rawQuery("SELECT liveTime FROM "+TABLE_NAME+" WHERE "+ID+" = "+id, new String [] {});
+            if (cursor != null)
+                if(cursor.moveToFirst())
+                {
+                    timeLife= cursor.getInt(0);
+                }
+            Log.d("", "TIMELIFE: "+timeLife);
+            return timeLife;
+        }
+        catch(Exception e){
+            return timeLife;
         }
     }
 

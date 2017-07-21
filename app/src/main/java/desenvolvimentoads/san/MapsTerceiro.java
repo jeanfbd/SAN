@@ -38,7 +38,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import desenvolvimentoads.san.DAO.MarkerDAO;
 import desenvolvimentoads.san.Model.MarkerBD;
@@ -49,6 +52,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     private GoogleMap googleMapFinal;
     private static Circle circle;
     private LatLng inicial = null;
+    private HashMap<Marker, Integer> mHashMap = new HashMap<Marker, Integer>();
+    private List<Marker>listMarkers = new ArrayList<Marker>();
+
+    private LayoutInflater mInflater;
 
     private LocationManager locationManager;
 
@@ -58,6 +65,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     private static final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 0;
 
     private AlertDialog alerta;
+    private boolean validation = true;
     private int image = R.mipmap.ic_maker_amarelo_star;
 
     @Override
@@ -123,6 +131,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 }
             });
 
+            googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    final int id = mHashMap.get(marker);
+                    Log.e("Real Marker ID", id+"");
+                    return false;
+                }
+            });
+
             googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
                 @Override
                 public View getInfoWindow(Marker marker) {
@@ -131,11 +148,24 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 @Override
                 public View getInfoContents(Marker marker) {
+                    final MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
+                    markerDAO.getPerMarker(marker.getId());
+                    List<MarkerBD> markerBDs = markerDAO.getPerMarker(marker.getId());
+                    final MarkerBD markerBDClass = markerBDs.get(0);
+
+                    LayoutInflater li = LayoutInflater.from(getContext());
+
+                    //inflamos o layout alerta.xml na view
+                    final View view = li.inflate(R.layout.dialog_validar, null);
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Validar Marcador");
+
                     LinearLayout info = new LinearLayout(getContext());
                     info.setOrientation(LinearLayout.VERTICAL);
 
                     ImageView imageView = new ImageView(getContext());
-                    imageView.setImageResource(image);
+                    imageView.setImageResource(markerBDClass.getImage());
 
                     TextView title = new TextView(getContext());
                     title.setTextColor(Color.BLACK);
@@ -147,9 +177,39 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     snippet.setTextColor(Color.GRAY);
                     snippet.setText(marker.getSnippet());
 
+                    Button btnLike = (Button)  view.findViewById(R.id.btLike);
+
+                    Button btnDislike = (Button)  view.findViewById(R.id.btDislike);
+
+                    btnLike.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            markerBDClass.setLifeTime(markerBDClass.getLifeTime()+10);
+                            markerDAO.update(markerBDClass);
+//                            validation = false;
+                            alerta.dismiss();
+                        }
+                    });
+
+                    btnDislike.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            markerBDClass.setLifeTime(markerBDClass.getLifeTime()-10);
+                            markerDAO.update(markerBDClass);
+                            alerta.dismiss();
+                        }
+                    });
+
                     info.addView(imageView);
                     info.addView(title);
                     info.addView(snippet);
+
+                    builder.setView(view);
+                    if (validation){
+                        alerta = builder.create();
+                        alerta.show();
+                    }
+
 
                     return info;
                 }
@@ -177,7 +237,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 @Override
                 public void onMarkerDragEnd(Marker marker) {
-                 dialogDrag(marker);
+                    final int id = mHashMap.get(marker);
+                    dialogDrag(marker, id);
                 }
             });
 
@@ -245,7 +306,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
 
-    private void dialogDrag(final Marker marker) {
+    private void dialogDrag(final Marker marker, final int id) {
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
         //-pegamos nossa instancia da classe
         LayoutInflater li = LayoutInflater.from(getContext());
@@ -263,19 +324,17 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-                List<MarkerBD> markerBDs = markerDAO.getPerMarker(marker.getId());
-                MarkerBD markerBDClass = markerBDs.get(0);
-                Log.d("ID Classe", String.valueOf(markerBDClass.getId()));
+                final MarkerBD markerBD = markerDAO.getPerIdClass(id);
 
-                markerBDClass.setDraggable(false);
-                markerBDClass.setLatitude(marker.getPosition().latitude);
-                markerBDClass.setLongitude(marker.getPosition().longitude);
-                markerBDClass.setTitle(getStreet(marker.getPosition()));
-                markerDAO.update(markerBDClass);
+                markerBD.setDraggable(false);
+                markerBD.setLatitude(marker.getPosition().latitude);
+                markerBD.setLongitude(marker.getPosition().longitude);
+                markerBD.setTitle(getStreet(marker.getPosition()));
+                markerDAO.update(markerBD);
 
-                Toast.makeText(getActivity(), "Draggable: "+ markerBDClass.isDraggable(), Toast.LENGTH_LONG).show();
-                marker.setDraggable(markerBDClass.isDraggable());
-                marker.setTitle(markerBDClass.getTitle());
+                Toast.makeText(getActivity(), "Draggable: "+ markerBD.isDraggable(), Toast.LENGTH_LONG).show();
+                marker.setDraggable(markerBD.isDraggable());
+                marker.setTitle(markerBD.getTitle());
 
 
                 removeCircle();
@@ -314,25 +373,27 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId()+1),1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
+                final MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId()+1),1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
 
-                Log.d("Id Construtor", String.valueOf(markerBDClass.getId()));
-
-                Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                final Marker marker = googleMapFinal.addMarker(new MarkerOptions()
                         .position(new LatLng(markerBDClass.getLatitude(), markerBDClass.getLongitude()))
                         .title(markerBDClass.getTitle())
                         .draggable(markerBDClass.isDraggable())
                         .icon(BitmapDescriptorFactory.fromResource(markerBDClass.getImage()))
                         .visible(markerBDClass.isStatus())
                 );
+
                 markerBDClass.setIdMarker(marker.getId());
                 markerDAO.saveMarker(markerBDClass);
                 markerDAO.getPerMarker(marker.getId());
                 marker.setDraggable(markerBDClass.isDraggable());
                 CreateCircle(marker);
                 zoomMarker(marker.getPosition(), googleMapFinal);
-                //new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
+                Log.d("Maker x Class","Marker: "+marker.getId()+": Class: "+markerBDClass.getId());
+                mHashMap.put(marker, markerBDClass.getId());
+                new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
+
             }
         });
 
@@ -421,7 +482,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
     public void CreateCircle (Marker marker){
-        circle = mMap.addCircle(new CircleOptions()
+        circle = googleMapFinal.addCircle(new CircleOptions()
                 .center(new LatLng(marker.getPosition().latitude, marker.getPosition().longitude))
                 .radius(10)
                 .strokeWidth(10)
@@ -448,22 +509,25 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public void loadMarkers(){
         MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-        List<MarkerBD> markerBDs = markerDAO.getAllMarkersActive();
-        List<Marker> listMarkers = new ArrayList<Marker>();
+        final List<MarkerBD> markerBDs = markerDAO.getAllMarkersActive();
         int count = 0;
-        for (MarkerBD m : markerBDs){
-            Marker marker = googleMapFinal.addMarker(new MarkerOptions()
-                    .position(new LatLng(m.getLatitude(), m.getLongitude()))
-                    .title(m.getTitle())
-                    .draggable(m.isDraggable())
-                    .icon(BitmapDescriptorFactory.fromResource(m.getImage()))
-                    .visible(m.isStatus())
+
+        for (int i = 0; i < markerBDs.size(); i++) {
+            final Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                    .position(new LatLng(markerBDs.get(i).getLatitude(), markerBDs.get(i).getLongitude()))
+                    .title(markerBDs.get(i).getTitle())
+                    .draggable(markerBDs.get(i).isDraggable())
+                    .icon(BitmapDescriptorFactory.fromResource(markerBDs.get(i).getImage()))
+                    .visible(markerBDs.get(i).isStatus())
             );
-            Log.d("idClasse", String.valueOf(m.getId()));
+            Log.d("Maker x Class","Marker: "+marker.getId()+": Class: "+markerBDs.get(i).getId());
             listMarkers.add(marker);
+            mHashMap.put(marker, markerBDs.get(i).getId());
+
+
         }
         for (Marker m: listMarkers){
-            //new LiveThread().liveMarkerCount(m, markerBDs.get(count), getActivity());
+            new LiveThread().liveMarkerCount(m, markerBDs.get(count), getActivity());
             count++;
         }
     }
