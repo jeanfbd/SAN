@@ -27,24 +27,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
-import java.util.List;
+
 
 public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener{
 
     private GoogleMap mMap;
-    private GoogleMap googleMapFinal;
     static Boolean marcadorON = false;
     Marker marcador = null;
-    private int image =  R.mipmap.ic_maker_amarelo_star;
-    private AlertDialog alerta;
     private LocationManager locationManager;
-    private double longitude = -45.4130600;
-    private double latitude = -23.6202800;
 
-    MarkerDialog test = new MarkerDialog();
+    /* Classe com os metodos dos markers */
+    MarkerDialog markerDialog = new MarkerDialog();
+
     Geocoder geocoder2;
 
+    /*Iniciando dados estaticos de posição*/
+    private double longitude = -45.4130600;
+    private double latitude = -23.6202800;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,19 +52,13 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     }
 
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
         geocoder2 = new Geocoder(getContext());
+
+        /*Adiciona o listener no infoWindows(tag) do marker*/
         googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -73,53 +66,62 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
             }
         });
 
-
-        googleMap = test.setListenerDragDiag(googleMap, marcador, getContext());
-
-
-       /* googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-                Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
+        /*Criando o listener do click longo*/
+        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
 
             @Override
-            public void onMarkerDrag(Marker marker) {
-                Snackbar.make(getView(), "Confirme a posição do marcador", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
+            public void onMapLongClick(LatLng arg0) {
+                // TODO Auto-generated method stub
 
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-                test.dialogDrag(marker, getContext());
+                markerDialog.dialogAdd(arg0,getContext(), mMap, geocoder2);
 
             }
         });
-*/
 
 
-        googleMapFinal = googleMap;
+        /*Criando o listener do drag*/
+        googleMap = markerDialog.setListenerDragDiag(googleMap, marcador, getContext());
+
         mMap = googleMap;
+
+        /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
+        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+
+
+        }
 
         mMap.setOnMapClickListener(this);
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        //Metodo carrega após o mapa estiver pronto usar o timeready da tela inicial
-        // Add a marker in Sydney and move the camera
 
 
+        /*Listener responsavel adicionar o botão da localização*/
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
+            @Override
+            public boolean onMyLocationButtonClick()
+            {   LatLng hue = new LatLng(latitude, longitude);
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(hue));
+                return false;
+            }
+        });
 
+        /*Iniciando o serviço de localização*/
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
-       final Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//        longitude = location.getLongitude();
-        //latitude = location.getLatitude();
+         final Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
+
+        /*Criando o listener de localização*/
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
-                //longitude = location.getLongitude();
-                //latitude = location.getLatitude();
+
 
             }
 
@@ -139,62 +141,27 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         };
 
 
-        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                        PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-
-
-        }
+        /*As frescuras de teste de implementação*/
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
 
-        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-
-            @Override
-            public void onMapLongClick(LatLng arg0) {
-                // TODO Auto-generated method stub
-
-                test.dialogAdd(arg0,getContext(), googleMapFinal, geocoder2);
-
-            }
-        });
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-       Location loc = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
-        LatLng sydney = new LatLng(loc.getLatitude(),loc.getLongitude());
-        // LatLng sydney = new LatLng(latitude, longitude);
+        Location loc = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
+      //  LatLng sydney = new LatLng(loc.getLatitude(),loc.getLongitude());
+        LatLng sydney = new LatLng(latitude, longitude);
 
 
 
         MarkerOptions marker = new MarkerOptions();
         marker.position(sydney);
         marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
-
         mMap.addMarker(marker);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
 
 
-        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
-            @Override
-            public boolean onMyLocationButtonClick()
-            {   LatLng hue = new LatLng(latitude, longitude);
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(hue));
-                return false;
-            }
-        });
-        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
-            @Override
-            public boolean onMyLocationButtonClick()
-            {   LatLng hue = new LatLng(latitude, longitude);
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(hue));
-                return true;
-            }
-        });
 
 
     }
@@ -204,14 +171,14 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
 
 
-
+    /*Override do metodo onMapClick..*/
     @Override
     public void onMapClick(LatLng latLng) {
 
         if(marcadorON){
-            test.dialogAdd(latLng,this.getContext(), googleMapFinal, geocoder2);
+           markerDialog.dialogAdd(latLng,this.getContext(), mMap, geocoder2);
 
-          //  dialogAdd(latLng);
+
 
 
         }
@@ -221,6 +188,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
     }
 
+    /*Metodo responsavel por identificar o estado do botão flutuante de adicionar*/
     public static void flagOne (){
         marcadorON = true;
 
@@ -228,7 +196,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
     }
 
-
+    /*Metodo responsavel por identificar o estado do botão flutuante de adicionar*/
     public static void flagTwo (){
         marcadorON = false;
 
@@ -237,152 +205,6 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     }
 
 
-    private void dialogAdd(final LatLng latLng) {
-
-        //LayoutInflater é utilizado para inflar nosso layout em uma view.
-        //-pegamos nossa instancia da classe
-        LayoutInflater li = LayoutInflater.from(getContext());
-
-        //inflamos o layout alerta.xml na view
-       final View view = li.inflate(R.layout.dialogadd, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Criar Marcador");
-         final Button confirm = (Button)  view.findViewById(R.id.btConfirm);
-
-        Button cancel = (Button)  view.findViewById(R.id.btCancel);
-
-        confirm.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                alerta.dismiss();
-                marcadorON =false;
-                MenuInicial.changeMind();
-
-                MarkerOptions markerOption = new MarkerOptions();
-                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
-                marcador = googleMapFinal.addMarker(markerOption);
-                marcador.setDraggable(true);
-                marcador.setTitle(getStreet(latLng));
-                zoomMarker(latLng, googleMapFinal);
-
-
-            }
-        });
-
-       cancel.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-
-                alerta.dismiss();
-                marcadorON = false;
-                MenuInicial.changeMind();
-
-
-
-            }
-        });
-
-        confirm.setVisibility(View.INVISIBLE);
-
-
-        final ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
-        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-
-
-
-
-        final ImageView laranja = (ImageView) view.findViewById(R.id.orange_star);
-        laranja.setImageResource(R.mipmap.ic_maker_laranja);
-
-
-        final ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
-        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-
-        amarelo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                image = R.mipmap.ic_maker_amarelo_star;
-                amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
-                laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-                confirm.setVisibility(View.VISIBLE);
-            }
-        });
-
-        laranja.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                image = R.mipmap.ic_maker_laranja_star;
-                amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
-                vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-                confirm.setVisibility(View.VISIBLE);
-
-            }
-        });
-        vermelho.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                image = R.mipmap.ic_maker_vermelho_star;
-                amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
-                confirm.setVisibility(View.VISIBLE);
-
-
-
-            }
-        });
-
-        builder.setView(view);
-
-        alerta = builder.create();
-
-        alerta.show();
-
-
-
-
-
-
-
-    }
-
-    public void zoomMarker(LatLng arg0, GoogleMap googleMap){
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(arg0)               // Sets the center of the map
-                .zoom(17)                   // Sets the zoom
-                .bearing(90)                // Sets the orientation of the camera to east
-                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
-                .build();                   // Creates a CameraPosition from the builder
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-    }
-
-    public String getStreet(LatLng location) {
-
-        String street = "";
-        //Classe que fornece a localização da cidade
-        Geocoder geocoder = new Geocoder(this.getContext());
-        List myLocation = null;
-
-        try {
-            //Obtendo os dados do endereço
-            myLocation = geocoder.getFromLocation(location.latitude, location.longitude, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //Log.d("My Location", myLocation.toString());
-        if (myLocation != null && myLocation.size() > 0) {
-            Address address = (Address) myLocation.get(0);
-            //Pega nome da cidade
-            String city = address.getLocality();
-            //Pega nome da rua
-            street = address.getAddressLine(0);
-        }else{
-            street = "Endereço não encontrado";
-        }
-
-        return street;
-    }
 
 
 
