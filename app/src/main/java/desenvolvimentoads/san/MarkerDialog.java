@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +20,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 //import desenvolvimentoads.san.Model.MarkerBD;
 
@@ -33,6 +36,8 @@ public class MarkerDialog {
     AlertDialog alerta;
     private int image;
     private static Circle circle;
+
+    LatLng loc;
 
 
     public void dialogAdd(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g) {
@@ -62,12 +67,14 @@ public class MarkerDialog {
 
                 MarkerOptions markerOption = new MarkerOptions();
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
-                googleMapFinal.addMarker(markerOption);
                 marcador = googleMapFinal.addMarker(markerOption);
                 marcador.setTitle(getStreet(latLng, c, g));
 
                 CreateCircle(latLng, googleMapFinal);
+
+                marcador.setTag(new MarkerTag(circle,marcador.getPosition()));
                 marcador.setDraggable(true);
+
                 zoomMarker(latLng, googleMapFinal);
 
 
@@ -186,6 +193,8 @@ public class MarkerDialog {
     }
 
     public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c, final View v) {
+
+
         googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {
@@ -193,6 +202,8 @@ public class MarkerDialog {
 
                   Snackbar.make(v, "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
                            .setAction("Action", null).show();
+
+
 
             }
 
@@ -206,6 +217,7 @@ public class MarkerDialog {
             public void onMarkerDragEnd(Marker marker) {
 
                 dialogDrag(marker, c);
+
             }
         });
 
@@ -229,14 +241,24 @@ public class MarkerDialog {
 
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
+                MarkerTag markerTag = (MarkerTag)marker.getTag();
+                markerTag.setPosition(marker.getPosition());
+                marker.setTag(markerTag);
 
-                removeCircle();
+                circle = markerTag.getCircle();
+                circle.remove();
+               // marker.setDraggable(false);
                 alerta.dismiss();
+
             }
         });
 
         cancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
+                MarkerTag markerTag = (MarkerTag)marker.getTag();
+                loc = markerTag.getPosition();
+             //   marker.setPosition(new LatLng(loc.latitude, loc.longitude));
+                marker.setPosition(markerTag.getPosition());
                 alerta.dismiss();
             }
         });
@@ -269,10 +291,7 @@ public class MarkerDialog {
 
     }
 
-    public static void removeCircle() {
-        if (circle != null)
-            circle.remove();
-    }
+
 
 }
 

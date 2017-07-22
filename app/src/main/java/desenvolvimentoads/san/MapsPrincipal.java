@@ -32,7 +32,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener{
 
     private GoogleMap mMap;
-    static Boolean marcadorON = false;
     Marker marcador = null;
     private LocationManager locationManager;
 
@@ -160,7 +159,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         MarkerOptions marker = new MarkerOptions();
         marker.position(sydney);
         marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
-        mMap.addMarker(marker);
+        Marker test = mMap.addMarker(marker);
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
 
 
