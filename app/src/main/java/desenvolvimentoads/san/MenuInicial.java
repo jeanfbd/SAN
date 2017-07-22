@@ -64,7 +64,7 @@ public class MenuInicial extends AppCompatActivity
                         .setAction("Action", null).show();
                 changeMind();
 
-                MapsPrincipal.flagOne();
+
 
             }
         });
@@ -77,7 +77,7 @@ public class MenuInicial extends AppCompatActivity
                         .setAction("Action", null).show();
                 changeMind();
 
-                MapsPrincipal.flagTwo();
+
             }
         });
 

@@ -80,7 +80,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
 
         /*Criando o listener do drag*/
-        googleMap = markerDialog.setListenerDragDiag(googleMap, marcador, getContext());
+        googleMap = markerDialog.setListenerDragDiag(googleMap, marcador, getContext(), getView());
 
         mMap = googleMap;
 
@@ -143,6 +143,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
 
         /*As frescuras de teste de implementação*/
+
+
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
@@ -174,33 +176,14 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     /*Override do metodo onMapClick..*/
     @Override
     public void onMapClick(LatLng latLng) {
-
-        if(marcadorON){
-           markerDialog.dialogAdd(latLng,this.getContext(), mMap, geocoder2);
-
-
-
+        if(MenuInicial.fab2.isShown()){
+            markerDialog.dialogAdd(latLng,this.getContext(), mMap, geocoder2);
 
         }
+
         else{
             Toast.makeText(getContext(), "Coordenadas: "+latLng.toString(), Toast.LENGTH_LONG).show();
         }
-
-    }
-
-    /*Metodo responsavel por identificar o estado do botão flutuante de adicionar*/
-    public static void flagOne (){
-        marcadorON = true;
-
-
-
-    }
-
-    /*Metodo responsavel por identificar o estado do botão flutuante de adicionar*/
-    public static void flagTwo (){
-        marcadorON = false;
-
-
 
     }
 

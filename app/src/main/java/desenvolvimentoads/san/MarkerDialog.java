@@ -5,11 +5,12 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-
+import android.support.design.widget.Snackbar;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -30,7 +31,7 @@ public class MarkerDialog {
 
     Marker marcador;
     AlertDialog alerta;
-    private int image = R.mipmap.ic_maker_amarelo_star;
+    private int image;
     private static Circle circle;
 
 
@@ -53,14 +54,18 @@ public class MarkerDialog {
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 alerta.dismiss();
-                MapsPrincipal.marcadorON = false;
-                MenuInicial.changeMind();
+
+                if(MenuInicial.fab2.isShown()){
+
+                    MenuInicial.changeMind();
+                }
 
                 MarkerOptions markerOption = new MarkerOptions();
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
                 googleMapFinal.addMarker(markerOption);
                 marcador = googleMapFinal.addMarker(markerOption);
                 marcador.setTitle(getStreet(latLng, c, g));
+
                 CreateCircle(latLng, googleMapFinal);
                 marcador.setDraggable(true);
                 zoomMarker(latLng, googleMapFinal);
@@ -73,8 +78,10 @@ public class MarkerDialog {
             public void onClick(View arg0) {
 
                 alerta.dismiss();
-                MapsPrincipal.marcadorON = false;
-                MenuInicial.changeMind();
+                if(MenuInicial.fab2.isShown()){
+
+                    MenuInicial.changeMind();
+                }
 
 
             }
@@ -142,8 +149,8 @@ public class MarkerDialog {
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(arg0)               // Sets the center of the map
                 .zoom(17)                   // Sets the zoom
-                .bearing(90)                // Sets the orientation of the camera to east
-                .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+          //      .bearing(90)                // Sets the orientation of the camera to east
+              //  .tilt(30)                   // Sets the tilt of the camera to 30 degrees
                 .build();                   // Creates a CameraPosition from the builder
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
@@ -164,7 +171,7 @@ public class MarkerDialog {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Log.d("My Location", myLocation.toString());
+       // Log.d("My Location", myLocation.toString());
         if (myLocation != null && myLocation.size() > 0) {
             Address address = (Address) myLocation.get(0);
             //Pega nome da cidade
@@ -178,14 +185,15 @@ public class MarkerDialog {
         return street;
     }
 
-    public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c) {
+    public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c, final View v) {
         googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
             @Override
             public void onMarkerDragStart(Marker marker) {
 
 
-                //  Snackbar.make(getView(), "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
-                //            .setAction("Action", null).show();
+                  Snackbar.make(v, "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
+                           .setAction("Action", null).show();
+
             }
 
             @Override
@@ -196,6 +204,7 @@ public class MarkerDialog {
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
+
                 dialogDrag(marker, c);
             }
         });
@@ -221,6 +230,8 @@ public class MarkerDialog {
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
 
+                removeCircle();
+                alerta.dismiss();
             }
         });
 
