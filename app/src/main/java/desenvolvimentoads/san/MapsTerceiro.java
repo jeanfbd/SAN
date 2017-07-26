@@ -1,5 +1,6 @@
 package desenvolvimentoads.san;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -35,8 +36,16 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +53,9 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import desenvolvimentoads.san.DAO.MarkerDAO;
+import desenvolvimentoads.san.Helper.AcessRestHelper;
+import desenvolvimentoads.san.Helper.HttpConnection;
+import desenvolvimentoads.san.Helper.JsonHelper;
 import desenvolvimentoads.san.Model.MarkerBD;
 
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener{
@@ -72,6 +84,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
+        getMarkerWebService();
     }
 
     @Override
@@ -547,5 +560,53 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
 
         return timeLife;
+    }
+
+    public void getMarkerWebService(){
+        AcessRestHelper acessRestHelper = new AcessRestHelper();
+
+        //URL DO WEBSERVICE CASO LOCALHOST TROCAR POR IP DA MAQUINA
+        String callWS = "http://10.92.40.176:8080/SAN-WebService/webresources/SAN/Marker/getAllActive";
+        String result = acessRestHelper.Get(callWS);
+
+        Log.i("JSON", result);
+
+        try {
+            Gson g = new Gson();
+            Type listType = new TypeToken<ArrayList<MarkerBD>>(){}.getType();
+
+            List<MarkerBD> markerBDs = new Gson().fromJson(result, listType);
+
+            for (int i = 0; i < markerBDs.size(); i++) {
+                Log.d("Marker", String.valueOf(markerBDs.get(i).getId()));
+                final Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                        .position(new LatLng(markerBDs.get(i).getLatitude(), markerBDs.get(i).getLongitude()))
+                        .title(markerBDs.get(i).getTitle())
+                        .draggable(markerBDs.get(i).isDraggable())
+                        .icon(BitmapDescriptorFactory.fromResource(markerBDs.get(i).getImage()))
+                        .visible(markerBDs.get(i).isStatus())
+                );
+                listMarkers.add(marker);
+                mHashMap.put(marker, markerBDs.get(i).getId());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressLint("NewApi")
+    private void callServer(final String method, final String data){
+        new Thread(){
+            public void run(){
+                String answer = HttpConnection.getSetDataWeb("http://10.92.40.176:8080/SAN-WebService/webresources/SAN/Marker/", method, data);
+
+                Log.i("Script", "ANSWER: "+answer);
+
+                if(data.isEmpty()){
+                    MarkerBD markerBD = JsonHelper.degenerateJSON(answer);
+                }
+            }
+        }.start();
     }
 }
