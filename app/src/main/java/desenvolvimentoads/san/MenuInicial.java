@@ -131,6 +131,8 @@ public class MenuInicial extends AppCompatActivity
         }
 
         if (id == R.id.denunciar) {
+
+
             Toast.makeText(this, "Perdeu playboy",Toast.LENGTH_LONG).show();
 
 

@@ -61,9 +61,12 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                marker.showInfoWindow();
+              //  marker.showInfoWindow();
+                Toast.makeText(getContext(), "Clickou", Toast.LENGTH_LONG).show();
             }
         });
+
+
 
         /*Criando o listener do click longo*/
         googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -76,6 +79,10 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
             }
         });
+
+
+        /*Criando o listener click on marker*/
+        googleMap = markerDialog.setMarkerClick(googleMap , getContext());
 
 
         /*Criando o listener do drag*/

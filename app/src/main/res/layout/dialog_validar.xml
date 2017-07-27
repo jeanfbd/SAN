@@ -38,6 +38,7 @@
     </TableRow>
 
     <TableRow
+        android:id="@+id/tableOne"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible">
@@ -62,9 +63,9 @@
     </TableRow>
 
     <TableRow
+        android:id="@+id/tableTwo"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-       >
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/btTwo"
@@ -83,14 +84,11 @@
 
     </TableRow>
 
-    <TableLayout>
-        <!-- Linha 2 com 2 colunas -->
-    </TableLayout>
-
     <TableRow
+        android:id="@+id/TableThree"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-         android:visibility="visible">
+        android:visibility="visible">
 
         <ImageView
             android:id="@+id/btThree"

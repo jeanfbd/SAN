@@ -12,6 +12,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.support.design.widget.Snackbar;
+import android.widget.TableRow;
+import android.widget.Toast;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -36,8 +39,207 @@ public class MarkerDialog {
     AlertDialog alerta;
     private int image;
     private static Circle circle;
+    Context context;
+    Boolean secondScreen = false;
 
     LatLng loc;
+
+
+
+    public GoogleMap setMarkerClick(GoogleMap googleMap, Context c){
+
+        this.context = c;
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                diagValidate(marker,context);
+
+
+                return true;
+
+
+            }
+        });
+
+        return googleMap;
+    }
+
+
+    public void diagValidate(final Marker marker,Context c){
+
+
+        LayoutInflater li = LayoutInflater.from(c);
+
+        //inflamos o layout alerta.xml na view
+        final View view = li.inflate(R.layout.dialog_validar, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+
+        Button btDislike = (Button) view.findViewById(R.id.btDislike);
+        final Button btValidate = (Button) view.findViewById(R.id.btLike);
+        Button btCancel =(Button) view.findViewById(R.id.btCancel);
+
+        TableRow tableOne = (TableRow) view.findViewById(R.id.tableOne);
+        TableRow tableTwo = (TableRow) view.findViewById(R.id.tableTwo);
+        TableRow tableThree = (TableRow) view.findViewById(R.id.TableThree);
+
+        btDislike.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+             alerta.dismiss();
+             marker.remove();
+
+
+            }
+        });
+
+
+        btValidate.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+                if(secondScreen)
+                {
+                    alerta.dismiss();
+                    secondScreen = false;
+
+
+                }
+                else
+                {
+                   btValidate.setText("Ok");
+                   secondScreen = true;
+
+                }
+
+
+
+            }
+        });
+
+
+        btCancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                if(secondScreen)
+                {
+                    btValidate.setText("Validar");
+                    secondScreen = false;
+
+                }
+                else
+                {
+                    alerta.dismiss();
+
+                }
+
+
+
+
+            }
+        });
+
+
+        tableOne.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0r) {
+                if(secondScreen)
+                {
+
+
+
+                }
+                else
+                {
+                    alerta.dismiss();
+
+                }
+
+
+
+            }
+        });
+
+
+        tableTwo.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                if(secondScreen)
+                {
+
+
+
+                }
+                else
+                {
+                    alerta.dismiss();
+
+                }
+
+
+            }
+        });
+
+
+        tableThree.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                if(secondScreen)
+                {
+
+
+
+                }
+                else
+                {
+                    alerta.dismiss();
+
+                }
+
+
+            }
+        });
+
+        tableOne.setVisibility(View.GONE);
+        tableTwo.setVisibility(View.GONE);
+        tableThree.setVisibility(View.GONE);
+
+        builder.setView(view);
+        alerta = builder.create();
+        alerta.show();
+
+
+    }
+
+
+    public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c, final View v) {
+
+
+        googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+
+
+                Snackbar.make(v, "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+                //       Snackbar.make(getView(), "Confirme a posição do marcador", Snackbar.LENGTH_LONG)
+                //                .setAction("Action", null).show();
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+
+                dialogDrag(marker, c);
+
+            }
+        });
+
+
+        return googleMap;
+    }
 
 
     public void dialogAdd(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g) {
@@ -192,38 +394,9 @@ public class MarkerDialog {
         return street;
     }
 
-    public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c, final View v) {
-
-
-        googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-
-
-                  Snackbar.make(v, "Arraste o marcador sobre o mapa para melhor precisão", Snackbar.LENGTH_LONG)
-                           .setAction("Action", null).show();
 
 
 
-            }
-
-            @Override
-            public void onMarkerDrag(Marker marker) {
-                //       Snackbar.make(getView(), "Confirme a posição do marcador", Snackbar.LENGTH_LONG)
-                //                .setAction("Action", null).show();
-            }
-
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-
-                dialogDrag(marker, c);
-
-            }
-        });
-
-
-        return googleMap;
-    }
 
     public void dialogDrag(final Marker marker, final Context c) {
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
