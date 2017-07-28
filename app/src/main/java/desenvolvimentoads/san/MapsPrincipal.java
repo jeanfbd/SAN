@@ -159,7 +159,9 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         Location loc = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
       //  LatLng sydney = new LatLng(loc.getLatitude(),loc.getLongitude());
-        LatLng sydney = new LatLng(latitude, longitude);
+
+    /*
+       LatLng sydney = new LatLng(latitude, longitude);
 
 
 
@@ -169,7 +171,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         Marker test = mMap.addMarker(marker);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-
+*/
 
 
 

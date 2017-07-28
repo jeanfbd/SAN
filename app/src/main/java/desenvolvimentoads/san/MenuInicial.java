@@ -23,6 +23,8 @@ public class MenuInicial extends AppCompatActivity
     private FragmentManager fragmentManager;
     static FloatingActionButton fab;
     static FloatingActionButton fab2;
+    static MenuItem denunciar;
+    Boolean den = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +57,8 @@ public class MenuInicial extends AppCompatActivity
 
         fab2 = (FloatingActionButton) findViewById(R.id.fabCancel);
         fab2.setVisibility(View.GONE);
+
+
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,6 +104,12 @@ public class MenuInicial extends AppCompatActivity
 
     }
 
+    public static void denunciar(){
+
+
+
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -131,16 +141,22 @@ public class MenuInicial extends AppCompatActivity
         }
 
         if (id == R.id.denunciar) {
+            denunciar = item;
+
+            denunciar.setTitle("Cancel");
 
 
-            Toast.makeText(this, "Perdeu playboy",Toast.LENGTH_LONG).show();
-
+            ChangeDenunciar();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    public void ChangeDenunciar(){
+
+        denunciar.setTitle("teste");
+    }
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {

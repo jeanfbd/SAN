@@ -10,13 +10,23 @@ import com.google.android.gms.maps.model.LatLng;
 public class MarkerTag {
 
 Circle circle;
+LatLng position;
+int nivel;
 
-    public MarkerTag(Circle circle, LatLng position) {
+
+    public MarkerTag(Circle circle, LatLng position, int nivel) {
         this.circle = circle;
         this.position = position;
+        this.nivel = nivel;
     }
 
-    LatLng position;
+    public int getNivel() {
+        return nivel;
+    }
+
+    public void setNivel(int nivel) {
+        this.nivel = nivel;
+    }
 
     public Circle getCircle() {
         return circle;

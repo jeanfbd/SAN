@@ -41,8 +41,8 @@ public class MarkerDialog {
     private static Circle circle;
     Context context;
     Boolean secondScreen = false;
-
     LatLng loc;
+    int nivel;
 
 
 
@@ -68,26 +68,41 @@ public class MarkerDialog {
 
 
     public void diagValidate(final Marker marker,Context c){
-
-
+        MarkerTag markerTag = (MarkerTag) marker.getTag();
+        nivel = markerTag.getNivel();
+        circle = markerTag.getCircle();
         LayoutInflater li = LayoutInflater.from(c);
 
         //inflamos o layout alerta.xml na view
         final View view = li.inflate(R.layout.dialog_validar, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
-
-        Button btDislike = (Button) view.findViewById(R.id.btDislike);
+        builder.setTitle("Validação");
+        final Button btDislike = (Button) view.findViewById(R.id.btDislike);
+        final TableRow tableZero = (TableRow) view.findViewById(R.id.tableZero);
         final Button btValidate = (Button) view.findViewById(R.id.btLike);
         Button btCancel =(Button) view.findViewById(R.id.btCancel);
 
-        TableRow tableOne = (TableRow) view.findViewById(R.id.tableOne);
-        TableRow tableTwo = (TableRow) view.findViewById(R.id.tableTwo);
-        TableRow tableThree = (TableRow) view.findViewById(R.id.TableThree);
+      final  TableRow tableOne = (TableRow) view.findViewById(R.id.tableOne);
+      final  TableRow tableTwo = (TableRow) view.findViewById(R.id.tableTwo);
+      final  TableRow tableThree = (TableRow) view.findViewById(R.id.TableThree);
+
+        final ImageView amarelo = (ImageView) view.findViewById(R.id.btOne);
+        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+
+
+        final ImageView laranja = (ImageView) view.findViewById(R.id.btTwo);
+        laranja.setImageResource(R.mipmap.ic_maker_laranja);
+
+
+        final ImageView vermelho = (ImageView) view.findViewById(R.id.btThree);
+        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+
 
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
              alerta.dismiss();
+             circle.remove();
              marker.remove();
 
 
@@ -100,6 +115,7 @@ public class MarkerDialog {
 
                 if(secondScreen)
                 {
+
                     alerta.dismiss();
                     secondScreen = false;
 
@@ -108,6 +124,18 @@ public class MarkerDialog {
                 else
                 {
                    btValidate.setText("Ok");
+                    if(!tableOne.isShown()){
+                        tableOne.setVisibility(View.VISIBLE);
+                    }
+                    if(!tableTwo.isShown()){
+                        tableTwo.setVisibility(View.VISIBLE);
+                    }
+                    if(!tableThree.isShown()){
+                        tableThree.setVisibility(View.VISIBLE);
+                    }
+
+                   btDislike.setVisibility(View.GONE);
+                   tableZero.setVisibility(View.GONE);
                    secondScreen = true;
 
                 }
@@ -124,11 +152,41 @@ public class MarkerDialog {
                 {
                     btValidate.setText("Validar");
                     secondScreen = false;
+                    if(nivel ==1){
+                        tableOne.setVisibility(View.VISIBLE);
+                        tableTwo.setVisibility(View.GONE);
+                        tableThree.setVisibility(View.GONE);
+                        amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
+                        laranja.setImageResource(R.mipmap.ic_maker_laranja);
+                        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
 
+                    }
+
+                    else if(nivel ==2){
+                        tableOne.setVisibility(View.GONE);
+                        tableTwo.setVisibility(View.VISIBLE);
+                        tableThree.setVisibility(View.GONE);
+                        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+                        laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
+                        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+                    }
+
+                    else if(nivel ==3){
+                        tableOne.setVisibility(View.GONE);
+                        tableTwo.setVisibility(View.GONE);
+                        tableThree.setVisibility(View.VISIBLE);
+
+                        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+                        laranja.setImageResource(R.mipmap.ic_maker_laranja);
+                        vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
+
+                    }
+                    btDislike.setVisibility(View.VISIBLE);
+                    tableZero.setVisibility(View.VISIBLE);
                 }
                 else
                 {
-                    alerta.dismiss();
+                   alerta.dismiss();
 
                 }
 
@@ -138,18 +196,21 @@ public class MarkerDialog {
             }
         });
 
-
         tableOne.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0r) {
+
+
                 if(secondScreen)
                 {
-
+                    amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
+                    laranja.setImageResource(R.mipmap.ic_maker_laranja);
+                    vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
 
 
                 }
                 else
                 {
-                    alerta.dismiss();
+                  //  alerta.dismiss();
 
                 }
 
@@ -161,15 +222,19 @@ public class MarkerDialog {
 
         tableTwo.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
+
+
                 if(secondScreen)
                 {
-
+                    amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+                    laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
+                    vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
 
 
                 }
                 else
                 {
-                    alerta.dismiss();
+                  //  alerta.dismiss();
 
                 }
 
@@ -180,15 +245,18 @@ public class MarkerDialog {
 
         tableThree.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
+
                 if(secondScreen)
                 {
-
+                    amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+                    laranja.setImageResource(R.mipmap.ic_maker_laranja);
+                    vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
 
 
                 }
                 else
                 {
-                    alerta.dismiss();
+                   // alerta.dismiss();
 
                 }
 
@@ -196,16 +264,49 @@ public class MarkerDialog {
             }
         });
 
-        tableOne.setVisibility(View.GONE);
-        tableTwo.setVisibility(View.GONE);
-        tableThree.setVisibility(View.GONE);
 
+
+        if(nivel ==1){
+            tableOne.setVisibility(View.VISIBLE);
+            tableTwo.setVisibility(View.GONE);
+            tableThree.setVisibility(View.GONE);
+            amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
+            laranja.setImageResource(R.mipmap.ic_maker_laranja);
+            vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+
+        }
+
+        else if(nivel ==2){
+            tableOne.setVisibility(View.GONE);
+            tableTwo.setVisibility(View.VISIBLE);
+            tableThree.setVisibility(View.GONE);
+            amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+            laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
+            vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+        }
+
+       else if(nivel ==3){
+            tableOne.setVisibility(View.GONE);
+            tableTwo.setVisibility(View.GONE);
+            tableThree.setVisibility(View.VISIBLE);
+
+            amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
+            laranja.setImageResource(R.mipmap.ic_maker_laranja);
+            vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
+
+        }
+/*
+
+
+*/
         builder.setView(view);
         alerta = builder.create();
         alerta.show();
 
 
     }
+
+
 
 
     public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c, final View v) {
@@ -274,7 +375,7 @@ public class MarkerDialog {
 
                 CreateCircle(latLng, googleMapFinal);
 
-                marcador.setTag(new MarkerTag(circle,marcador.getPosition()));
+                marcador.setTag(new MarkerTag(circle,marcador.getPosition(), nivel));
                 marcador.setDraggable(true);
 
                 zoomMarker(latLng, googleMapFinal);
@@ -313,6 +414,7 @@ public class MarkerDialog {
         amarelo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                nivel =1;
                 image = R.mipmap.ic_maker_amarelo_star;
                 amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
                 laranja.setImageResource(R.mipmap.ic_maker_laranja);
@@ -324,6 +426,7 @@ public class MarkerDialog {
         laranja.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                nivel =2;
                 image = R.mipmap.ic_maker_laranja_star;
                 amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
                 laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
@@ -336,6 +439,7 @@ public class MarkerDialog {
             @Override
             public void onClick(View view) {
                 image = R.mipmap.ic_maker_vermelho_star;
+                nivel =3;
                 amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
                 laranja.setImageResource(R.mipmap.ic_maker_laranja);
                 vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
