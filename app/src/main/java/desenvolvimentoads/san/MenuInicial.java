@@ -24,7 +24,7 @@ public class MenuInicial extends AppCompatActivity
     static FloatingActionButton fab;
     static FloatingActionButton fab2;
     static MenuItem denunciar;
-    Boolean den = true;
+    static Boolean vDenunciar = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,12 +63,18 @@ public class MenuInicial extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!vDenunciar){
+
+                    changeDenunciar();
+
+
+                }
+
+
 
                 Snackbar.make(view, "Click no mapa para criar um marcador ou click novamente para Cancelar", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 changeMind();
-
-
 
             }
         });
@@ -104,9 +110,18 @@ public class MenuInicial extends AppCompatActivity
 
     }
 
-    public static void denunciar(){
+    public static void changeDenunciar(){
+        if(denunciar.getTitle().equals("Denunciar"))    {
+            vDenunciar = false;
+            denunciar.setTitle("Cancel");
 
 
+        }else{
+
+            denunciar.setTitle("Denunciar");
+            vDenunciar = true;
+
+        }
 
     }
 
@@ -143,20 +158,18 @@ public class MenuInicial extends AppCompatActivity
         if (id == R.id.denunciar) {
             denunciar = item;
 
-            denunciar.setTitle("Cancel");
 
+            if(!fab.isShown()){
+               changeMind();
 
-            ChangeDenunciar();
+            }
+            changeDenunciar();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void ChangeDenunciar(){
-
-        denunciar.setTitle("teste");
-    }
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {

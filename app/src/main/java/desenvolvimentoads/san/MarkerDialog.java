@@ -38,12 +38,11 @@ public class MarkerDialog {
     Marker marcador;
     AlertDialog alerta;
     private int image;
-    private static Circle circle;
+    private static Circle circle = null;
     Context context;
     Boolean secondScreen = false;
     LatLng loc;
     int nivel;
-
 
 
     public GoogleMap setMarkerClick(GoogleMap googleMap, Context c){
@@ -53,8 +52,17 @@ public class MarkerDialog {
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                if(MenuInicial.vDenunciar){
 
-                diagValidate(marker,context);
+                    diagValidate(marker,context);
+
+                }
+               else{
+                    MenuInicial.changeDenunciar();
+                    circle.remove();
+                    marker.remove();
+
+                }
 
 
                 return true;
