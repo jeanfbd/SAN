@@ -1,6 +1,5 @@
 package desenvolvimentoads.san;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -36,36 +35,27 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
+import desenvolvimentoads.san.API.MarkerService;
 import desenvolvimentoads.san.DAO.MarkerDAO;
-import desenvolvimentoads.san.Helper.AcessRestHelper;
-import desenvolvimentoads.san.Helper.HttpConnection;
-import desenvolvimentoads.san.Helper.JsonHelper;
 import desenvolvimentoads.san.Model.MarkerBD;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener{
+public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener {
 
     private GoogleMap mMap;
     private GoogleMap googleMapFinal;
     private static Circle circle;
     private LatLng inicial = null;
     private HashMap<Marker, Integer> mHashMap = new HashMap<Marker, Integer>();
-    private List<Marker>listMarkers = new ArrayList<Marker>();
+    private List<Marker> listMarkers = new ArrayList<Marker>();
 
     private LayoutInflater mInflater;
 
@@ -84,16 +74,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
-        getMarkerWebService();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         try {
-            locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,0,this);
-        }catch (SecurityException ex){
+            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        } catch (SecurityException ex) {
             Log.e(TAG, "Erro", ex);
         }
     }
@@ -101,7 +90,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onPause() {
         super.onPause();
-        locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
     }
 
@@ -126,11 +115,13 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMap.setMinZoomPreference(10);
             loadMarkers();
+            getAllMarkers();
+            deleteMarker("7");
+            getMarker("7");
 
             //Estilos de mapas
             //mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
             //mMap.setMapStyle();
-
 
 
             googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -148,7 +139,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 @Override
                 public boolean onMarkerClick(Marker marker) {
                     final int id = mHashMap.get(marker);
-                    Log.e("Real Marker ID", id+"");
+                    Log.e("Real Marker ID", id + "");
                     return false;
                 }
             });
@@ -190,14 +181,14 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     snippet.setTextColor(Color.GRAY);
                     snippet.setText(marker.getSnippet());
 
-                    Button btnLike = (Button)  view.findViewById(R.id.btLike);
+                    Button btnLike = (Button) view.findViewById(R.id.btLike);
 
-                    Button btnDislike = (Button)  view.findViewById(R.id.btDislike);
+                    Button btnDislike = (Button) view.findViewById(R.id.btDislike);
 
                     btnLike.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            markerBDClass.setLifeTime(markerBDClass.getLifeTime()+10);
+                            markerBDClass.setLifeTime(markerBDClass.getLifeTime() + 10);
                             markerDAO.update(markerBDClass);
 //                            validation = false;
                             alerta.dismiss();
@@ -207,7 +198,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     btnDislike.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            markerBDClass.setLifeTime(markerBDClass.getLifeTime()-10);
+                            markerBDClass.setLifeTime(markerBDClass.getLifeTime() - 10);
                             markerDAO.update(markerBDClass);
                             alerta.dismiss();
                         }
@@ -218,7 +209,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     info.addView(snippet);
 
                     builder.setView(view);
-                    if (validation){
+                    if (validation) {
                         alerta = builder.create();
                         alerta.show();
                     }
@@ -283,18 +274,17 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     // result of the request.
                 }
             }
-        }catch (SecurityException ex){
+        } catch (SecurityException ex) {
             Log.e(TAG, "Erro", ex);
         }
         LatLng caragua = new LatLng(-23.6202800, -45.4130600);
-        zoomMarker(caragua,googleMapFinal);
+        zoomMarker(caragua, googleMapFinal);
     }
-
 
 
     @Override
     public void onMapClick(LatLng latLng) {
-        Toast.makeText(getContext(), "Coordenadas: "+latLng.toString(), Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), "Coordenadas: " + latLng.toString(), Toast.LENGTH_LONG).show();
 
     }
 
@@ -329,9 +319,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Alterar Posição");
-        final Button confirm = (Button)  view.findViewById(R.id.btConfirm);
+        final Button confirm = (Button) view.findViewById(R.id.btConfirm);
 
-        Button cancel = (Button)  view.findViewById(R.id.btCancel);
+        Button cancel = (Button) view.findViewById(R.id.btCancel);
 
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
@@ -345,7 +335,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 markerBD.setTitle(getStreet(marker.getPosition()));
                 markerDAO.update(markerBD);
 
-                Toast.makeText(getActivity(), "Draggable: "+ markerBD.isDraggable(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), "Draggable: " + markerBD.isDraggable(), Toast.LENGTH_LONG).show();
                 marker.setDraggable(markerBD.isDraggable());
                 marker.setTitle(markerBD.getTitle());
 
@@ -378,15 +368,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Criar Marcador");
-        final Button confirm = (Button)  view.findViewById(R.id.btConfirm);
+        final Button confirm = (Button) view.findViewById(R.id.btConfirm);
 
-        Button cancel = (Button)  view.findViewById(R.id.btCancel);
+        Button cancel = (Button) view.findViewById(R.id.btCancel);
 
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                final MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId()+1),1,latLng.latitude, latLng.longitude,getStreet(latLng), getTimeLive(image), image);
+                final MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId() + 1), 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
                 MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
 
                 final Marker marker = googleMapFinal.addMarker(new MarkerOptions()
@@ -403,9 +393,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 marker.setDraggable(markerBDClass.isDraggable());
                 CreateCircle(marker);
                 zoomMarker(marker.getPosition(), googleMapFinal);
-                Log.d("Maker x Class","Marker: "+marker.getId()+": Class: "+markerBDClass.getId());
+                Log.d("Maker x Class", "Marker: " + marker.getId() + ": Class: " + markerBDClass.getId());
                 mHashMap.put(marker, markerBDClass.getId());
-                new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
+                //new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
 
             }
         });
@@ -460,7 +450,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
 
-    public void zoomMarker(LatLng arg0, GoogleMap googleMap){
+    public void zoomMarker(LatLng arg0, GoogleMap googleMap) {
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(arg0)               // Sets the center of the map
                 .zoom(17)                   // Sets the zoom
@@ -487,20 +477,20 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             String city = address.getLocality();
             //Pega nome da rua
             street = address.getAddressLine(0);
-        }else{
+        } else {
             street = "Endereço não encontrado";
         }
 
         return street;
     }
 
-    public void CreateCircle (Marker marker){
+    public void CreateCircle(Marker marker) {
         circle = googleMapFinal.addCircle(new CircleOptions()
                 .center(new LatLng(marker.getPosition().latitude, marker.getPosition().longitude))
                 .radius(10)
                 .strokeWidth(10)
-                .strokeColor(Color.argb(128, 173,216,230))
-                .fillColor(Color.argb(24, 30,144,255))
+                .strokeColor(Color.argb(128, 173, 216, 230))
+                .fillColor(Color.argb(24, 30, 144, 255))
                 .clickable(true));
 
         googleMapFinal.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
@@ -515,12 +505,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         });
     }
 
-    public static void removeCircle(){
+    public static void removeCircle() {
         if (circle != null)
             circle.remove();
     }
 
-    public void loadMarkers(){
+    public void loadMarkers() {
         MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
         final List<MarkerBD> markerBDs = markerDAO.getAllMarkersActive();
         int count = 0;
@@ -533,21 +523,20 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     .icon(BitmapDescriptorFactory.fromResource(markerBDs.get(i).getImage()))
                     .visible(markerBDs.get(i).isStatus())
             );
-            Log.d("Maker x Class","Marker: "+marker.getId()+": Class: "+markerBDs.get(i).getId());
             listMarkers.add(marker);
             mHashMap.put(marker, markerBDs.get(i).getId());
 
 
         }
-        for (Marker m: listMarkers){
-            new LiveThread().liveMarkerCount(m, markerBDs.get(count), getActivity());
+        for (Marker m : listMarkers) {
+            //new LiveThread().liveMarkerCount(m, markerBDs.get(count), getActivity());
             count++;
         }
     }
 
-    public int getTimeLive(int idImage){
+    public int getTimeLive(int idImage) {
         int timeLife = 0;
-        switch (idImage){
+        switch (idImage) {
             case R.mipmap.ic_maker_amarelo_star:
                 timeLife = 10;
                 break;
@@ -562,51 +551,204 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         return timeLife;
     }
 
-    public void getMarkerWebService(){
-        AcessRestHelper acessRestHelper = new AcessRestHelper();
+//    public void getMarkerWebService() {
+//        AcessRestHelper acessRestHelper = new AcessRestHelper();
+//
+//        //URL DO WEBSERVICE CASO LOCALHOST TROCAR POR IP DA MAQUINA
+//        String callWS = "http://10.92.40.176:8080/SAN-WebService/webresources/SAN/Marker/getAllActive";
+//        String result = acessRestHelper.Get(callWS);
+//
+//        Log.i("JSON", result);
+//
+//        try {
+//            Gson g = new Gson();
+//            Type listType = new TypeToken<ArrayList<MarkerBD>>() {
+//            }.getType();
+//
+//            List<MarkerBD> markerBDs = g.fromJson(result, listType);
+//
+//            for (int i = 0; i < markerBDs.size(); i++) {
+//                Marker webMarker = googleMapFinal.addMarker(new MarkerOptions()
+//                        .position(new LatLng(markerBDs.get(i).getLatitude(), markerBDs.get(i).getLongitude()))
+//                        .title(markerBDs.get(i).getTitle())
+//                        .draggable(markerBDs.get(i).isDraggable())
+//                        .icon(BitmapDescriptorFactory.fromResource(markerBDs.get(i).getImage()))
+//                        .visible(markerBDs.get(i).isStatus())
+//                );
+//                listMarkers.add(webMarker);
+//                mHashMap.put(webMarker, markerBDs.get(i).getId());
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
-        //URL DO WEBSERVICE CASO LOCALHOST TROCAR POR IP DA MAQUINA
-        String callWS = "http://10.92.40.176:8080/SAN-WebService/webresources/SAN/Marker/getAllActive";
-        String result = acessRestHelper.Get(callWS);
+//    @SuppressLint("NewApi")
+//    private void callServer(final String complementURL, final String method, final String data) {
+//        new Thread() {
+//            public void run() {
+//                String answer = HttpConnection.getSetDataWeb(complementURL, method, data);
+//
+//                Log.i("Script", "ANSWER: " + answer);
+//
+//                if (data.isEmpty()) {
+//                    MarkerBD markerBD = JsonHelper.degenerateJSON(answer);
+//                }
+//            }
+//        }.start();
+//    }
 
-        Log.i("JSON", result);
+//    public void getAllMarkersWebService() {
+//        requestQueue = Volley.newRequestQueue(getContext());
+//
+//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
+//                showUrl, new Response.Listener<JSONObject>() {
+//            @Override
+//            public void onResponse(JSONObject response) {
+//                Log.d("Response: ",response.toString());
+//                try {
+//                    JSONArray markers = response.getJSONArray("marker");
+//                    for (int i = 0; i < markers.length(); i++) {
+//                        JSONObject markerJson = markers.getJSONObject(i);
+//                        Gson g = new Gson();
+//                        Type listType = new TypeToken<ArrayList<MarkerBD>>() {
+//                        }.getType();
+//
+//                        MarkerBD markerBD = g.fromJson(String.valueOf(markerJson), listType);
+//
+//                        Marker webMarker = googleMapFinal.addMarker(new MarkerOptions()
+//                                .position(new LatLng(markerBD.getLatitude(), markerBD.getLongitude()))
+//                                .title(markerBD.getTitle())
+//                                .draggable(markerBD.isDraggable())
+//                                .icon(BitmapDescriptorFactory.fromResource(markerBD.getImage()))
+//                                .visible(markerBD.isStatus())
+//                        );
+//                        listMarkers.add(webMarker);
+//                        mHashMap.put(webMarker, markerBD.getId());
+//
+//                    }
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.d("Error: ",error.getMessage());
+//
+//            }
+//        });
+//        requestQueue.add(jsonObjectRequest);
+//    }
+//
+//
+//    StringRequest request = new StringRequest(Request.Method.POST, insertUrl, new Response.Listener<String>() {
+//        @Override
+//        public void onResponse(String response) {
+//
+//            System.out.println(response.toString());
+//        }
+//    }, new Response.ErrorListener() {
+//        @Override
+//        public void onErrorResponse(VolleyError error) {
+//
+//        }
+//    }) {
+//
+//        @Override
+//        protected Map<String, String> getParams() throws AuthFailureError {
+//            Map<String, String> parameters = new HashMap<String, String>();
+//            parameters.put("firstname", firstname.getText().toString());
+//            parameters.put("lastname", lastname.getText().toString());
+//            parameters.put("age", age.getText().toString());
+//
+//            return parameters;
+//        }
+//    };
+//                requestQueue.add(request);
+//}
+//
+//        });
+//
+//
+//                }
+//                }
+//                }
 
-        try {
-            Gson g = new Gson();
-            Type listType = new TypeToken<ArrayList<MarkerBD>>(){}.getType();
+    public void getAllMarkers() {
+        MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
+        final Call<List<MarkerBD>> call = markerService.getAllMarker();
 
-            List<MarkerBD> markerBDs = new Gson().fromJson(result, listType);
-
-            for (int i = 0; i < markerBDs.size(); i++) {
-                Log.d("Marker", String.valueOf(markerBDs.get(i).getId()));
-                final Marker marker = googleMapFinal.addMarker(new MarkerOptions()
-                        .position(new LatLng(markerBDs.get(i).getLatitude(), markerBDs.get(i).getLongitude()))
-                        .title(markerBDs.get(i).getTitle())
-                        .draggable(markerBDs.get(i).isDraggable())
-                        .icon(BitmapDescriptorFactory.fromResource(markerBDs.get(i).getImage()))
-                        .visible(markerBDs.get(i).isStatus())
-                );
-                listMarkers.add(marker);
-                mHashMap.put(marker, markerBDs.get(i).getId());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @SuppressLint("NewApi")
-    private void callServer(final String method, final String data){
-        new Thread(){
-            public void run(){
-                String answer = HttpConnection.getSetDataWeb("http://10.92.40.176:8080/SAN-WebService/webresources/SAN/Marker/", method, data);
-
-                Log.i("Script", "ANSWER: "+answer);
-
-                if(data.isEmpty()){
-                    MarkerBD markerBD = JsonHelper.degenerateJSON(answer);
+        call.enqueue(new Callback<List<MarkerBD>>() {
+            @Override
+            public void onResponse(Call<List<MarkerBD>> call, Response<List<MarkerBD>> response) {
+                final List<MarkerBD> listamMarkerBDs = response.body();
+                if (listamMarkerBDs != null) {
+                    for (int i = 0; i < listamMarkerBDs.size(); i++) {
+                        Log.i(TAG, "MARKER: " + listamMarkerBDs.get(i).getId());
+                    }
                 }
             }
-        }.start();
+
+            @Override
+            public void onFailure(Call<List<MarkerBD>> call, Throwable t) {
+                Log.e(TAG, "Erro: " + t.toString());
+            }
+        });
+    }
+
+    public void getMarker(String id){
+        MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
+        final Call<MarkerBD> call = markerService.getMarker(id);
+
+        call.enqueue(new Callback<MarkerBD>() {
+            @Override
+            public void onResponse(Call<MarkerBD> call, Response<MarkerBD> response) {
+                MarkerBD markerBD = response.body();
+                Log.i(TAG, "MARKER: " + markerBD.getId());
+            }
+
+            @Override
+            public void onFailure(Call<MarkerBD> call, Throwable t) {
+                Log.e(TAG, "Erro: " + t.toString());
+            }
+        });
+
+    }
+
+    public void updateMarker(MarkerBD markerBD){
+        MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
+        Call<Void> call = markerService.updateMarker(String.valueOf(markerBD.getId()),markerBD);
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Toast.makeText(getContext(), "Marker alterado com sucesso", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Erro: " + t.toString());
+            }
+        });
+    }
+
+    public void deleteMarker(String id){
+        MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
+        Call<Void> call = markerService.deleteMarker(id);
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Toast.makeText(getContext(), "Marker removido com sucesso", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Erro: " + t.toString());
+            }
+        });
     }
 }
