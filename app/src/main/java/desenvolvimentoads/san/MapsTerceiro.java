@@ -117,7 +117,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             loadMarkers();
             getAllMarkers();
             deleteMarker("7");
-            getMarker("7");
+
 
             //Estilos de mapas
             //mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);

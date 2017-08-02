@@ -29,10 +29,10 @@ public interface MarkerService {
     @POST("insert")
     Call<Void> insertMarker(@Body MarkerBD markerBD);
 
-    @PUT("update/{id}")
+    @POST("update/{id}")
     Call<Void> updateMarker(@Path("id") String id, @Body MarkerBD markerBD);
 
-    @DELETE("delete/{id}")
+    @GET("delete/{id}")
     Call<Void> deleteMarker(@Path("id") String id);
 
     public static final Retrofit RETROFIT = new Retrofit.Builder()
