@@ -18,13 +18,21 @@ import retrofit2.http.Path;
  */
 
 public interface MarkerService {
-    public static final String BASE_URL = "https://jeanfelipebrock.000webhostapp.com/index.php/";
+    //Webservice Online
+    //public static final String BASE_URL = "https://jeanfelipebrock.000webhostapp.com/index.php/";
+
+    //Localhost substituir 10.92.40.176 pelo ip da maquina
+    public static final String BASE_URL = "http://10.92.40.176/Webservice/";
+
 
     @GET("getAllMarkers")
     Call<List<MarkerBD>> getAllMarker();
 
     @GET("getMarker/{id}")
     Call<MarkerBD> getMarker(@Path("id") String id);
+
+    @GET("getRaio/{lat}/{lng}/{km}")
+    Call<List<MarkerBD>> getRaio(@Path("lat") String lat,@Path("lng") String lng, @Path("km") String km );
 
     @POST("insert")
     Call<Void> insertMarker(@Body MarkerBD markerBD);
@@ -34,6 +42,8 @@ public interface MarkerService {
 
     @GET("delete/{id}")
     Call<Void> deleteMarker(@Path("id") String id);
+
+
 
     public static final Retrofit RETROFIT = new Retrofit.Builder()
             .baseUrl(BASE_URL)

@@ -114,9 +114,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             mMap.setOnMapClickListener(this);
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMap.setMinZoomPreference(10);
-            loadMarkers();
-            getAllMarkers();
-            deleteMarker("7");
+            //loadMarkers();
+            //getAllMarkers();
+            getRaio("-23.6202800","-45.4130600","10");
 
 
             //Estilos de mapas
@@ -376,26 +376,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                final MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId() + 1), 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
-                MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-
-                final Marker marker = googleMapFinal.addMarker(new MarkerOptions()
-                        .position(new LatLng(markerBDClass.getLatitude(), markerBDClass.getLongitude()))
-                        .title(markerBDClass.getTitle())
-                        .draggable(markerBDClass.isDraggable())
-                        .icon(BitmapDescriptorFactory.fromResource(markerBDClass.getImage()))
-                        .visible(markerBDClass.isStatus())
-                );
-
-                markerBDClass.setIdMarker(marker.getId());
-                markerDAO.saveMarker(markerBDClass);
-                markerDAO.getPerMarker(marker.getId());
-                marker.setDraggable(markerBDClass.isDraggable());
-                CreateCircle(marker);
-                zoomMarker(marker.getPosition(), googleMapFinal);
-                Log.d("Maker x Class", "Marker: " + marker.getId() + ": Class: " + markerBDClass.getId());
-                mHashMap.put(marker, markerBDClass.getId());
-                //new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
+                //markerInsertLocal(latLng);
+                markerInsertServer(latLng);
 
             }
         });
@@ -449,6 +431,34 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         alerta.show();
     }
 
+    public void markerInsertLocal(LatLng latLng){
+        final MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId() + 1), 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
+        MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
+
+        final Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                .position(new LatLng(markerBDClass.getLatitude(), markerBDClass.getLongitude()))
+                .title(markerBDClass.getTitle())
+                .draggable(markerBDClass.isDraggable())
+                .icon(BitmapDescriptorFactory.fromResource(markerBDClass.getImage()))
+                .visible(markerBDClass.isStatus())
+        );
+
+        markerBDClass.setIdMarker(marker.getId());
+        markerDAO.saveMarker(markerBDClass);
+        markerDAO.getPerMarker(marker.getId());
+        marker.setDraggable(markerBDClass.isDraggable());
+        CreateCircle(marker);
+        zoomMarker(marker.getPosition(), googleMapFinal);
+        Log.d("Maker x Class", "Marker: " + marker.getId() + ": Class: " + markerBDClass.getId());
+        mHashMap.put(marker, markerBDClass.getId());
+        //new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
+    }
+
+    public void markerInsertServer(LatLng latLng){
+        MarkerBD markerBD = new MarkerBD(0, 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
+        insertMarker(markerBD);
+        getAllMarkers();
+    }
 
     public void zoomMarker(LatLng arg0, GoogleMap googleMap) {
         CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -688,6 +698,30 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 if (listamMarkerBDs != null) {
                     for (int i = 0; i < listamMarkerBDs.size(); i++) {
                         Log.i(TAG, "MARKER: " + listamMarkerBDs.get(i).getId());
+                        Log.d("ID", String.valueOf(listamMarkerBDs.get(i).getId()));
+                        Log.d("IDUSER", String.valueOf(listamMarkerBDs.get(i).getIdUser()));
+                        if (listamMarkerBDs.get(i).getIdMarker() == null){
+                            Log.d("IDMARKER", "null");
+                        }else{
+                            Log.d("IDMARKER", listamMarkerBDs.get(i).getIdMarker());
+                        }
+
+                        Log.d("LATITUDE", String.valueOf(listamMarkerBDs.get(i).getLatitude()));
+                        Log.d("LONGITUDE", String.valueOf(listamMarkerBDs.get(i).getLongitude()));
+                        Log.d("TITLE", listamMarkerBDs.get(i).getTitle());
+                        Log.d("LIFETIME", String.valueOf(listamMarkerBDs.get(i).getLifeTime()));
+                        Log.d("IMAGE", String.valueOf(listamMarkerBDs.get(i).getImage()));
+                        //Log.d("CREATIONDATE", listamMarkerBDs.get(i).getCreationDate());
+                        Log.d("DRAGGABLE", String.valueOf(listamMarkerBDs.get(i).isDraggable()));
+                        Log.d("STATUS", String.valueOf(listamMarkerBDs.get(i).isStatus()));
+                        Log.d("Size", String.valueOf(listamMarkerBDs.size()));
+                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(listamMarkerBDs.get(i).getLatitude(), listamMarkerBDs.get(i).getLongitude()))
+                                .title(listamMarkerBDs.get(i).getTitle())
+                                .draggable(listamMarkerBDs.get(i).isDraggable())
+                                .icon(BitmapDescriptorFactory.fromResource(listamMarkerBDs.get(i).getImage()))
+                        );
+                        mHashMap.put(marker, listamMarkerBDs.get(i).getId());
                     }
                 }
             }
@@ -716,6 +750,52 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }
         });
 
+    }
+
+    public void getRaio(String lat, String lng, String km){
+        MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
+        final Call<List<MarkerBD>> call = markerService.getRaio(lat, lng, km);
+
+        call.enqueue(new Callback<List<MarkerBD>>() {
+
+            @Override
+            public void onResponse(Call<List<MarkerBD>> call, Response<List<MarkerBD>> response) { final List<MarkerBD> listamMarkerBDs = response.body();
+                if (listamMarkerBDs != null) {
+                    for (int i = 0; i < listamMarkerBDs.size(); i++) {
+                        Log.i(TAG, "MARKER: " + listamMarkerBDs.get(i).getId());
+                        Log.d("ID", String.valueOf(listamMarkerBDs.get(i).getId()));
+                        Log.d("IDUSER", String.valueOf(listamMarkerBDs.get(i).getIdUser()));
+                        if (listamMarkerBDs.get(i).getIdMarker() == null){
+                            Log.d("IDMARKER", "null");
+                        }else{
+                            Log.d("IDMARKER", listamMarkerBDs.get(i).getIdMarker());
+                        }
+
+                        Log.d("LATITUDE", String.valueOf(listamMarkerBDs.get(i).getLatitude()));
+                        Log.d("LONGITUDE", String.valueOf(listamMarkerBDs.get(i).getLongitude()));
+                        Log.d("TITLE", listamMarkerBDs.get(i).getTitle());
+                        Log.d("LIFETIME", String.valueOf(listamMarkerBDs.get(i).getLifeTime()));
+                        Log.d("IMAGE", String.valueOf(listamMarkerBDs.get(i).getImage()));
+                        //Log.d("CREATIONDATE", listamMarkerBDs.get(i).getCreationDate());
+                        Log.d("DRAGGABLE", String.valueOf(listamMarkerBDs.get(i).isDraggable()));
+                        Log.d("STATUS", String.valueOf(listamMarkerBDs.get(i).isStatus()));
+                        Log.d("Size", String.valueOf(listamMarkerBDs.size()));
+                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(listamMarkerBDs.get(i).getLatitude(), listamMarkerBDs.get(i).getLongitude()))
+                                .title(listamMarkerBDs.get(i).getTitle())
+                                .draggable(listamMarkerBDs.get(i).isDraggable())
+                                .icon(BitmapDescriptorFactory.fromResource(listamMarkerBDs.get(i).getImage()))
+                        );
+                        mHashMap.put(marker, listamMarkerBDs.get(i).getId());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MarkerBD>> call, Throwable t) {
+                Log.e(TAG, "Erro: " + t.toString());
+            }
+        });
     }
 
     public void updateMarker(MarkerBD markerBD){
@@ -751,4 +831,21 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }
         });
     }
+
+    public void insertMarker(MarkerBD markerBD){
+        MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
+        final Call<Void> call = markerService.insertMarker(markerBD);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Toast.makeText(getContext(), "Marker cadastrado com sucesso", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "Erro: " + t.toString());
+            }
+        });
+    }
+
 }
