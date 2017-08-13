@@ -12,6 +12,8 @@ public class MarkerTag {
 Circle circle;
 LatLng position;
 int nivel;
+String Street;
+int id;
 
 
     public MarkerTag(Circle circle, LatLng position, int nivel) {
@@ -20,6 +22,23 @@ int nivel;
         this.nivel = nivel;
     }
 
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getStreet() {
+        return Street;
+    }
+
+    public void setStreet(String street) {
+        Street = street;
+    }
     public int getNivel() {
         return nivel;
     }

@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.support.design.widget.Snackbar;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -88,6 +89,10 @@ public class MarkerDialog {
         builder.setTitle("Validação");
         final Button btDislike = (Button) view.findViewById(R.id.btDislike);
         final TableRow tableZero = (TableRow) view.findViewById(R.id.tableZero);
+        final TextView streetText = (TextView) view.findViewById(R.id.txInfo);
+        final TextView txOne = (TextView) view.findViewById(R.id.tvOne);
+        final TextView txTwo = (TextView) view.findViewById(R.id.tvTwo);
+        final TextView txThree = (TextView) view.findViewById(R.id.tvThree);
         final Button btValidate = (Button) view.findViewById(R.id.btLike);
         Button btCancel =(Button) view.findViewById(R.id.btCancel);
 
@@ -106,6 +111,7 @@ public class MarkerDialog {
         final ImageView vermelho = (ImageView) view.findViewById(R.id.btThree);
         vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
 
+        streetText.setText(markerTag.getStreet());
 
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
@@ -134,12 +140,15 @@ public class MarkerDialog {
                    btValidate.setText("Ok");
                     if(!tableOne.isShown()){
                         tableOne.setVisibility(View.VISIBLE);
+
                     }
                     if(!tableTwo.isShown()){
                         tableTwo.setVisibility(View.VISIBLE);
+
                     }
                     if(!tableThree.isShown()){
                         tableThree.setVisibility(View.VISIBLE);
+
                     }
 
                    btDislike.setVisibility(View.GONE);
@@ -167,6 +176,11 @@ public class MarkerDialog {
                         amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
                         laranja.setImageResource(R.mipmap.ic_maker_laranja);
                         vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+
+
+
+
+
 
                     }
 
@@ -281,6 +295,8 @@ public class MarkerDialog {
             amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
             laranja.setImageResource(R.mipmap.ic_maker_laranja);
             vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+            txOne.setText("Nivel Baixo (Atual)");
+
 
         }
 
@@ -291,6 +307,8 @@ public class MarkerDialog {
             amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
             laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
             vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+            txTwo.setText("Nivel Médio (Atual)");
+
         }
 
        else if(nivel ==3){
@@ -301,6 +319,7 @@ public class MarkerDialog {
             amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
             laranja.setImageResource(R.mipmap.ic_maker_laranja);
             vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
+            txThree.setText("Nivel Alto (Atual)");
 
         }
 /*
@@ -379,11 +398,14 @@ public class MarkerDialog {
                 MarkerOptions markerOption = new MarkerOptions();
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
                 marcador = googleMapFinal.addMarker(markerOption);
-                marcador.setTitle(getStreet(latLng, c, g));
+                //marcador.setTitle(getStreet(latLng, c, g));
 
                 CreateCircle(latLng, googleMapFinal);
 
-                marcador.setTag(new MarkerTag(circle,marcador.getPosition(), nivel));
+
+                MarkerTag tag = new MarkerTag(circle,marcador.getPosition(), nivel);
+                tag.setStreet(getStreet(latLng, c, g));
+                marcador.setTag(tag);
                 marcador.setDraggable(true);
 
                 zoomMarker(latLng, googleMapFinal);
@@ -407,6 +429,8 @@ public class MarkerDialog {
 
         confirm.setVisibility(View.INVISIBLE);
 
+        final TextView tvChoosed = (TextView) view.findViewById(R.id.tvChoosed);
+        tvChoosed.setText("Nivel Escolhido = 'Nenhum'");
 
         final ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
         amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
@@ -428,6 +452,7 @@ public class MarkerDialog {
                 laranja.setImageResource(R.mipmap.ic_maker_laranja);
                 vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
                 confirm.setVisibility(View.VISIBLE);
+                tvChoosed.setText("Nivel Escolhido = 'Baixo'");
             }
         });
 
@@ -440,6 +465,7 @@ public class MarkerDialog {
                 laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
                 vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
                 confirm.setVisibility(View.VISIBLE);
+                tvChoosed.setText("Nivel Escolhido = 'Médio'");
 
             }
         });
@@ -452,6 +478,7 @@ public class MarkerDialog {
                 laranja.setImageResource(R.mipmap.ic_maker_laranja);
                 vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
                 confirm.setVisibility(View.VISIBLE);
+                tvChoosed.setText("Nivel Escolhido = 'Alto'");
 
 
             }

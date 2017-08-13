@@ -35,7 +35,8 @@
             android:layout_height="wrap_content"
             android:layout_column="1"
             android:layout_span="2"
-            android:text="TextView" />
+            android:text="Endereço"
+            tools:textAlignment="center" />
     </TableRow>
 
     <TableRow
@@ -58,7 +59,8 @@
             android:id="@+id/tvOne"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="text"
+            android:layout_gravity="center"
+            android:text="Nvel Baixo"
             android:visibility="visible" />
 
     </TableRow>
@@ -81,7 +83,8 @@
             android:id="@+id/tvTwo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="text" />
+            android:layout_gravity="center"
+            android:text="Nivel Médio" />
 
     </TableRow>
 
@@ -89,6 +92,7 @@
         android:id="@+id/TableThree"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textAlignment="center"
         android:visibility="visible">
 
         <ImageView
@@ -105,7 +109,8 @@
             android:id="@+id/tvThree"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="text"
+            android:layout_gravity="center"
+            android:text="Nivel Alto"
             android:visibility="visible" />
     </TableRow>
 
