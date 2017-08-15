@@ -1,6 +1,7 @@
 package desenvolvimentoads.san;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -48,13 +49,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener {
 
     private GoogleMap mMap;
-    private GoogleMap googleMapFinal;
+    public static GoogleMap googleMapFinal;
     private static Circle circle;
     private LatLng inicial = null;
-    private HashMap<Marker, Integer> mHashMap = new HashMap<Marker, Integer>();
+    public static HashMap<Marker, Integer> mHashMap = new HashMap<Marker, Integer>();
     private List<Marker> listMarkers = new ArrayList<Marker>();
 
     private LayoutInflater mInflater;
@@ -103,20 +105,27 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+
+
     @Override
     public void onMapReady(final GoogleMap googleMap) {
-
         try {
-
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (location != null){
+                Log.i(TAG, "Minha Localização: Lat: "+location.getLatitude()+"  Lng: "+location.getLongitude());
+            }
             googleMapFinal = googleMap;
             mMap = googleMap;
             mMap.setOnMapClickListener(this);
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMap.setMinZoomPreference(10);
             //loadMarkers();
-            //getAllMarkers();
-            getRaio("-23.6202800","-45.4130600","10");
+//            getAllMarkers();
+
+            getRaio("-23.6202800","-45.4130600","1.5");
+            getActivity().startService(new Intent(getActivity(),ServiceThread.class));
 
 
             //Estilos de mapas
@@ -152,10 +161,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 @Override
                 public View getInfoContents(Marker marker) {
-                    final MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
-                    markerDAO.getPerMarker(marker.getId());
-                    List<MarkerBD> markerBDs = markerDAO.getPerMarker(marker.getId());
-                    final MarkerBD markerBDClass = markerBDs.get(0);
+//                    final MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
+//                    markerDAO.getPerMarker(marker.getId());
+//                    List<MarkerBD> markerBDs = markerDAO.getPerMarker(marker.getId());
+//                    final MarkerBD markerBDClass = markerBDs.get(0);
 
                     LayoutInflater li = LayoutInflater.from(getContext());
 
@@ -168,8 +177,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     LinearLayout info = new LinearLayout(getContext());
                     info.setOrientation(LinearLayout.VERTICAL);
 
-                    ImageView imageView = new ImageView(getContext());
-                    imageView.setImageResource(markerBDClass.getImage());
+//                    ImageView imageView = new ImageView(getContext());
+//                    imageView.setImageResource(markerBDClass.getImage());
 
                     TextView title = new TextView(getContext());
                     title.setTextColor(Color.BLACK);
@@ -185,26 +194,26 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                     Button btnDislike = (Button) view.findViewById(R.id.btDislike);
 
-                    btnLike.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            markerBDClass.setLifeTime(markerBDClass.getLifeTime() + 10);
-                            markerDAO.update(markerBDClass);
-//                            validation = false;
-                            alerta.dismiss();
-                        }
-                    });
+//                    btnLike.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            markerBDClass.setLifeTime(markerBDClass.getLifeTime() + 10);
+//                            markerDAO.update(markerBDClass);
+////                            validation = false;
+//                            alerta.dismiss();
+//                        }
+//                    });
+//
+//                    btnDislike.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            markerBDClass.setLifeTime(markerBDClass.getLifeTime() - 10);
+//                            markerDAO.update(markerBDClass);
+//                            alerta.dismiss();
+//                        }
+//                    });
 
-                    btnDislike.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            markerBDClass.setLifeTime(markerBDClass.getLifeTime() - 10);
-                            markerDAO.update(markerBDClass);
-                            alerta.dismiss();
-                        }
-                    });
-
-                    info.addView(imageView);
+//                    info.addView(imageView);
                     info.addView(title);
                     info.addView(snippet);
 
@@ -285,6 +294,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onMapClick(LatLng latLng) {
         Toast.makeText(getContext(), "Coordenadas: " + latLng.toString(), Toast.LENGTH_LONG).show();
+        getRaio(String.valueOf(latLng.latitude), String.valueOf(latLng.longitude), "10");
 
     }
 
@@ -457,7 +467,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void markerInsertServer(LatLng latLng){
         MarkerBD markerBD = new MarkerBD(0, 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
         insertMarker(markerBD);
-        getAllMarkers();
+//        getAllMarkers();
     }
 
     public void zoomMarker(LatLng arg0, GoogleMap googleMap) {
@@ -697,24 +707,24 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 final List<MarkerBD> listamMarkerBDs = response.body();
                 if (listamMarkerBDs != null) {
                     for (int i = 0; i < listamMarkerBDs.size(); i++) {
-                        Log.i(TAG, "MARKER: " + listamMarkerBDs.get(i).getId());
-                        Log.d("ID", String.valueOf(listamMarkerBDs.get(i).getId()));
-                        Log.d("IDUSER", String.valueOf(listamMarkerBDs.get(i).getIdUser()));
-                        if (listamMarkerBDs.get(i).getIdMarker() == null){
-                            Log.d("IDMARKER", "null");
-                        }else{
-                            Log.d("IDMARKER", listamMarkerBDs.get(i).getIdMarker());
-                        }
-
-                        Log.d("LATITUDE", String.valueOf(listamMarkerBDs.get(i).getLatitude()));
-                        Log.d("LONGITUDE", String.valueOf(listamMarkerBDs.get(i).getLongitude()));
-                        Log.d("TITLE", listamMarkerBDs.get(i).getTitle());
-                        Log.d("LIFETIME", String.valueOf(listamMarkerBDs.get(i).getLifeTime()));
-                        Log.d("IMAGE", String.valueOf(listamMarkerBDs.get(i).getImage()));
-                        //Log.d("CREATIONDATE", listamMarkerBDs.get(i).getCreationDate());
-                        Log.d("DRAGGABLE", String.valueOf(listamMarkerBDs.get(i).isDraggable()));
-                        Log.d("STATUS", String.valueOf(listamMarkerBDs.get(i).isStatus()));
-                        Log.d("Size", String.valueOf(listamMarkerBDs.size()));
+//                        Log.i(TAG, "MARKER: " + listamMarkerBDs.get(i).getId());
+//                        Log.d("ID", String.valueOf(listamMarkerBDs.get(i).getId()));
+//                        Log.d("IDUSER", String.valueOf(listamMarkerBDs.get(i).getIdUser()));
+//                        if (listamMarkerBDs.get(i).getIdMarker() == null){
+//                            Log.d("IDMARKER", "null");
+//                        }else{
+//                            Log.d("IDMARKER", listamMarkerBDs.get(i).getIdMarker());
+//                        }
+//
+//                        Log.d("LATITUDE", String.valueOf(listamMarkerBDs.get(i).getLatitude()));
+//                        Log.d("LONGITUDE", String.valueOf(listamMarkerBDs.get(i).getLongitude()));
+//                        Log.d("TITLE", listamMarkerBDs.get(i).getTitle());
+//                        Log.d("LIFETIME", String.valueOf(listamMarkerBDs.get(i).getLifeTime()));
+//                        Log.d("IMAGE", String.valueOf(listamMarkerBDs.get(i).getImage()));
+//                        //Log.d("CREATIONDATE", listamMarkerBDs.get(i).getCreationDate());
+//                        Log.d("DRAGGABLE", String.valueOf(listamMarkerBDs.get(i).isDraggable()));
+//                        Log.d("STATUS", String.valueOf(listamMarkerBDs.get(i).isStatus()));
+//                        Log.d("Size", String.valueOf(listamMarkerBDs.size()));
                         Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(listamMarkerBDs.get(i).getLatitude(), listamMarkerBDs.get(i).getLongitude()))
                                 .title(listamMarkerBDs.get(i).getTitle())
@@ -752,7 +762,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-    public void getRaio(String lat, String lng, String km){
+    public static void getRaio(String lat, String lng, String km){
         MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
         final Call<List<MarkerBD>> call = markerService.getRaio(lat, lng, km);
 
@@ -762,25 +772,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             public void onResponse(Call<List<MarkerBD>> call, Response<List<MarkerBD>> response) { final List<MarkerBD> listamMarkerBDs = response.body();
                 if (listamMarkerBDs != null) {
                     for (int i = 0; i < listamMarkerBDs.size(); i++) {
-                        Log.i(TAG, "MARKER: " + listamMarkerBDs.get(i).getId());
-                        Log.d("ID", String.valueOf(listamMarkerBDs.get(i).getId()));
-                        Log.d("IDUSER", String.valueOf(listamMarkerBDs.get(i).getIdUser()));
-                        if (listamMarkerBDs.get(i).getIdMarker() == null){
-                            Log.d("IDMARKER", "null");
-                        }else{
-                            Log.d("IDMARKER", listamMarkerBDs.get(i).getIdMarker());
-                        }
-
-                        Log.d("LATITUDE", String.valueOf(listamMarkerBDs.get(i).getLatitude()));
-                        Log.d("LONGITUDE", String.valueOf(listamMarkerBDs.get(i).getLongitude()));
-                        Log.d("TITLE", listamMarkerBDs.get(i).getTitle());
-                        Log.d("LIFETIME", String.valueOf(listamMarkerBDs.get(i).getLifeTime()));
-                        Log.d("IMAGE", String.valueOf(listamMarkerBDs.get(i).getImage()));
-                        //Log.d("CREATIONDATE", listamMarkerBDs.get(i).getCreationDate());
-                        Log.d("DRAGGABLE", String.valueOf(listamMarkerBDs.get(i).isDraggable()));
-                        Log.d("STATUS", String.valueOf(listamMarkerBDs.get(i).isStatus()));
-                        Log.d("Size", String.valueOf(listamMarkerBDs.size()));
-                        Marker marker = mMap.addMarker(new MarkerOptions()
+                        Marker marker = googleMapFinal.addMarker(new MarkerOptions()
                                 .position(new LatLng(listamMarkerBDs.get(i).getLatitude(), listamMarkerBDs.get(i).getLongitude()))
                                 .title(listamMarkerBDs.get(i).getTitle())
                                 .draggable(listamMarkerBDs.get(i).isDraggable())
@@ -797,6 +789,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }
         });
     }
+
 
     public void updateMarker(MarkerBD markerBD){
         MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
