@@ -25,6 +25,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
+import com.firebase.geofire.core.GeoHash;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,13 +41,23 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import desenvolvimentoads.san.API.MarkerService;
+import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.DAO.MarkerDAO;
 import desenvolvimentoads.san.Model.MarkerBD;
 import retrofit2.Call;
@@ -52,12 +67,15 @@ import retrofit2.Response;
 
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, LocationListener {
 
+    private DatabaseReference mDatabase;
+    private FirebaseDatabase firebaseDatabase;
     private GoogleMap mMap;
     public static GoogleMap googleMapFinal;
     private static Circle circle;
     private LatLng inicial = null;
     public static HashMap<Marker, Integer> mHashMap = new HashMap<Marker, Integer>();
     private List<Marker> listMarkers = new ArrayList<Marker>();
+    private List<MarkerBD> markerBDList = new ArrayList<MarkerBD>();
 
     private LayoutInflater mInflater;
 
@@ -107,14 +125,13 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
      */
 
 
-
     @Override
     public void onMapReady(final GoogleMap googleMap) {
         try {
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (location != null){
-                Log.i(TAG, "Minha Localização: Lat: "+location.getLatitude()+"  Lng: "+location.getLongitude());
+            if (location != null) {
+                Log.i(TAG, "Minha Localização: Lat: " + location.getLatitude() + "  Lng: " + location.getLongitude());
             }
             googleMapFinal = googleMap;
             mMap = googleMap;
@@ -124,8 +141,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             //loadMarkers();
 //            getAllMarkers();
 
-            getRaio("-23.6202800","-45.4130600","1.5");
-            getActivity().startService(new Intent(getActivity(),ServiceThread.class));
+//            getRaio("-23.6202800","-45.4130600","1.5");
+//            getActivity().startService(new Intent(getActivity(),ServiceThread.class));
+//            getAllFirebase();
+            getRaioFirebase(-23.6202800, -45.4130600, 1000.00);
 
 
             //Estilos de mapas
@@ -441,7 +460,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         alerta.show();
     }
 
-    public void markerInsertLocal(LatLng latLng){
+    public void markerInsertLocal(LatLng latLng) {
         final MarkerBD markerBDClass = new MarkerBD((MarkerDAO.lastQueryId() + 1), 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
         MarkerDAO markerDAO = MarkerDAO.getInstance(getContext());
 
@@ -464,9 +483,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         //new LiveThread().liveMarkerCount( marker, markerBDClass, getActivity());
     }
 
-    public void markerInsertServer(LatLng latLng){
+    public void markerInsertServer(LatLng latLng) {
         MarkerBD markerBD = new MarkerBD(0, 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
         insertMarker(markerBD);
+        insertFirebase(latLng);
 //        getAllMarkers();
     }
 
@@ -743,7 +763,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         });
     }
 
-    public void getMarker(String id){
+    public void getMarker(String id) {
         MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
         final Call<MarkerBD> call = markerService.getMarker(id);
 
@@ -762,14 +782,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-    public static void getRaio(String lat, String lng, String km){
+    public static void getRaio(String lat, String lng, String km) {
         MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
         final Call<List<MarkerBD>> call = markerService.getRaio(lat, lng, km);
 
         call.enqueue(new Callback<List<MarkerBD>>() {
 
             @Override
-            public void onResponse(Call<List<MarkerBD>> call, Response<List<MarkerBD>> response) { final List<MarkerBD> listamMarkerBDs = response.body();
+            public void onResponse(Call<List<MarkerBD>> call, Response<List<MarkerBD>> response) {
+                final List<MarkerBD> listamMarkerBDs = response.body();
                 if (listamMarkerBDs != null) {
                     for (int i = 0; i < listamMarkerBDs.size(); i++) {
                         Marker marker = googleMapFinal.addMarker(new MarkerOptions()
@@ -791,9 +812,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
 
-    public void updateMarker(MarkerBD markerBD){
+    public void updateMarker(MarkerBD markerBD) {
         MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
-        Call<Void> call = markerService.updateMarker(String.valueOf(markerBD.getId()),markerBD);
+        Call<Void> call = markerService.updateMarker(String.valueOf(markerBD.getId()), markerBD);
 
         call.enqueue(new Callback<Void>() {
             @Override
@@ -808,7 +829,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         });
     }
 
-    public void deleteMarker(String id){
+    public void deleteMarker(String id) {
         MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
         Call<Void> call = markerService.deleteMarker(id);
 
@@ -825,7 +846,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         });
     }
 
-    public void insertMarker(MarkerBD markerBD){
+    public void insertMarker(MarkerBD markerBD) {
         MarkerService markerService = MarkerService.RETROFIT.create(MarkerService.class);
         final Call<Void> call = markerService.insertMarker(markerBD);
         call.enqueue(new Callback<Void>() {
@@ -840,5 +861,143 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }
         });
     }
+
+    public void insertFirebase(LatLng latLng) {
+        MarkerBD markerBD = new MarkerBD(0, 1, latLng.latitude, latLng.longitude, getStreet(latLng), getTimeLive(image), image);
+        mDatabase = ConfigFireBase.getFirebase();
+        String itemId = mDatabase.child("Marker").push().getKey();
+        mDatabase.child("Marker").child(itemId).setValue(markerBD);
+
+        GeoFire geoFire = new GeoFire(mDatabase.child("marker_location"));
+        geoFire.setLocation(itemId, new GeoLocation(markerBD.getLatitude(), markerBD.getLongitude()), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    System.err.println("There was an error saving the location to GeoFire: " + error);
+                } else {
+                    System.out.println("Location saved on server successfully!");
+                }
+            }
+        });
+
+        GeoHash geoHash = new GeoHash(new GeoLocation(markerBD.getLatitude(), markerBD.getLongitude()));
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("Marker/" + itemId, markerBD);
+        updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
+        updates.put("marker_location/" + itemId + "/l", Arrays.asList(markerBD.getLatitude(), markerBD.getLongitude()));
+        mDatabase.updateChildren(updates);
+
+        try {
+
+            Toast.makeText(getContext(), "Marker inserido com sucesso", Toast.LENGTH_LONG).show();
+
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void getAllFirebase() {
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child("Marker").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                markerBDList.clear();
+                if (dataSnapshot != null) {
+                    for (DataSnapshot objSnapShot : dataSnapshot.getChildren()) {
+                        Log.i(TAG, "onDataChange: " + objSnapShot);
+                        MarkerBD markerBD = objSnapShot.getValue(MarkerBD.class);
+                        markerBDList.add(markerBD);
+                    }
+                    Log.i(TAG, "getAllFirebase: Size: " + markerBDList);
+                    if (markerBDList != null) {
+                        for (int i = 0; i < markerBDList.size(); i++) {
+                            Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                                    .position(new LatLng(markerBDList.get(i).getLatitude(), markerBDList.get(i).getLongitude()))
+                                    .title(markerBDList.get(i).getTitle())
+                                    .draggable(markerBDList.get(i).isDraggable())
+                                    .icon(BitmapDescriptorFactory.fromResource(markerBDList.get(i).getImage()))
+                            );
+                            mHashMap.put(marker, markerBDList.get(i).getId());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void getRaioFirebase(Double lat, Double lng, Double radius) {
+        mDatabase = ConfigFireBase.getFirebase();
+        GeoFire geoFire = new GeoFire(mDatabase.child("marker_location"));
+
+        final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lng), radius);
+
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                Log.i(TAG, "onKeyEntered: " + key);
+                mDatabase = ConfigFireBase.getFirebase();
+                mDatabase.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null) {//
+                            Map<String, String> newRequest = (Map<String, String>) dataSnapshot.getValue();
+                            MarkerBD markerBD = dataSnapshot.getValue(MarkerBD.class);//
+                            Log.i(TAG, "onDataChange: " + markerBD.getCreationDate());
+//
+                            Marker marker = googleMapFinal.addMarker(new MarkerOptions()
+                                    .position(new LatLng(markerBD.getLatitude(), markerBD.getLongitude()))
+                                    .title(markerBD.getTitle())
+                                    .draggable(markerBD.isDraggable())
+                                    .icon(BitmapDescriptorFactory.fromResource(markerBD.getImage()))
+                            );
+                            mHashMap.put(marker, markerBD.getId());
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
+    }
+
+    public void updateMarkerFirebase(MarkerBD markerBD) {
+        markerBD.setLifeTime(9999);
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child("Marker").child(markerBD.getCreationDate()).setValue(markerBD);
+    }
+
+    public void deleteMarkerFirebase(MarkerBD markerBD) {
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child("Marker").child(markerBD.getCreationDate()).removeValue();
+    }
+
 
 }
