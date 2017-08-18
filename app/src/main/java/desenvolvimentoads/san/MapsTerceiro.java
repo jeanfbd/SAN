@@ -144,7 +144,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 //            getRaio("-23.6202800","-45.4130600","1.5");
 //            getActivity().startService(new Intent(getActivity(),ServiceThread.class));
 //            getAllFirebase();
-            getRaioFirebase(-23.6202800, -45.4130600, 1000.00);
+            getRaioFirebase(-23.6202800, -45.4130600, 5.00);
+
 
 
             //Estilos de mapas
@@ -932,7 +933,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
         mDatabase = ConfigFireBase.getFirebase();
-        GeoFire geoFire = new GeoFire(mDatabase.child("marker_location"));
+//        GeoFire geoFire = new GeoFire(mDatabase.child("marker_location"));
+        firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
+        GeoFire geoFire = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
 
         final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lng), radius);
 
@@ -944,7 +947,17 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 mDatabase.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot != null) {//
+                        Log.i(TAG, "onDataChange: "+dataSnapshot);
+//                        new Thread() {
+//                            public void run() {
+//                                try {
+//                                    Thread.sleep(1000);
+//                                } catch (InterruptedException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        }.run();
+                        if (dataSnapshot != null && dataSnapshot.getValue() != null) {//
                             Map<String, String> newRequest = (Map<String, String>) dataSnapshot.getValue();
                             MarkerBD markerBD = dataSnapshot.getValue(MarkerBD.class);//
                             Log.i(TAG, "onDataChange: " + markerBD.getCreationDate());
@@ -987,6 +1000,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }
         });
     }
+
 
     public void updateMarkerFirebase(MarkerBD markerBD) {
         markerBD.setLifeTime(9999);
