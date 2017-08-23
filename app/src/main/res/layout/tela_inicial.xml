@@ -21,6 +21,23 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="40dp"
         android:elevation="20dp"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/signInButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|fill_horizontal"
+            android:layout_marginBottom="?actionBarSize"
+            android:visibility="visible" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:elevation="20dp"
         android:orientation="horizontal">
 
         <ProgressBar
