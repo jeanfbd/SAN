@@ -1,4 +1,4 @@
-package desenvolvimentoads.san;
+package desenvolvimentoads.san.Marker;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;

@@ -29,8 +29,11 @@ import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import desenvolvimentoads.san.Observer.Action;
+import desenvolvimentoads.san.Observer.ActionObserver;
+
 public class MenuInicial extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener  {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener,ActionObserver {
 
     private GoogleApiClient googleApiClient;
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
@@ -40,15 +43,18 @@ public class MenuInicial extends AppCompatActivity
     private String userEmail;
     private String userId;
 
+    private boolean buttomAddMarker;
     private static final String TAG = "MenuInicial";
 
     private FragmentManager fragmentManager;
-    static FloatingActionButton fab;
-    static FloatingActionButton fab2;
+    public static FloatingActionButton btnAddMarker;
+    public static FloatingActionButton btnCancelAddMarker;
     static MenuItem denunciar;
-    static Boolean vDenunciar = true;
+    public static Boolean vDenunciar = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Action.getInstance().registraInteressados(this);
+        buttomAddMarker = Action.getInstance().getButtomAddMaker();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_inicial);
 
@@ -97,16 +103,16 @@ public class MenuInicial extends AppCompatActivity
         fragmentTransaction.commitAllowingStateLoss();
 
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setVisibility(View.VISIBLE);
+        btnAddMarker = (FloatingActionButton) findViewById(R.id.fab);
+        btnAddMarker.setVisibility(View.VISIBLE);
 
 
-        fab2 = (FloatingActionButton) findViewById(R.id.fabCancel);
-        fab2.setVisibility(View.GONE);
+        btnCancelAddMarker = (FloatingActionButton) findViewById(R.id.fabCancel);
+        btnCancelAddMarker.setVisibility(View.GONE);
 
 
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        btnAddMarker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(!vDenunciar){
@@ -120,18 +126,18 @@ public class MenuInicial extends AppCompatActivity
 
                 Snackbar.make(view, "Click no mapa para criar um marcador ou click novamente para Cancelar", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                changeMind();
+                addMarkerFloatButtom();
 
             }
         });
 
-        fab2.setOnClickListener(new View.OnClickListener() {
+       btnCancelAddMarker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 Snackbar.make(view, "Criação do novo marcador Cancelada", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                changeMind();
+                addMarkerFloatButtom();
 
 
             }
@@ -140,17 +146,18 @@ public class MenuInicial extends AppCompatActivity
     }
 
 
-    public static void changeMind(){
-
-        if(fab.isShown()){
-            fab.setVisibility(View.GONE);
-            fab2.setVisibility(View.VISIBLE);
+    public  void addMarkerFloatButtom(){
+        if(buttomAddMarker){
+       // if(btnAddMarker.isShown()){
+            btnAddMarker.setVisibility(View.GONE);
+            btnCancelAddMarker.setVisibility(View.VISIBLE);
+            Action.getInstance().setButtomAddMaker(false);
         }
 
         else {
-            fab.setVisibility(View.VISIBLE);
-            fab2.setVisibility(View.GONE);
-
+            btnAddMarker.setVisibility(View.VISIBLE);
+            btnCancelAddMarker.setVisibility(View.GONE);
+            Action.getInstance().setButtomAddMaker(true);
         }
 
 
@@ -205,8 +212,8 @@ public class MenuInicial extends AppCompatActivity
             denunciar = item;
 
 
-            if(!fab.isShown()){
-               changeMind();
+            if(!buttomAddMarker){
+               addMarkerFloatButtom();
 
             }
             changeDenunciar();
@@ -316,6 +323,16 @@ public class MenuInicial extends AppCompatActivity
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void notificaticarInteressados(Action action) {
+        buttomAddMarker = action.getButtomAddMaker();
+        addMarkerFloatButtom();
+
+
+
 
     }
 }

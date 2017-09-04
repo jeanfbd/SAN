@@ -6,9 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -17,35 +14,29 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.net.URI;
+import desenvolvimentoads.san.Marker.MarkerDialog;
+import desenvolvimentoads.san.Observer.Action;
+import desenvolvimentoads.san.Observer.ActionObserver;
+import desenvolvimentoads.san.notification.NotificationApp;
 
 
-public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener{
+public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener,ActionObserver{
 
     private GoogleMap mMap;
     Marker marcador = null;
     private LocationManager locationManager;
+    private boolean buttomAddMarker;
 
     /* Classe com os metodos dos markers */
     MarkerDialog markerDialog = new MarkerDialog();
@@ -66,7 +57,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
+        Action.getInstance().registraInteressados(this);
+        buttomAddMarker = Action.getInstance().getButtomAddMaker();
         geocoder2 = new Geocoder(getContext());
 
         /*Adiciona o listener no infoWindows(tag) do marker*/
@@ -187,8 +179,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
 */
-
-        Intent resultIntent = new Intent(getActivity(), MenuInicial.class);
+    /*Intent resultIntent = new Intent(getActivity(), MenuInicial.class);
        PendingIntent resultPendingIntent = PendingIntent.getActivity(getContext(),0,resultIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
 
@@ -227,8 +218,9 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         }
 
 
-        mNotificationManager.notify(001, n);
-
+        mNotificationManager.notify(001, n);*/
+        NotificationApp notificationApp = new NotificationApp(getView());
+        notificationApp.notification();
 
 
 
@@ -245,8 +237,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     @Override
     public void onMapClick(LatLng latLng) {
 
-
-        if(MenuInicial.fab2.isShown()){
+        if(!buttomAddMarker){
+      //  if(MenuInicial.btnCancelAddMarker.isShown()){
             markerDialog.dialogAdd(latLng,this.getContext(), mMap, geocoder2);
 
         }
@@ -258,8 +250,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     }
 
 
-
-
-
-
+    @Override
+    public void notificaticarInteressados(Action action) {
+        buttomAddMarker = action.getButtomAddMaker();
+    }
 }

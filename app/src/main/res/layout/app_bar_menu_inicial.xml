@@ -64,7 +64,9 @@
         layout="@layout/content_menu_inicial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButton"
@@ -73,7 +75,7 @@
         android:layout_marginStart="350dp"
         android:layout_marginTop="220dp"
         android:clickable="true"
-        android:visibility="visible"
+        android:visibility="gone"
         app:backgroundTint="@android:color/transparent"
         app:elevation="4dp"
         app:fabSize="mini"

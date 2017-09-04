@@ -89,8 +89,7 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
                 if (user != null) {
                     goMainScreen();
                 }else{
-                    Toast.makeText(TelaInicial.this, "Usuário NULL", Toast.LENGTH_SHORT).show();
-                }
+                    Toast.makeText(TelaInicial.this, "Usuário NULL", Toast.LENGTH_SHORT).show();                }
             }
         };
     }

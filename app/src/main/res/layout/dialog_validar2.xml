@@ -1,0 +1,78 @@
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:stretchColumns="*"
+
+    android:background="#ffffff">
+
+    <!-- Linha 1 com 3 colunas -->
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <Button
+            android:id="@+id/btDislike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_span="8"
+            android:text="Informação Invalida"
+            android:visibility="visible" />
+
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/tableZero"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/txInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_span="2"
+            android:text="Endereço"
+            tools:textAlignment="center" />
+    </TableRow>
+
+    <TableRow
+        android:id="@+id/TableThree"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textAlignment="center"
+        android:visibility="visible">
+
+        <ImageView
+            android:id="@+id/btThree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:adjustViewBounds="true"
+            android:src="@mipmap/ic_maker_vermelho"
+            android:text="Button"
+            android:visibility="visible" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/btLike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Validar" />
+
+        <Button
+            android:id="@+id/btCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancelar" />
+    </TableRow>
+</TableLayout>

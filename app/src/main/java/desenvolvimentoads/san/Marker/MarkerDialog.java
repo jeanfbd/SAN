@@ -1,12 +1,10 @@
-package desenvolvimentoads.san;
+package desenvolvimentoads.san.Marker;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -14,7 +12,6 @@ import android.widget.ImageView;
 import android.support.design.widget.Snackbar;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,9 +21,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+
+import desenvolvimentoads.san.MenuInicial;
+import desenvolvimentoads.san.Observer.Action;
+import desenvolvimentoads.san.R;
 
 //import desenvolvimentoads.san.Model.MarkerBD;
 
@@ -390,9 +389,9 @@ public class MarkerDialog {
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                if(MenuInicial.fab2.isShown()){
+                if(!Action.getInstance().getButtomAddMaker()){
 
-                    MenuInicial.changeMind();
+                    Action.getInstance().setButtomAddMaker(true);
                 }
 
                 MarkerOptions markerOption = new MarkerOptions();
@@ -418,9 +417,9 @@ public class MarkerDialog {
             public void onClick(View arg0) {
 
                 alerta.dismiss();
-                if(MenuInicial.fab2.isShown()){
+                if(!Action.getInstance().getButtomAddMaker()){
 
-                    MenuInicial.changeMind();
+                    Action.getInstance().setButtomAddMaker(true);
                 }
 
 
