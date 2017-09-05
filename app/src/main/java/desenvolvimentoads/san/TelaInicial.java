@@ -55,50 +55,52 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tela_inicial);
-
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        signInButton = (SignInButton) findViewById(R.id.signInButton);
-        signInButton.setSize(SignInButton.SIZE_WIDE);
-        signInButton.setColorScheme(SignInButton.COLOR_DARK);
-
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-                startActivityForResult(intent, SIGN_IN_CODE);
-            }
-        });
-
-
-        firebaseAuth = ConfigFireBase.getAuth();
-        firebaseAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    goMainScreen();
-                }else{
-                    Toast.makeText(TelaInicial.this, "Usuário NULL", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
+//
+//        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+//
+//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                .requestIdToken(getString(R.string.default_web_client_id))
+//                .requestEmail()
+//                .build();
+//
+//        googleApiClient = new GoogleApiClient.Builder(this)
+//                .enableAutoManage(this, this)
+//                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+//                .build();
+//
+//        signInButton = (SignInButton) findViewById(R.id.signInButton);
+//        signInButton.setSize(SignInButton.SIZE_WIDE);
+//        signInButton.setColorScheme(SignInButton.COLOR_DARK);
+//
+//        signInButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+//                startActivityForResult(intent, SIGN_IN_CODE);
+//            }
+//        });
+//
+//
+//        firebaseAuth = ConfigFireBase.getAuth();
+//        firebaseAuthListener = new FirebaseAuth.AuthStateListener() {
+//            @Override
+//            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+//                FirebaseUser user = firebaseAuth.getCurrentUser();
+//                if (user != null) {
+//                    goMainScreen();
+//                }else{
+//                    Toast.makeText(TelaInicial.this, "Usuário NULL", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        };
+        Intent intent = new Intent(this, MenuInicial.class);
+        startActivity(intent);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        firebaseAuth.addAuthStateListener(firebaseAuthListener);
+//        firebaseAuth.addAuthStateListener(firebaseAuthListener);
     }
 
     @Override
