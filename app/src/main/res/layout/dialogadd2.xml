@@ -1,68 +1,57 @@
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:shrinkColumns="*"
-    android:stretchColumns="*">
+    android:orientation="vertical">
 
-    <!-- Linha 1 com 3 colunas -->
-
-    <TableRow
-        android:id="@+id/tableRow"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
+        android:layout_height="130dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/red_star"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:adjustViewBounds="true"
             android:gravity="center"
             android:src="@mipmap/ic_maker_vermelho_star" />
 
-    </TableRow>
-
-    <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp">
-
-        <TableRow
-            android:id="@+id/tableRowChoosed"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/tvChoosed"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="TextView"
-                android:textAlignment="center" />
-
-        </TableRow>
-    </TableLayout>
-    <TableLayout android:layout_marginTop="60dp">
-        <!-- Linha 2 com 2 colunas -->
-        <TableRow
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvChoosed"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:gravity="center_horizontal">
+            android:layout_gravity="center"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:text="TextView"
+            android:textAlignment="center" />
+    </LinearLayout>
 
-            <Button
-                android:id="@+id/btConfirm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Confirmar" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cancelar" />
-        </TableRow>
-    </TableLayout>
-</TableLayout>
+        <Button
+            android:id="@+id/btConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Confirmar" />
+
+        <Button
+            android:id="@+id/btCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancelar" />
+    </LinearLayout>
+
+</LinearLayout>
+
+
+

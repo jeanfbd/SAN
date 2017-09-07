@@ -18,16 +18,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
@@ -43,7 +37,7 @@ public class MenuInicial extends AppCompatActivity
     private String userEmail;
     private String userId;
 
-    private boolean buttomAddMarker;
+    private boolean buttomAddMarkerVisivel;
     private static final String TAG = "MenuInicial";
 
     private FragmentManager fragmentManager;
@@ -54,15 +48,15 @@ public class MenuInicial extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Action.getInstance().registraInteressados(this);
-        buttomAddMarker = Action.getInstance().getButtomAddMaker();
+        buttomAddMarkerVisivel = Action.getInstance().getButtomAddMakerClickado();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_inicial);
 
-
+/*
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .build();
-
+                .build();*/
+/*
         googleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -79,7 +73,7 @@ public class MenuInicial extends AppCompatActivity
                     goLogInScreen();
                 }
             }
-        };
+        };*/
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -147,17 +141,18 @@ public class MenuInicial extends AppCompatActivity
 
 
     public  void addMarkerFloatButtom(){
-        if(buttomAddMarker){
+        Log.d("olha aqui",String.valueOf(buttomAddMarkerVisivel));
+        if(buttomAddMarkerVisivel){
        // if(btnAddMarker.isShown()){
             btnAddMarker.setVisibility(View.GONE);
             btnCancelAddMarker.setVisibility(View.VISIBLE);
-            Action.getInstance().setButtomAddMaker(false);
+            Action.getInstance().setButtomAddMakerClickado(false);
         }
 
         else {
             btnAddMarker.setVisibility(View.VISIBLE);
             btnCancelAddMarker.setVisibility(View.GONE);
-            Action.getInstance().setButtomAddMaker(true);
+            Action.getInstance().setButtomAddMakerClickado(true);
         }
 
 
@@ -212,7 +207,7 @@ public class MenuInicial extends AppCompatActivity
             denunciar = item;
 
 
-            if(!buttomAddMarker){
+            if(!buttomAddMarkerVisivel){
                addMarkerFloatButtom();
 
             }
@@ -258,7 +253,7 @@ public class MenuInicial extends AppCompatActivity
 
         fragmentTransaction.commit();
     }
-
+/*
     private void setUserData(FirebaseUser user) {
         userName = user.getDisplayName();
         userEmail = user.getEmail();
@@ -266,13 +261,13 @@ public class MenuInicial extends AppCompatActivity
 
         Log.i(TAG, "setUserData: Nome "+userName+", Email: "+userEmail+", ID: "+userId);
 //        Glide.with(this).load(user.getPhotoUrl()).into(photoImageView);
-    }
+    }*/
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        firebaseAuth.addAuthStateListener(firebaseAuthListener);
+      //  firebaseAuth.addAuthStateListener(firebaseAuthListener);
     }
 
     private void goLogInScreen() {
@@ -281,7 +276,7 @@ public class MenuInicial extends AppCompatActivity
         startActivity(intent);
     }
 
-    public void logOut(View view) {
+  /*  public void logOut(View view) {
         firebaseAuth.signOut();
 
         Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
@@ -294,9 +289,9 @@ public class MenuInicial extends AppCompatActivity
                 }
             }
         });
-    }
+    }*/
 
-    public void revoke(View view) {
+   /* public void revoke(View view) {
         firebaseAuth.signOut();
 
         Auth.GoogleSignInApi.revokeAccess(googleApiClient).setResultCallback(new ResultCallback<Status>() {
@@ -309,7 +304,8 @@ public class MenuInicial extends AppCompatActivity
                 }
             }
         });
-    }
+    }*/
+/*
 
     @Override
     protected void onStop() {
@@ -319,6 +315,7 @@ public class MenuInicial extends AppCompatActivity
             firebaseAuth.removeAuthStateListener(firebaseAuthListener);
         }
     }
+*/
 
 
     @Override
@@ -328,8 +325,19 @@ public class MenuInicial extends AppCompatActivity
 
     @Override
     public void notificaticarInteressados(Action action) {
-        buttomAddMarker = action.getButtomAddMaker();
-        addMarkerFloatButtom();
+       buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
+        if(!buttomAddMarkerVisivel){
+            // if(btnAddMarker.isShown()){
+            btnAddMarker.setVisibility(View.GONE);
+            btnCancelAddMarker.setVisibility(View.VISIBLE);
+
+        }
+
+        else {
+            btnAddMarker.setVisibility(View.VISIBLE);
+            btnCancelAddMarker.setVisibility(View.GONE);
+
+        }
 
 
 

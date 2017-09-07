@@ -69,6 +69,11 @@ public class NotificationApp {
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
 
+        if(this.descricaoLine ==null){
+
+            this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento proximos a você"};
+        }
+
         for (int i =0; i<descricaoLine.length; i++)
         {
             style.addLine(descricaoLine[i]);

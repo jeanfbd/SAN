@@ -15,6 +15,12 @@ int nivel;
 String Street;
 int id;
 
+    public MarkerTag(Circle circle, LatLng position) {
+        this.circle = circle;
+        this.position = position;
+        this.nivel = 3;
+    }
+
 
     public MarkerTag(Circle circle, LatLng position, int nivel) {
         this.circle = circle;

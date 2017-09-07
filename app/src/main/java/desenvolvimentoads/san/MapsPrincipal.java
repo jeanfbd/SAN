@@ -1,20 +1,12 @@
 package desenvolvimentoads.san;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
@@ -36,7 +28,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     private GoogleMap mMap;
     Marker marcador = null;
     private LocationManager locationManager;
-    private boolean buttomAddMarker;
+    private boolean buttomAddMarkerVisivel;
+    Action action = Action.getInstance();
 
     /* Classe com os metodos dos markers */
     MarkerDialog markerDialog = new MarkerDialog();
@@ -57,8 +50,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Action.getInstance().registraInteressados(this);
-        buttomAddMarker = Action.getInstance().getButtomAddMaker();
+        action.registraInteressados(this);
+        buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
         geocoder2 = new Geocoder(getContext());
 
         /*Adiciona o listener no infoWindows(tag) do marker*/
@@ -77,7 +70,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
             public void onMapLongClick(LatLng arg0) {
                 // TODO Auto-generated method stub
                 if(MenuInicial.vDenunciar){
-                    markerDialog.dialogAdd(arg0,getContext(), mMap, geocoder2);
+                    markerDialog.dialogAdd2(arg0,getContext(), mMap, geocoder2);
 
 
                 }else{
@@ -237,9 +230,9 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     @Override
     public void onMapClick(LatLng latLng) {
 
-        if(!buttomAddMarker){
+        if(!buttomAddMarkerVisivel){
       //  if(MenuInicial.btnCancelAddMarker.isShown()){
-            markerDialog.dialogAdd(latLng,this.getContext(), mMap, geocoder2);
+            markerDialog.dialogAdd2(latLng,this.getContext(), mMap, geocoder2);
 
         }
 
@@ -252,6 +245,6 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
     @Override
     public void notificaticarInteressados(Action action) {
-        buttomAddMarker = action.getButtomAddMaker();
+        buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
     }
 }

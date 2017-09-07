@@ -43,6 +43,7 @@ public class MarkerDialog {
     Boolean secondScreen = false;
     LatLng loc;
     int nivel;
+     Action action = Action.getInstance();
 
 
     public GoogleMap setMarkerClick(GoogleMap googleMap, Context c){
@@ -54,7 +55,7 @@ public class MarkerDialog {
             public boolean onMarkerClick(Marker marker) {
                 if(MenuInicial.vDenunciar){
 
-                    diagValidate(marker,context);
+                    diagValidate2(marker,context);
 
                 }
                else{
@@ -332,6 +333,61 @@ public class MarkerDialog {
 
     }
 
+    public void diagValidate2(final Marker marker,Context c){
+        MarkerTag markerTag = (MarkerTag) marker.getTag();
+        nivel = markerTag.getNivel();
+        circle = markerTag.getCircle();
+        LayoutInflater li = LayoutInflater.from(c);
+
+        //inflamos o layout alerta.xml na view
+        final View view = li.inflate(R.layout.dialog_validar2, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Validação");
+        final Button btDislike = (Button) view.findViewById(R.id.btDislike);
+        final TextView streetText = (TextView) view.findViewById(R.id.txInfo);
+        final Button btValidate = (Button) view.findViewById(R.id.btLike);
+        Button btCancel =(Button) view.findViewById(R.id.btCancel);
+        final ImageView vermelho = (ImageView) view.findViewById(R.id.btThree);
+        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+
+        streetText.setText(markerTag.getStreet());
+
+        btDislike.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                alerta.dismiss();
+                circle.remove();
+                marker.remove();
+
+
+            }
+        });
+
+
+        btValidate.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+                    alerta.dismiss();
+  }
+        });
+
+
+        btCancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+
+                    alerta.dismiss();
+
+
+            }
+        });
+
+        builder.setView(view);
+        alerta = builder.create();
+        alerta.show();
+
+
+    }
 
 
 
@@ -389,10 +445,9 @@ public class MarkerDialog {
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                if(!Action.getInstance().getButtomAddMaker()){
 
-                    Action.getInstance().setButtomAddMaker(true);
-                }
+
+
 
                 MarkerOptions markerOption = new MarkerOptions();
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
@@ -407,6 +462,8 @@ public class MarkerDialog {
                 marcador.setTag(tag);
                 marcador.setDraggable(true);
 
+
+                action.setButtomAddMakerClickado(true);
                 zoomMarker(latLng, googleMapFinal);
 
 
@@ -417,9 +474,9 @@ public class MarkerDialog {
             public void onClick(View arg0) {
 
                 alerta.dismiss();
-                if(!Action.getInstance().getButtomAddMaker()){
+                if(!Action.getInstance().getButtomAddMakerClickado()){
 
-                    Action.getInstance().setButtomAddMaker(true);
+                    Action.getInstance().setButtomAddMakerClickado(true);
                 }
 
 
@@ -482,6 +539,87 @@ public class MarkerDialog {
 
             }
         });
+
+        builder.setView(view);
+
+        alerta = builder.create();
+
+        alerta.show();
+
+
+    }
+    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g) {
+
+
+        //LayoutInflater é utilizado para inflar nosso layout em uma view.
+        //-pegamos nossa instancia da classe
+        LayoutInflater li = LayoutInflater.from(c);
+
+        //inflamos o layout alerta.xml na view
+        final View view = li.inflate(R.layout.dialogadd2, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Criar Marcador");
+        final Button confirm = (Button) view.findViewById(R.id.btConfirm);
+
+        Button cancel = (Button) view.findViewById(R.id.btCancel);
+
+        confirm.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+                alerta.dismiss();
+
+
+                image = R.mipmap.ic_maker_vermelho_star;
+
+
+                          MarkerOptions markerOption = new MarkerOptions();
+              markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
+              marcador = googleMapFinal.addMarker(markerOption);
+                //marcador.setTitle(getStreet(latLng, c, g));
+
+                CreateCircle(latLng, googleMapFinal);
+
+
+
+                MarkerTag tag = new MarkerTag(circle,marcador.getPosition());
+                tag.setStreet(getStreet(latLng, c, g));
+                marcador.setTag(tag);
+
+                marcador.setDraggable(true);
+
+
+                action.setButtomAddMakerClickado(true);
+                zoomMarker(latLng, googleMapFinal);
+
+
+
+            }
+        });
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+                alerta.dismiss();
+                if(!Action.getInstance().getButtomAddMakerClickado()){
+
+                    Action.getInstance().setButtomAddMakerClickado(true);
+                }
+
+
+            }
+        });
+
+
+
+        final TextView tvChoosed = (TextView) view.findViewById(R.id.tvChoosed);
+        tvChoosed.setText(getStreet(latLng, c, g));
+
+
+
+        final ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
+        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+
+
 
         builder.setView(view);
 

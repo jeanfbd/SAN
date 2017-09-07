@@ -112,38 +112,8 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == SIGN_IN_CODE) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
-        }
     }
 
-    private void handleSignInResult(GoogleSignInResult result) {
-        if (result.isSuccess()) {
-            firebaseAuthWithGoogle(result.getSignInAccount());
-        } else {
-            Toast.makeText(this, "Não foi possível iniciar a sessão", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void firebaseAuthWithGoogle(GoogleSignInAccount signInAccount) {
-        progressBar.setVisibility(View.VISIBLE);
-        signInButton.setVisibility(View.GONE);
-
-        AuthCredential credential = GoogleAuthProvider.getCredential(signInAccount.getIdToken(), null);
-        firebaseAuth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-
-                progressBar.setVisibility(View.GONE);
-                signInButton.setVisibility(View.VISIBLE);
-
-                if (!task.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Não foi possível autenticar no Firebase", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
 
     private void goMainScreen() {
         Intent intent = new Intent(this, MenuInicial.class);
@@ -155,9 +125,6 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
     protected void onStop() {
         super.onStop();
 
-        if (firebaseAuthListener != null) {
-            firebaseAuth.removeAuthStateListener(firebaseAuthListener);
-        }
     }
 
     public void updateProgressBar(final int timePassed) {

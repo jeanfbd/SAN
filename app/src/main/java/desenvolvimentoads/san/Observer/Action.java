@@ -1,5 +1,7 @@
 package desenvolvimentoads.san.Observer;
 
+import android.util.Log;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,7 +12,7 @@ import java.util.Set;
 public class Action {
     private static Action instance;
     private Set<ActionObserver> interessados = new HashSet<>();
-    private boolean buttomAddMaker = true;
+    private boolean buttomAddMakerVisivel = true;
 
     private Action() {
 
@@ -29,13 +31,14 @@ public class Action {
         return instance;
     }
 
-    public boolean getButtomAddMaker() {
-        return buttomAddMaker;
+    public boolean getButtomAddMakerClickado() {
+        return buttomAddMakerVisivel;
     }
 
-    public void setButtomAddMaker(boolean buttomAddMaker) {
+    public void setButtomAddMakerClickado(boolean buttomAddMakerClickado) {
 
-        this.buttomAddMaker = buttomAddMaker;
+        this.buttomAddMakerVisivel = buttomAddMakerClickado;
+        Log.d("Mudei aqui agora olha",String.valueOf(this.buttomAddMakerVisivel));
         buttonAddMarkerStateChanged();
     }
 
