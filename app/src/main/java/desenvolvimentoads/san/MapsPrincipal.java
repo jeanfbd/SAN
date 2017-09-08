@@ -1,6 +1,7 @@
 package desenvolvimentoads.san;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Geocoder;
 import android.location.Location;
@@ -158,66 +159,14 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         Location loc = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
-      //  LatLng sydney = new LatLng(loc.getLatitude(),loc.getLongitude());
 
-    /*
-       LatLng sydney = new LatLng(latitude, longitude);
-
-
-
-        MarkerOptions marker = new MarkerOptions();
-        marker.position(sydney);
-        marker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_amarelo));
-        Marker test = mMap.addMarker(marker);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-*/
-    /*Intent resultIntent = new Intent(getActivity(), MenuInicial.class);
-       PendingIntent resultPendingIntent = PendingIntent.getActivity(getContext(),0,resultIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(getContext())
-                        .setSmallIcon(R.drawable.ic_menu_slideshow)
-                        .setContentTitle("My notification")
-                        .setTicker("Alerta San")
-                        .setContentIntent(resultPendingIntent)
-                        .setContentText("Hello World!");
-
-
-        NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
-        String [] descs = new String[]{"desc1","desc2"};
-        for (int i =0; i<descs.length; i++)
-        {
-            style.addLine(descs[i]);
-        }
-
-
-
-        mBuilder.setAutoCancel(true);
-        mBuilder.setStyle(style);
-        NotificationManager mNotificationManager = (NotificationManager) this.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification n = mBuilder.build();
-        n.vibrate = new long[]{150,300,150,600};
-
-        try{
-            Uri som =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            Ringtone toque = RingtoneManager.getRingtone(getContext(), som);
-            toque.play();
-
-        }catch(Exception e) {
-
-        }
-
-
-        mNotificationManager.notify(001, n);*/
         NotificationApp notificationApp = new NotificationApp(getView());
         notificationApp.notification();
 
 
-
-
+       /* Intent intent = new Intent(getContext(),ServiceThread.class);
+        getContext().startService(intent);
+*/
 
     }
 
@@ -231,7 +180,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     public void onMapClick(LatLng latLng) {
 
         if(!buttomAddMarkerVisivel){
-      //  if(MenuInicial.btnCancelAddMarker.isShown()){
+
             markerDialog.dialogAdd2(latLng,this.getContext(), mMap, geocoder2);
 
         }

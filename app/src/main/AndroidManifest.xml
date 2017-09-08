@@ -13,7 +13,7 @@
      <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
     <uses-permission android:name="android.hardware.location.network"/>
     <uses-permission android:name="android.hardware.location.gps"/>
@@ -42,8 +42,8 @@
         </service>
         <receiver
             android:name=".BroadcastThread"
-            android:label="BroadcastThread"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+            android:label="BroadcastThread">
+
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>

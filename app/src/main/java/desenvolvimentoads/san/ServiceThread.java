@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +27,16 @@ public class ServiceThread extends Service {
     @Override
     public void onCreate(){
         super.onCreate();
+
         Log.i("Script", "onCreate()");
     }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
 
+
+        Log.d("Service teste"," esta funcioando???");
         new Worker(){}.start();
 
         return(START_REDELIVER_INTENT);
@@ -48,7 +53,8 @@ public class ServiceThread extends Service {
             while(true){
                 try {
                     Thread.sleep(1000);
-                    if (count == 60){
+                    if (count == 2){
+                        Log.d("Service teste"," esta funcioando???");
                         Log.i("Script", "Tempo de Requisição");
                         count = 0;
                         MapsTerceiro.getRaio("-23.6202800","-45.4130600","10");
