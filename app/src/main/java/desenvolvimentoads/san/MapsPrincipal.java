@@ -18,6 +18,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import desenvolvimentoads.san.Marker.MarkerDialog;
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
@@ -31,6 +34,7 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     private LocationManager locationManager;
     private boolean buttomAddMarkerVisivel;
     Action action = Action.getInstance();
+    List<Marker> marcadores = new ArrayList<>();
 
     /* Classe com os metodos dos markers */
     MarkerDialog markerDialog = new MarkerDialog();
@@ -71,10 +75,16 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
             public void onMapLongClick(LatLng arg0) {
                 // TODO Auto-generated method stub
                 if(MenuInicial.vDenunciar){
-                    markerDialog.dialogAdd2(arg0,getContext(), mMap, geocoder2);
+                   if(markerDialog.hasNearby(marcadores,arg0)){
+                       Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
 
+                   }else{
 
-                }else{
+                       Toast.makeText(getContext(), "NÃO TEM NADA NÃO!!!", Toast.LENGTH_LONG).show();
+                       markerDialog.dialogAdd2(arg0,getContext(), mMap, geocoder2, marcadores);
+
+                   }
+
 
 
                 }
@@ -181,11 +191,20 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
         if(!buttomAddMarkerVisivel){
 
-            markerDialog.dialogAdd2(latLng,this.getContext(), mMap, geocoder2);
+            if(!markerDialog.hasNearby(marcadores,latLng)) {
+              markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, marcadores);
+            }
 
+            else{
+                Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
+
+
+            }
         }
 
         else{
+
+
             Toast.makeText(getContext(), "Coordenadas: "+latLng.toString(), Toast.LENGTH_LONG).show();
         }
 

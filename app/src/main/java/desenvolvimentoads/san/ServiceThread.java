@@ -21,13 +21,15 @@ public class ServiceThread extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d("Service teste bind"," esta funcioando???");
+
         return null;
     }
 
     @Override
     public void onCreate(){
         super.onCreate();
-
+        Log.d("Service teste"," esta funcioando???");
         Log.i("Script", "onCreate()");
     }
 
@@ -36,10 +38,10 @@ public class ServiceThread extends Service {
     public int onStartCommand(Intent intent, int flags, int startId){
 
 
-        Log.d("Service teste"," esta funcioando???");
+        Log.d("Service teste 0"," esta funcioando???");
         new Worker(){}.start();
 
-        return(START_REDELIVER_INTENT);
+        return(START_STICKY);
         // START_NOT_STICKY
         // START_STICKY
         // START_REDELIVER_INTENT
@@ -54,7 +56,7 @@ public class ServiceThread extends Service {
                 try {
                     Thread.sleep(1000);
                     if (count == 2){
-                        Log.d("Service teste"," esta funcioando???");
+                        Log.d("Service teste 1"," esta funcioando???");
                         Log.i("Script", "Tempo de Requisição");
                         count = 0;
                         MapsTerceiro.getRaio("-23.6202800","-45.4130600","10");
@@ -74,6 +76,8 @@ public class ServiceThread extends Service {
 
     @Override
     public void onDestroy(){
+
+        Log.d("Service teste morreu"," esta funcioando???");
         super.onDestroy();
     }
 }
