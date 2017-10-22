@@ -44,12 +44,13 @@ public class MarkerDialog {
     LatLng loc;
     int nivel;
     final int RADIUS = 500;
+    final int MYRADIUS = 500;
     Action action = Action.getInstance();
 
 
     public Boolean hasNearby(final List<Marker> m, final LatLng latLng) {
 
-           double markerRadius = RADIUS * 0.002;
+           double proximity = RADIUS * 0.002;
 
            double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
            double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
@@ -67,15 +68,41 @@ public class MarkerDialog {
                                        Math.sin(Math.toRadians(marker.getPosition().latitude)) *
                                                newMarkerSinLat
                        );
-               if(searchNearby <= markerRadius ){
+               if(searchNearby <= proximity ){
 
                    return true;
 
                }
-
-
            }
+         return false;
 
+
+
+    }
+
+    public Boolean closeToMe(final LatLng myPosition, final LatLng latLng) {
+
+        double proximity = RADIUS * 0.001;
+
+        double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
+        double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
+        double newMakerRadianLng = Math.toRadians(latLng.longitude) ;
+
+
+
+        double searchNearby = 6371 *
+                Math.acos(
+                        Math.cos(Math.toRadians(myPosition.latitude)) *
+                                newMarkerCosLat *
+                                Math.cos(Math.toRadians(myPosition.longitude) - newMakerRadianLng) +
+                                Math.sin(Math.toRadians(myPosition.latitude)) *
+                                        newMarkerSinLat
+                );
+        if(searchNearby <= proximity ){
+
+            return true;
+
+        }
 
 
 
@@ -365,7 +392,7 @@ public class MarkerDialog {
             public void onClick(View arg0) {
                 alerta.dismiss();
                 circle.remove();
-                marker.remove();
+                marker.setVisible(false);
 
 
             }

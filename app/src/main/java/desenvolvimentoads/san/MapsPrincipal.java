@@ -8,9 +8,12 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -27,7 +30,18 @@ import desenvolvimentoads.san.Observer.ActionObserver;
 import desenvolvimentoads.san.notification.NotificationApp;
 
 
-public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener,ActionObserver{
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+
+public class MapsPrincipal extends SupportMapFragment implements LocationListener , OnMapReadyCallback, GoogleMap.OnMapClickListener,ActionObserver,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+
+    LocationRequest mLocationRequest;
+   Marker mCurrLocation;
+    LatLng latLng;
+    GoogleApiClient mGoogleApiClient;
 
     private GoogleMap mMap;
     Marker marcador = null;
@@ -45,12 +59,22 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     private double longitude = -45.4130600;
     private double latitude = -23.6202800;
 
+
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
     }
-
+    protected synchronized void buildGoogleApiClient() {
+        Toast.makeText(getContext(),"buildGoogleApiClient",Toast.LENGTH_SHORT).show();
+        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
 
 
     @Override
@@ -58,6 +82,9 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
         action.registraInteressados(this);
         buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
         geocoder2 = new Geocoder(getContext());
+
+        buildGoogleApiClient();
+
 
         /*Adiciona o listener no infoWindows(tag) do marker*/
         googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -168,6 +195,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
         Location loc = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
 
         NotificationApp notificationApp = new NotificationApp(getView());
@@ -176,8 +205,8 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
 
        /* Intent intent = new Intent(getContext(),ServiceThread.class);
         getContext().startService(intent);
-*/
-
+*/    //  mGoogleApiClient.connect();
+    //   LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
 
@@ -214,5 +243,91 @@ public class MapsPrincipal extends SupportMapFragment implements OnMapReadyCallb
     @Override
     public void notificaticarInteressados(Action action) {
         buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+
+
+        }
+
+        Toast.makeText(getContext(),"onConnected",Toast.LENGTH_SHORT).show();
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            //place marker at current position
+            mMap.clear();
+            latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title("Current Position");
+
+           mCurrLocation = mMap.addMarker(markerOptions);
+        }
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(5000); //5 seconds
+        mLocationRequest.setFastestInterval(3000); //3 seconds
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        //mLocationRequest.setSmallestDisplacement(0.1F); //1/10 meter
+
+      //  LocationServices.FusedLocationApi.requestLocationUpdates()
+
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Toast.makeText(getContext(),"onConnectionSuspended",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Toast.makeText(getContext(),"onConnectionFailed",Toast.LENGTH_SHORT).show();
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+        //remove previous current location marker and add new one at current position
+        if (mCurrLocation != null) {
+            mCurrLocation.remove();
+        }
+        latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+
+        mCurrLocation = mMap.addMarker(markerOptions);
+
+        Toast.makeText(getContext(),"Location Changed",Toast.LENGTH_SHORT).show();
+
+        //If you only need one location, unregister the listener
+        //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 }
