@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "227590056884",
+    "firebase_url": "https://websan-46271.firebaseio.com",
+    "project_id": "websan-46271",
+    "storage_bucket": "websan-46271.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227590056884:android:1fb05b1eaf3a6eed",
+        "android_client_info": {
+          "package_name": "desenvolvimentoads.san"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "227590056884-ca6uthm2nncr41lgjoqo5otfoj3hhdgi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6aUCuLshbSiv_7909vIlpAIULOijnUNI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

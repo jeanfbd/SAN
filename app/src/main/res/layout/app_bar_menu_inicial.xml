@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:context="desenvolvimentoads.san.MenuInicial">
+
+
+    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/holo_blue_dark"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <include
+            android:id="@+id/include"
+            layout="@layout/content_menu_inicial" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:clickable="true"
+            android:visibility="visible"
+            app:backgroundTint="@android:color/transparent"
+            app:elevation="5dp"
+            app:fabSize="mini"
+            app:layout_anchor="@+id/include"
+            app:layout_anchorGravity="right|center_vertical"
+            app:srcCompat="@android:drawable/ic_delete" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:clickable="true"
+            android:visibility="visible"
+            app:backgroundTint="@android:color/transparent"
+            app:elevation="5dp"
+            app:fabSize="mini"
+            app:layout_anchor="@+id/include"
+            app:layout_anchorGravity="right|center_vertical"
+            app:rippleColor="@color/common_google_signin_btn_text_dark_disabled"
+            app:srcCompat="@mipmap/ic_maker_vermelho" />
+    </android.support.design.widget.CoordinatorLayout>
+
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_menu_inicial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="350dp"
+        android:layout_marginTop="220dp"
+        android:clickable="true"
+        android:visibility="gone"
+        app:backgroundTint="@android:color/transparent"
+        app:elevation="4dp"
+        app:fabSize="mini"
+        app:layout_anchor="@+id/include"
+        app:rippleColor="@color/common_google_signin_btn_text_dark_disabled"
+        app:srcCompat="@mipmap/ic_maker_vermelho" />
+
+</RelativeLayout>
+
