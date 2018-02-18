@@ -21,7 +21,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import desenvolvimentoads.san.MenuInicial;
 import desenvolvimentoads.san.Observer.Action;
@@ -47,25 +49,26 @@ public class MarkerDialog {
     final int MYRADIUS = 500;
     Action action = Action.getInstance();
 
-
-    public Boolean hasNearby(final List<Marker> m, final LatLng latLng) {
+/*Verifica se existe algum marcador proximo retornando true se existir.*/
+    public Boolean hasNearby(final HashMap<LatLng,Marker> m, final LatLng latLng) {
 
            double proximity = RADIUS * 0.002;
 
            double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
            double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
            double newMakerRadianLng = Math.toRadians(latLng.longitude) ;
+        Set<LatLng> markerKey = m.keySet();
 
-           for(Marker markers : m){
-
-               MarkerTag marker =(MarkerTag) markers.getTag();
+         //  for(Marker markers : m){
+            for(LatLng marker : markerKey ){
+             //  MarkerTag marker =(MarkerTag) markers.getTag();
 
                double searchNearby = 6371 *
                        Math.acos(
-                               Math.cos(Math.toRadians(marker.getPosition().latitude)) *
+                               Math.cos(Math.toRadians(marker.latitude)) *
                                        newMarkerCosLat *
-                                       Math.cos(Math.toRadians(marker.getPosition().longitude) - newMakerRadianLng) +
-                                       Math.sin(Math.toRadians(marker.getPosition().latitude)) *
+                                       Math.cos(Math.toRadians(marker.longitude) - newMakerRadianLng) +
+                                       Math.sin(Math.toRadians(marker.latitude)) *
                                                newMarkerSinLat
                        );
                if(searchNearby <= proximity ){
@@ -79,10 +82,11 @@ public class MarkerDialog {
 
 
     }
-
+/*Verifica se a ultima posição é proxima a do local a onde o marcador sera inserido retornando true se for*/
     public Boolean closeToMe(final LatLng myPosition, final LatLng latLng) {
 
-        double proximity = RADIUS * 0.001;
+        double proximity = RADIUS * 0.01;
+
 
         double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
         double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
@@ -113,8 +117,8 @@ public class MarkerDialog {
 
 
     }
-
-    public GoogleMap setMarkerClick(GoogleMap googleMap, Context c) {
+/*Adicionando o listenner dos marker para poder deletar e validar*/
+    public GoogleMap setMarkerClick(GoogleMap googleMap, Context c, final HashMap<LatLng,Marker> m) {
 
         this.context = c;
 
@@ -123,12 +127,17 @@ public class MarkerDialog {
             public boolean onMarkerClick(Marker marker) {
                 if (MenuInicial.vDenunciar) {
 
-                    diagValidate2(marker, context);
+                    diagValidate2(marker, context, m);
 
                 } else {
                     MenuInicial.changeDenunciar();
-                    circle.remove();
-                    marker.remove();
+                 //   circle.remove();
+                    MarkerTag markerTemp =(MarkerTag)  m.get(marker.getPosition()).getTag();
+                    m.get(marker.getPosition()).remove();
+                    m.remove(marker.getPosition());
+                    markerTemp.getCircle().remove();
+                  //  marker.remove();
+
 
                 }
 
@@ -368,7 +377,7 @@ public class MarkerDialog {
 
     }
 
-    public void diagValidate2(final Marker marker, Context c) {
+    public void diagValidate2(final Marker marker, Context c, final HashMap<LatLng,Marker> m) {
         MarkerTag markerTag = (MarkerTag) marker.getTag();
         nivel = markerTag.getNivel();
         circle = markerTag.getCircle();
@@ -391,8 +400,11 @@ public class MarkerDialog {
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 alerta.dismiss();
-                circle.remove();
-                marker.setVisible(false);
+               // marker.setVisible(false);
+                MarkerTag markerTemp =(MarkerTag)  m.get(marker.getPosition()).getTag();
+                m.get(marker.getPosition()).setVisible(false);
+                markerTemp.getCircle().remove();
+
 
 
             }
@@ -579,7 +591,7 @@ public class MarkerDialog {
 
     }
 
-    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g,final List<Marker> m) {
+    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g,final HashMap<LatLng,Marker> m) {
 
 
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
@@ -620,7 +632,7 @@ public class MarkerDialog {
 
                 action.setButtomAddMakerClickado(true);
                 zoomMarker(latLng, googleMapFinal);
-                m.add(marcador);
+                m.put(latLng,marcador);
 
 
             }
