@@ -250,7 +250,7 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
         final Handler handler = new Handler();
         final ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar);
         Drawable progressDrawable = bar.getProgressDrawable().mutate();
-        progressDrawable.setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+        progressDrawable.setColorFilter(Color.parseColor("#536DFE"), PorterDuff.Mode.MULTIPLY);
         bar.setProgressDrawable(progressDrawable);
 
         new Thread(new Runnable() {

@@ -1,58 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="20dp"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:background="@drawable/main_header_selector"
+    tools:context=".TelaInicial">
 
-    <ImageView
-        android:id="@+id/logoSan"
+    <RelativeLayout
+        android:id="@+id/relImage"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_centerVertical="true"
-        android:scaleType="fitCenter"
-        android:src="@mipmap/ic_logo_san"
-        android:visibility="visible"/>
+        android:layout_height="wrap_content"
+        android:paddingBottom="60dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="20dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_centerVertical="true"
-        android:orientation="horizontal"
-        android:visibility="visible">
-
-        <RelativeLayout
+        <ImageView
+            android:id="@+id/logoSan"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="right">
+            android:layout_centerHorizontal="true"
+            android:scaleType="fitStart"
+            android:src="@mipmap/ic_logo_san"
+            android:visibility="visible" />
+
+        <RelativeLayout
+            android:id="@+id/relGoogle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <com.google.android.gms.common.SignInButton
                 android:id="@+id/signInButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_gravity="bottom|fill_horizontal"
-                android:layout_marginBottom="?actionBarSize"
-                android:visibility="visible"/>
-
+                android:layout_above="@+id/progressBar"
+                android:visibility="visible" />
 
             <ProgressBar
                 android:id="@+id/progressBar"
                 style="@android:style/Widget.ProgressBar.Horizontal"
+                android:progressDrawable="@drawable/custom_progress_bar"
                 android:layout_width="match_parent"
                 android:layout_height="32dp"
-                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
                 android:layout_marginLeft="25dp"
+                android:layout_marginBottom="10dp"
                 android:minHeight="60dp"
-                android:visibility="visible"/>
+                android:visibility="visible" />
         </RelativeLayout>
-    </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>
 
-</LinearLayout>
