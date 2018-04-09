@@ -236,34 +236,23 @@ public class MarkerDialog {
                 } else {
                     MenuInicial.changeDenunciar();
 
+
                     for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
 
                         MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
 
-                        if (markerTag.getPosition() == marker.getPosition()) {
+                        MarkerTag markerTagMap = (MarkerTag) marker.getTag();
 
+                        if (markerTag.getId() == markerTagMap.getId()) {
 
                             //   circle.remove();
-                            insertDenunciar(markerTag, userId, m);
-                            m.get(markerTag.getId()).remove();
-                            m.remove(markerTag.getId());
-                            markerTag.getCircle().remove();
-                            //  marker.remove();
+                            insertDenunciar(markerTag,userId,m);
+
 
                         }
                     }
 
 
-
-                    /*
-                    //   circle.remove();
-                    MarkerTag markerTemp =(MarkerTag)  m.get(marker.getPosition()).getTag();
-                    m.get(marker.getPosition()).remove();
-                    m.remove(marker.getPosition());
-                    markerTemp.getCircle().remove();
-                    //  marker.remove();
-
-                    */
                 }
 
 
@@ -300,31 +289,18 @@ public class MarkerDialog {
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-
                 for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
 
                     MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
 
-                    if (markerTag.getPosition() == marker.getPosition()) {
+                    if (markerTag.getId() == ((MarkerTag) marker.getTag()).getId()) {
 
 
-                        // m.get(markerTag.getId()).setVisible(false);
-                        // markerTag.getCircle().remove();
-                        //  marker.remove();
+                        insertValidar(markerTag, userId, timeAdd, false,m);
+
 
                     }
                 }
-
-
-                /*
-
-
-                // marker.setVisible(false);
-                MarkerTag markerTemp =(MarkerTag)  m.get(marker.getPosition()).getTag();
-                m.get(marker.getPosition()).setVisible(false);
-                markerTemp.getCircle().remove();
-
-                */
 
 
             }
@@ -337,14 +313,10 @@ public class MarkerDialog {
 
                     MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
 
-                    if (markerTag.getPosition() == marker.getPosition()) {
+                    if (markerTag.getId() == ((MarkerTag) marker.getTag()).getId()) {
 
 
-                        //   circle.remove();
-                        insertValidar(markerTag, userId, timeAdd, true, m);
-                        // m.get(markerTag.getId()).setVisible(false);
-                        // markerTag.getCircle().remove();
-                        //  marker.remove();
+                        insertValidar(markerTag, userId, timeAdd, true,m);
 
                     }
                 }
@@ -448,7 +420,7 @@ public class MarkerDialog {
                 tag.setId(itemId);
 
                 marcador.setTag(tag);
-                marcador.setDraggable(true);
+                marcador.setDraggable(false);
 
                 MarkerTag markerTag = (MarkerTag) marcador.getTag();
                 //Persiste os dados sobre a chave itemId

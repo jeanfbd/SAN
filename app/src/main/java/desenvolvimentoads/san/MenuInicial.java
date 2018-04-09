@@ -92,7 +92,7 @@ public class MenuInicial extends AppCompatActivity
 
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.add(R.id.container, new MapsPrincipal(), "MapsPrincipal");
+        fragmentTransaction.add(R.id.container, new MapsQuarto(), "MapsQuarto");
 
         fragmentTransaction.commitAllowingStateLoss();
 

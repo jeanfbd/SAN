@@ -17,7 +17,7 @@ public class MarkerTag {
     private String street;
 
     @Exclude
-    private boolean validate;
+    private boolean validate = false;
 
     @Exclude
     private Circle circle;
