@@ -34,20 +34,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:label="ServiceThread" android:name=".ServiceThread" android:exported="false" >
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <action android:name="SERVICO_TEST"/>
-            </intent-filter>
-        </service>
-        <receiver
-            android:name=".BroadcastThread"
-            android:label="BroadcastThread">
+        <!--<service android:label="ServiceThread" android:name=".ServiceThread" android:exported="false" >-->
+            <!--<intent-filter>-->
+                <!--<category android:name="android.intent.category.DEFAULT"/>-->
+                <!--<action android:name="SERVICO_TEST"/>-->
+            <!--</intent-filter>-->
+        <!--</service>-->
+        <!--<receiver-->
+            <!--android:name=".BroadcastThread"-->
+            <!--android:label="BroadcastThread">-->
 
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-            </intent-filter>
-        </receiver>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED"/>-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <activity
             android:name=".MenuInicial"

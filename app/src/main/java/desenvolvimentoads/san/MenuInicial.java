@@ -236,8 +236,12 @@ public class MenuInicial extends AppCompatActivity
                 setTitle("Marcadores do Usuário");
                 break;
             case R.id.nav_user_disable:
-                showFragment(new MapsTerceiro(), "Marcadores Inativos do sistema");
-                setTitle("Marcadores Inativos do sistema");
+//                showFragment(new MapsTerceiro(), "Marcadores Inativos do sistema");
+//                setTitle("Marcadores Inativos do sistema");
+                break;
+            case R.id.nav_integracao:
+                showFragment(new MapsQuarto(), "Integração back front");
+                setTitle("Integração back front");
                 break;
         }
 

@@ -59,7 +59,7 @@ public class ServiceThread extends Service {
                         Log.d("Service teste 1"," esta funcioando???");
                         Log.i("Script", "Tempo de Requisição");
                         count = 0;
-                        MapsTerceiro.getRaio("-23.6202800","-45.4130600","10");
+                        //MapsTerceiro.getRaio("-23.6202800","-45.4130600","10");
 
                     }
                 } catch (InterruptedException e) {
