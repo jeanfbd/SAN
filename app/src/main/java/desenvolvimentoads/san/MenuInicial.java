@@ -92,7 +92,7 @@ public class MenuInicial extends AppCompatActivity
 
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.add(R.id.container, new MapsPrincipal(), "MapsPrincipal");
+        fragmentTransaction.add(R.id.container, new MapsQuarto(), "MapsQuarto");
 
         fragmentTransaction.commitAllowingStateLoss();
 
@@ -236,8 +236,12 @@ public class MenuInicial extends AppCompatActivity
                 setTitle("Marcadores do Usuário");
                 break;
             case R.id.nav_user_disable:
-                showFragment(new MapsTerceiro(), "Marcadores Inativos do sistema");
-                setTitle("Marcadores Inativos do sistema");
+//                showFragment(new MapsTerceiro(), "Marcadores Inativos do sistema");
+//                setTitle("Marcadores Inativos do sistema");
+                break;
+            case R.id.nav_integracao:
+                showFragment(new MapsQuarto(), "Integração back front");
+                setTitle("Integração back front");
                 break;
         }
 
@@ -343,7 +347,4 @@ public class MenuInicial extends AppCompatActivity
 
 
     }
-
-
-
 }

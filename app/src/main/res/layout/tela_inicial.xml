@@ -11,44 +11,48 @@
         android:id="@+id/logoSan"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_weight="0.90"
-        android:adjustViewBounds="false"
-        android:src="@mipmap/ic_logo_san"/>
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/ic_logo_san"
+        android:visibility="visible"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:elevation="20dp"
-        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"
         android:visibility="visible">
 
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/signInButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|fill_horizontal"
-            android:layout_marginBottom="?actionBarSize"
-            android:visibility="visible" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
-        android:elevation="20dp"
-        android:orientation="horizontal">
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleSmallTitle"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_weight="0.70"
-            android:minHeight="60dp"
-            android:visibility="visible" />
+            android:layout_gravity="right">
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/signInButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="bottom|fill_horizontal"
+                android:layout_marginBottom="?actionBarSize"
+                android:visibility="visible"/>
+
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:layout_marginLeft="25dp"
+                android:minHeight="60dp"
+                android:visibility="visible"/>
+        </RelativeLayout>
     </LinearLayout>
 
 </LinearLayout>

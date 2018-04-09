@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -13,21 +14,40 @@ import android.support.design.widget.Snackbar;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.core.GeoHash;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.*;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.MenuInicial;
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.R;
+import desenvolvimentoads.san.TelaInicial;
+
+import static android.content.ContentValues.TAG;
 
 //import desenvolvimentoads.san.Model.MarkerBD;
 
@@ -36,62 +56,145 @@ import desenvolvimentoads.san.R;
  */
 
 public class MarkerDialog {
+    private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
+    private FirebaseUser currentUser = mAuth.getCurrentUser();
+
+    // String userId = currentUser.getUid();
+    String userId = "123";
+    HashMap<String, Circle> circles = new HashMap<String, Circle>();
+    Long creationDate;
+
+
+    long timeAdd = 120000;
+    long timestamp;
 
     Marker marcador;
     AlertDialog alerta;
     private int image;
     private static Circle circle = null;
     Context context;
-    Boolean secondScreen = false;
     LatLng loc;
-    int nivel;
     final int RADIUS = 500;
-    final int MYRADIUS = 500;
     Action action = Action.getInstance();
 
-/*Verifica se existe algum marcador proximo retornando true se existir.*/
-    public Boolean hasNearby(final HashMap<LatLng,Marker> m, final LatLng latLng) {
 
-           double proximity = RADIUS * 0.002;
+    public static void deleteDataArrayFirebase(final HashMap<String, Marker> m, final String key) {
 
-           double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
-           double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
-           double newMakerRadianLng = Math.toRadians(latLng.longitude) ;
-        Set<LatLng> markerKey = m.keySet();
 
-         //  for(Marker markers : m){
-            for(LatLng marker : markerKey ){
-             //  MarkerTag marker =(MarkerTag) markers.getTag();
+        MarkerTag markerTag = (MarkerTag) m.get(key).getTag();
 
-               double searchNearby = 6371 *
-                       Math.acos(
-                               Math.cos(Math.toRadians(marker.latitude)) *
-                                       newMarkerCosLat *
-                                       Math.cos(Math.toRadians(marker.longitude) - newMakerRadianLng) +
-                                       Math.sin(Math.toRadians(marker.latitude)) *
-                                               newMarkerSinLat
-                       );
-               if(searchNearby <= proximity ){
+        if (markerTag.getId() == key) {
 
-                   return true;
 
-               }
-           }
-         return false;
+            //   circle.remove();
 
+            m.get(key).remove();
+            m.remove(key);
+            markerTag.getCircle().remove();
+            //  marker.remove();
+
+        }
 
 
     }
-/*Verifica se a ultima posição é proxima a do local a onde o marcador sera inserido retornando true se for*/
+
+    public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key) {
+
+
+        if (key.equals(userId)) {
+            image = R.mipmap.ic_maker_vermelho_star;
+        } else {
+            image = R.mipmap.ic_maker_vermelho;
+        }
+
+
+        MarkerOptions markerOption = new MarkerOptions();
+        markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
+        marcador = googleMapFinal.addMarker(markerOption);
+        //marcador.setTitle(getStreet(latLng, c, g));
+
+        CreateCircle(latLng, googleMapFinal);
+
+
+        MarkerTag tag = new MarkerTag(marcador.getPosition().latitude, marcador.getPosition().longitude, circle);
+        tag.setStreet(getStreet(latLng, c, g));
+
+        //Pega Referencia do Firebase
+
+        tag.setId(key);
+
+        if (true) {
+            tag.setValidate(true);
+            tag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
+        } else {
+            tag.getCircle().setStrokeColor(Color.argb(128, 224, 158, 90));
+        }
+
+        marcador.setTag(tag);
+        marcador.setDraggable(false);
+        //Persiste os dados sobre a chave itemId
+
+
+        circles.put(key, circle);
+
+
+        action.setButtomAddMakerClickado(true);
+        zoomMarker(latLng, googleMapFinal);
+
+        m.put(key, marcador);
+
+
+    }
+
+    public HashMap<String, Circle> getCircles() {
+        return circles;
+    }
+
+    public void setCircles(HashMap<String, Circle> circles) {
+        this.circles = circles;
+    }
+
+    /*Verifica se existe algum marcador proximo retornando true se existir.*/
+    public Boolean hasNearby(final HashMap<String, Marker> m, final LatLng latLng) {
+
+        double proximity = RADIUS * 0.002;
+
+        double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
+        double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
+        double newMakerRadianLng = Math.toRadians(latLng.longitude);
+
+        for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
+
+            double searchNearby = 6371 *
+                    Math.acos(
+                            Math.cos(Math.toRadians(markerTemp.getValue().getPosition().latitude)) *
+                                    newMarkerCosLat *
+                                    Math.cos(Math.toRadians(markerTemp.getValue().getPosition().longitude) - newMakerRadianLng) +
+                                    Math.sin(Math.toRadians(markerTemp.getValue().getPosition().latitude)) *
+                                            newMarkerSinLat
+                    );
+            if (searchNearby <= proximity) {
+
+                return true;
+
+            }
+        }
+        return false;
+
+
+    }
+
+
+    /*Verifica se a ultima posição é proxima a do local a onde o marcador sera inserido retornando true se for*/
     public Boolean closeToMe(final LatLng myPosition, final LatLng latLng) {
 
-        double proximity = RADIUS * 0.01;
+        double proximity = RADIUS * 1.01;
 
 
         double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
         double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
-        double newMakerRadianLng = Math.toRadians(latLng.longitude) ;
-
+        double newMakerRadianLng = Math.toRadians(latLng.longitude);
 
 
         double searchNearby = 6371 *
@@ -102,23 +205,20 @@ public class MarkerDialog {
                                 Math.sin(Math.toRadians(myPosition.latitude)) *
                                         newMarkerSinLat
                 );
-        if(searchNearby <= proximity ){
+        if (searchNearby <= proximity) {
 
             return true;
 
         }
 
 
-
-
-
         return false;
 
 
-
     }
-/*Adicionando o listenner dos marker para poder deletar e validar*/
-    public GoogleMap setMarkerClick(GoogleMap googleMap, Context c, final HashMap<LatLng,Marker> m) {
+
+    /*Adicionando o listenner dos marker para poder deletar e validar*/
+    public GoogleMap setMarkerClick(GoogleMap googleMap, Context c, final HashMap<String, Marker> m) {
 
         this.context = c;
 
@@ -127,16 +227,30 @@ public class MarkerDialog {
             public boolean onMarkerClick(Marker marker) {
                 if (MenuInicial.vDenunciar) {
 
-                    diagValidate2(marker, context, m);
+                    MarkerTag markerTagMap = (MarkerTag) marker.getTag();
+                    if (!markerTagMap.getValidate()) {
+
+                        diagValidate2(marker, context, m);
+                    }
 
                 } else {
                     MenuInicial.changeDenunciar();
-                 //   circle.remove();
-                    MarkerTag markerTemp =(MarkerTag)  m.get(marker.getPosition()).getTag();
-                    m.get(marker.getPosition()).remove();
-                    m.remove(marker.getPosition());
-                    markerTemp.getCircle().remove();
-                  //  marker.remove();
+
+
+                    for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
+
+                        MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
+
+                        MarkerTag markerTagMap = (MarkerTag) marker.getTag();
+
+                        if (markerTag.getId() == markerTagMap.getId()) {
+
+                            //   circle.remove();
+                            insertDenunciar(markerTag,userId,m);
+
+
+                        }
+                    }
 
 
                 }
@@ -152,234 +266,8 @@ public class MarkerDialog {
     }
 
 
-    public void diagValidate(final Marker marker, Context c) {
+    public void diagValidate2(final Marker marker, Context c, final HashMap<String, Marker> m) {
         MarkerTag markerTag = (MarkerTag) marker.getTag();
-        nivel = markerTag.getNivel();
-        circle = markerTag.getCircle();
-        LayoutInflater li = LayoutInflater.from(c);
-
-        //inflamos o layout alerta.xml na view
-        final View view = li.inflate(R.layout.dialog_validar, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(c);
-        builder.setTitle("Validação");
-        final Button btDislike = (Button) view.findViewById(R.id.btDislike);
-        final TableRow tableZero = (TableRow) view.findViewById(R.id.tableZero);
-        final TextView streetText = (TextView) view.findViewById(R.id.txInfo);
-        final TextView txOne = (TextView) view.findViewById(R.id.tvOne);
-        final TextView txTwo = (TextView) view.findViewById(R.id.tvTwo);
-        final TextView txThree = (TextView) view.findViewById(R.id.tvThree);
-        final Button btValidate = (Button) view.findViewById(R.id.btLike);
-        Button btCancel = (Button) view.findViewById(R.id.btCancel);
-
-        final TableRow tableOne = (TableRow) view.findViewById(R.id.tableOne);
-        final TableRow tableTwo = (TableRow) view.findViewById(R.id.tableTwo);
-        final TableRow tableThree = (TableRow) view.findViewById(R.id.TableThree);
-
-        final ImageView amarelo = (ImageView) view.findViewById(R.id.btOne);
-        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-
-
-        final ImageView laranja = (ImageView) view.findViewById(R.id.btTwo);
-        laranja.setImageResource(R.mipmap.ic_maker_laranja);
-
-
-        final ImageView vermelho = (ImageView) view.findViewById(R.id.btThree);
-        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-
-        streetText.setText(markerTag.getStreet());
-
-        btDislike.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                alerta.dismiss();
-                circle.remove();
-                marker.remove();
-
-
-            }
-        });
-
-
-        btValidate.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-
-                if (secondScreen) {
-
-                    alerta.dismiss();
-                    secondScreen = false;
-
-
-                } else {
-                    btValidate.setText("Ok");
-                    if (!tableOne.isShown()) {
-                        tableOne.setVisibility(View.VISIBLE);
-
-                    }
-                    if (!tableTwo.isShown()) {
-                        tableTwo.setVisibility(View.VISIBLE);
-
-                    }
-                    if (!tableThree.isShown()) {
-                        tableThree.setVisibility(View.VISIBLE);
-
-                    }
-
-                    btDislike.setVisibility(View.GONE);
-                    tableZero.setVisibility(View.GONE);
-                    secondScreen = true;
-
-                }
-
-
-            }
-        });
-
-
-        btCancel.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                if (secondScreen) {
-                    btValidate.setText("Validar");
-                    secondScreen = false;
-                    if (nivel == 1) {
-                        tableOne.setVisibility(View.VISIBLE);
-                        tableTwo.setVisibility(View.GONE);
-                        tableThree.setVisibility(View.GONE);
-                        amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
-                        laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-
-
-                    } else if (nivel == 2) {
-                        tableOne.setVisibility(View.GONE);
-                        tableTwo.setVisibility(View.VISIBLE);
-                        tableThree.setVisibility(View.GONE);
-                        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                        laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
-                        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-                    } else if (nivel == 3) {
-                        tableOne.setVisibility(View.GONE);
-                        tableTwo.setVisibility(View.GONE);
-                        tableThree.setVisibility(View.VISIBLE);
-
-                        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                        laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                        vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
-
-                    }
-                    btDislike.setVisibility(View.VISIBLE);
-                    tableZero.setVisibility(View.VISIBLE);
-                } else {
-                    alerta.dismiss();
-
-                }
-
-
-            }
-        });
-
-        tableOne.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0r) {
-
-
-                if (secondScreen) {
-                    amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
-                    laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                    vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-
-
-                } else {
-                    //  alerta.dismiss();
-
-                }
-
-
-            }
-        });
-
-
-        tableTwo.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-
-
-                if (secondScreen) {
-                    amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                    laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
-                    vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-
-
-                } else {
-                    //  alerta.dismiss();
-
-                }
-
-
-            }
-        });
-
-
-        tableThree.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-
-                if (secondScreen) {
-                    amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                    laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                    vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
-
-
-                } else {
-                    // alerta.dismiss();
-
-                }
-
-
-            }
-        });
-
-
-        if (nivel == 1) {
-            tableOne.setVisibility(View.VISIBLE);
-            tableTwo.setVisibility(View.GONE);
-            tableThree.setVisibility(View.GONE);
-            amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
-            laranja.setImageResource(R.mipmap.ic_maker_laranja);
-            vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-            txOne.setText("Nivel Baixo (Atual)");
-
-
-        } else if (nivel == 2) {
-            tableOne.setVisibility(View.GONE);
-            tableTwo.setVisibility(View.VISIBLE);
-            tableThree.setVisibility(View.GONE);
-            amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-            laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
-            vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-            txTwo.setText("Nivel Médio (Atual)");
-
-        } else if (nivel == 3) {
-            tableOne.setVisibility(View.GONE);
-            tableTwo.setVisibility(View.GONE);
-            tableThree.setVisibility(View.VISIBLE);
-
-            amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-            laranja.setImageResource(R.mipmap.ic_maker_laranja);
-            vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
-            txThree.setText("Nivel Alto (Atual)");
-
-        }
-/*
-
-
-*/
-        builder.setView(view);
-        alerta = builder.create();
-        alerta.show();
-
-
-    }
-
-    public void diagValidate2(final Marker marker, Context c, final HashMap<LatLng,Marker> m) {
-        MarkerTag markerTag = (MarkerTag) marker.getTag();
-        nivel = markerTag.getNivel();
         circle = markerTag.getCircle();
         LayoutInflater li = LayoutInflater.from(c);
 
@@ -400,11 +288,19 @@ public class MarkerDialog {
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 alerta.dismiss();
-               // marker.setVisible(false);
-                MarkerTag markerTemp =(MarkerTag)  m.get(marker.getPosition()).getTag();
-                m.get(marker.getPosition()).setVisible(false);
-                markerTemp.getCircle().remove();
 
+                for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
+
+                    MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
+
+                    if (markerTag.getId() == ((MarkerTag) marker.getTag()).getId()) {
+
+
+                        insertValidar(markerTag, userId, timeAdd, false,m);
+
+
+                    }
+                }
 
 
             }
@@ -413,6 +309,17 @@ public class MarkerDialog {
 
         btValidate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
+                for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
+
+                    MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
+
+                    if (markerTag.getId() == ((MarkerTag) marker.getTag()).getId()) {
+
+
+                        insertValidar(markerTag, userId, timeAdd, true,m);
+
+                    }
+                }
 
                 alerta.dismiss();
             }
@@ -460,7 +367,7 @@ public class MarkerDialog {
             @Override
             public void onMarkerDragEnd(Marker marker) {
 
-                dialogDrag(marker, c);
+                dialogDrag(marker, c, marker.getPosition());
 
             }
         });
@@ -470,128 +377,7 @@ public class MarkerDialog {
     }
 
 
-    public void dialogAdd(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g) {
-
-
-        //LayoutInflater é utilizado para inflar nosso layout em uma view.
-        //-pegamos nossa instancia da classe
-        LayoutInflater li = LayoutInflater.from(c);
-
-        //inflamos o layout alerta.xml na view
-        final View view = li.inflate(R.layout.dialogadd, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(c);
-        builder.setTitle("Criar Marcador");
-        final Button confirm = (Button) view.findViewById(R.id.btConfirm);
-
-        Button cancel = (Button) view.findViewById(R.id.btCancel);
-
-        confirm.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-                alerta.dismiss();
-
-
-                MarkerOptions markerOption = new MarkerOptions();
-                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(image));
-                marcador = googleMapFinal.addMarker(markerOption);
-                //marcador.setTitle(getStreet(latLng, c, g));
-
-                CreateCircle(latLng, googleMapFinal);
-
-
-                MarkerTag tag = new MarkerTag(circle, marcador.getPosition(), nivel);
-                tag.setStreet(getStreet(latLng, c, g));
-                marcador.setTag(tag);
-                marcador.setDraggable(true);
-
-
-                action.setButtomAddMakerClickado(true);
-                zoomMarker(latLng, googleMapFinal);
-
-
-            }
-        });
-
-        cancel.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View arg0) {
-
-                alerta.dismiss();
-                if (!Action.getInstance().getButtomAddMakerClickado()) {
-
-                    Action.getInstance().setButtomAddMakerClickado(true);
-                }
-
-
-            }
-        });
-
-        confirm.setVisibility(View.INVISIBLE);
-
-        final TextView tvChoosed = (TextView) view.findViewById(R.id.tvChoosed);
-        tvChoosed.setText("Nivel Escolhido = 'Nenhum'");
-
-        final ImageView amarelo = (ImageView) view.findViewById(R.id.yellow_star);
-        amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-
-
-        final ImageView laranja = (ImageView) view.findViewById(R.id.orange_star);
-        laranja.setImageResource(R.mipmap.ic_maker_laranja);
-
-
-        final ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
-        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-
-        amarelo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                nivel = 1;
-                image = R.mipmap.ic_maker_amarelo_star;
-                amarelo.setImageResource(R.mipmap.ic_maker_amarelo_star);
-                laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-                confirm.setVisibility(View.VISIBLE);
-                tvChoosed.setText("Nivel Escolhido = 'Baixo'");
-            }
-        });
-
-        laranja.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                nivel = 2;
-                image = R.mipmap.ic_maker_laranja_star;
-                amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                laranja.setImageResource(R.mipmap.ic_maker_laranja_star);
-                vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
-                confirm.setVisibility(View.VISIBLE);
-                tvChoosed.setText("Nivel Escolhido = 'Médio'");
-
-            }
-        });
-        vermelho.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                image = R.mipmap.ic_maker_vermelho_star;
-                nivel = 3;
-                amarelo.setImageResource(R.mipmap.ic_maker_amarelo);
-                laranja.setImageResource(R.mipmap.ic_maker_laranja);
-                vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
-                confirm.setVisibility(View.VISIBLE);
-                tvChoosed.setText("Nivel Escolhido = 'Alto'");
-
-
-            }
-        });
-
-        builder.setView(view);
-
-        alerta = builder.create();
-
-        alerta.show();
-
-
-    }
-
-    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g,final HashMap<LatLng,Marker> m) {
+    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m) {
 
 
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
@@ -623,16 +409,74 @@ public class MarkerDialog {
                 CreateCircle(latLng, googleMapFinal);
 
 
-                MarkerTag tag = new MarkerTag(circle, marcador.getPosition());
+                MarkerTag tag = new MarkerTag(marcador.getPosition().latitude, marcador.getPosition().longitude, circle);
                 tag.setStreet(getStreet(latLng, c, g));
+
+                //Pega Referencia do Firebase
+                mDatabase = ConfigFireBase.getFirebase();
+                //Persiste uma key no banco do firebase
+                final String itemId = mDatabase.child("Marker").push().getKey();
+                //Faz referencia da key na tag do marcador
+                tag.setId(itemId);
+
                 marcador.setTag(tag);
+                marcador.setDraggable(false);
 
-                marcador.setDraggable(true);
+                MarkerTag markerTag = (MarkerTag) marcador.getTag();
+                //Persiste os dados sobre a chave itemId
+                mDatabase.child("Marker").child(itemId).setValue(markerTag);
+                mDatabase.child("Marker").child(itemId).child("fim").setValue(getCreationDate());
+                insertFim(markerTag, timeAdd);
+                mDatabase.child("Marker").child(itemId).child("idUser").setValue(userId);
+                mDatabase.child("Validar").child(itemId).child("idUser").setValue(userId);
+                mDatabase.child("Denunciar").child(itemId).child("idUser").setValue(userId);
+                circles.put(itemId, circle);
 
+                DatabaseReference tempDataBaseReference = mDatabase.child("Marker");
+                tempDataBaseReference.child(itemId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        try {
+                        } catch (Throwable e) {
+                            System.err.println("onCreate error: " + e);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                    }
+                });
+
+
+                GeoFire geoFire = new GeoFire(mDatabase.child("marker_location"));
+                geoFire.setLocation(itemId, new GeoLocation(marcador.getPosition().latitude, marcador.getPosition().longitude), new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+                        if (error != null) {
+                            System.err.println("There was an error saving the location to GeoFire: " + error);
+                        } else {
+                            System.out.println("Location saved on server successfully!");
+                        }
+                    }
+                });
+
+                GeoHash geoHash = new GeoHash(new GeoLocation(marcador.getPosition().latitude, marcador.getPosition().longitude));
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
+                updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
+                try {
+
+//            Toast.makeText(getContext(), "Marker inserido com sucesso", Toast.LENGTH_LONG).show();
+
+
+                } catch (Exception e) {
+
+                }
 
                 action.setButtomAddMakerClickado(true);
                 zoomMarker(latLng, googleMapFinal);
-                m.put(latLng,marcador);
+
+                m.put(itemId, marcador);
 
 
             }
@@ -710,7 +554,7 @@ public class MarkerDialog {
     }
 
 
-    public void dialogDrag(final Marker marker, final Context c) {
+    public void dialogDrag(final Marker marker, final Context c, final LatLng latLng) {
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
         //-pegamos nossa instancia da classe
         LayoutInflater li = LayoutInflater.from(c);
@@ -720,6 +564,7 @@ public class MarkerDialog {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle("Alterar Posição");
+
         final Button confirm = (Button) view.findViewById(R.id.btConfirm);
 
         Button cancel = (Button) view.findViewById(R.id.btCancel);
@@ -727,12 +572,15 @@ public class MarkerDialog {
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 MarkerTag markerTag = (MarkerTag) marker.getTag();
-                markerTag.setPosition(marker.getPosition());
+                markerTag.setLatitude(marker.getPosition().latitude);
+                markerTag.setLongitude(marker.getPosition().longitude);
                 marker.setTag(markerTag);
 
                 circle = markerTag.getCircle();
-                circle.remove();
-                // marker.setDraggable(false);
+                circle.setCenter(latLng);
+                circle.setStrokeColor(Color.argb(128, 2, 158, 90));
+
+                marker.setDraggable(false);
                 alerta.dismiss();
 
             }
@@ -775,6 +623,133 @@ public class MarkerDialog {
 
     }
 
+    public void insertFim(final MarkerTag markerTag, final long time) {
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child("Marker").child(markerTag.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                try {
+                    Long timestamp = (Long) snapshot.child("fim").getValue();
+                    timestamp += time;
+                    mDatabase.child("Marker").child(markerTag.getId()).child("fim").setValue(timestamp);
+                } catch (Throwable e) {
+                    System.err.println("onCreate error: " + e);
+                }
+            }
 
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+    }
+
+
+    public void insertDenunciar(MarkerTag markerTag, String idUser, HashMap<String, Marker> markerHashMap) {
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child("Denunciar").child(markerTag.getId()).setValue(idUser);
+        if (markerTag.getId() != null) {
+            //markerHashMap.get(markerTag.getId()).setVisible(false);
+            markerHashMap.get(markerTag.getId()).remove();
+            markerHashMap.remove(markerTag.getId());
+            markerTag.getCircle().remove();
+        }
+
+    }
+
+    public void insertValidar(final MarkerTag markerTag, String idUser, final long time, final boolean status, final HashMap<String, Marker> markerHashMap) {
+
+        checkIfUserExists(userId, "Validar");
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child("Validar").child(markerTag.getId()).child("idUser").setValue(idUser);
+        mDatabase.child("Marker").child(markerTag.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                try {
+                    Long fim = (Long) snapshot.child("fim").getValue();
+                    if (status == true) {
+                        fim += time;
+                        markerTag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
+                    } else {
+                        fim -= time;
+                        if (markerTag.getId() != null) {
+                            markerHashMap.get(markerTag.getId()).setVisible(false);
+                            markerTag.getCircle().remove();
+                        }
+                    }
+                    MarkerTag tag = (MarkerTag) markerHashMap.get(markerTag.getId()).getTag();
+                    tag.setValidate(true);
+                    mDatabase.child("Marker").child(markerTag.getId()).child("fim").setValue(fim);
+                } catch (Throwable e) {
+                    System.err.println("onCreate error: " + e);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+    }
+
+    public boolean userExistsCallback(boolean exists) {
+        if (exists) {
+            Log.i(TAG, "userExistsCallback: EXISTE");
+        } else {
+            Log.i(TAG, "userExistsCallback: NÃO EXISTE");
+        }
+        return exists;
+    }
+
+    public void checkIfUserExists(String idUser, String child) {
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child("Marker").child(child).child(idUser).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                try {
+                    boolean exists = (snapshot != null);
+                    userExistsCallback(exists);
+                } catch (Throwable e) {
+                    System.err.println("onCreate error: " + e);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+
+    public Long getServerTime() {
+        mDatabase = ConfigFireBase.getFirebase();
+        final Long[] timestampServer = new Long[1];
+        mDatabase.child("current_timestamp").setValue(ServerValue.TIMESTAMP);
+        mDatabase.child("current_timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                timestampServer[0] = (Long) dataSnapshot.getValue();
+                timestamp = timestampServer[0];
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return timestamp;
+    }
+
+
+    public java.util.Map<String, String> getCreationDate() {
+        return ServerValue.TIMESTAMP;
+    }
+
+    @Exclude
+    public Long getCreationDateLong() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Long creationDate) {
+        this.creationDate = creationDate;
+    }
 }
-

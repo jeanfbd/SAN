@@ -14,6 +14,10 @@
             android:id="@+id/nav_user_disable"
             android:icon="@drawable/ic_menu_camera"
             android:title="Marcadores Inativos do sistema" />
+        <item
+            android:id="@+id/nav_integracao"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="Integração" />
     </group>
 
 </menu>

@@ -37,7 +37,7 @@ public class LiveThread {
                                     markerDAO.update(markerBDClass);
                                     marker.setVisible(markerBDClass.isStatus());
                                     marker.setDraggable(markerBDClass.isDraggable());
-                                    MapsTerceiro.removeCircle();
+                                 //   MapsTerceiro.removeCircle();
                                 }
                             }
                         });
