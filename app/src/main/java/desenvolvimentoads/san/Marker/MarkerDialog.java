@@ -217,7 +217,7 @@ public class MarkerDialog {
 
     }
 
-    /*Adicionando o listenner dos marker para poder deletar e validar*/
+    /*Adicionando o listener dos marker para poder deletar e validar*/
     public GoogleMap setMarkerClick(GoogleMap googleMap, Context c, final HashMap<String, Marker> m) {
 
         this.context = c;
@@ -225,9 +225,10 @@ public class MarkerDialog {
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                MarkerTag markerTagMap = (MarkerTag) marker.getTag();
                 if (MenuInicial.vDenunciar) {
 
-                    MarkerTag markerTagMap = (MarkerTag) marker.getTag();
+
                     if (!markerTagMap.getValidate()) {
 
                         diagValidate2(marker, context, m);
@@ -237,20 +238,8 @@ public class MarkerDialog {
                     MenuInicial.changeDenunciar();
 
 
-                    for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
+                        insertDenunciar( (MarkerTag) m.get(markerTagMap.getId()).getTag(),userId,m);
 
-                        MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
-
-                        MarkerTag markerTagMap = (MarkerTag) marker.getTag();
-
-                        if (markerTag.getId() == markerTagMap.getId()) {
-
-                            //   circle.remove();
-                            insertDenunciar(markerTag,userId,m);
-
-
-                        }
-                    }
 
 
                 }
@@ -267,7 +256,7 @@ public class MarkerDialog {
 
 
     public void diagValidate2(final Marker marker, Context c, final HashMap<String, Marker> m) {
-        MarkerTag markerTag = (MarkerTag) marker.getTag();
+        final MarkerTag markerTag = (MarkerTag) marker.getTag();
         circle = markerTag.getCircle();
         LayoutInflater li = LayoutInflater.from(c);
 
@@ -289,18 +278,11 @@ public class MarkerDialog {
             public void onClick(View arg0) {
                 alerta.dismiss();
 
-                for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
-
-                    MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
-
-                    if (markerTag.getId() == ((MarkerTag) marker.getTag()).getId()) {
 
 
-                        insertValidar(markerTag, userId, timeAdd, false,m);
 
 
-                    }
-                }
+                        insertValidar((MarkerTag)m.get(markerTag.getId()).getTag(), userId, timeAdd, false,m);
 
 
             }
@@ -309,17 +291,11 @@ public class MarkerDialog {
 
         btValidate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
-
-                    MarkerTag markerTag = (MarkerTag) markerTemp.getValue().getTag();
-
-                    if (markerTag.getId() == ((MarkerTag) marker.getTag()).getId()) {
 
 
-                        insertValidar(markerTag, userId, timeAdd, true,m);
 
-                    }
-                }
+                        insertValidar((MarkerTag)m.get(markerTag.getId()).getTag(),  userId, timeAdd, true,m);
+
 
                 alerta.dismiss();
             }
