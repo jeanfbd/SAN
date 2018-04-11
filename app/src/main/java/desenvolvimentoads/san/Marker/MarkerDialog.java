@@ -60,8 +60,8 @@ public class MarkerDialog {
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
 
-    // String userId = currentUser.getUid();
-    String userId = "123";
+    String userId = currentUser.getUid();
+    //String userId = "123";
     HashMap<String, Circle> circles = new HashMap<String, Circle>();
     Long creationDate;
 
@@ -99,7 +99,7 @@ public class MarkerDialog {
 
     }
 
-    public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key) {
+    public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key, boolean validou) {
 
 
         if (key.equals(userId)) {
@@ -115,9 +115,8 @@ public class MarkerDialog {
         //marcador.setTitle(getStreet(latLng, c, g));
 
         CreateCircle(latLng, googleMapFinal);
+        MarkerTag tag = new MarkerTag(marcador.getPosition().latitude, marcador.getPosition().longitude, circle, validou);
 
-
-        MarkerTag tag = new MarkerTag(marcador.getPosition().latitude, marcador.getPosition().longitude, circle);
         tag.setStreet(getStreet(latLng, c, g));
 
         //Pega Referencia do Firebase
@@ -383,7 +382,7 @@ public class MarkerDialog {
                 CreateCircle(latLng, googleMapFinal);
 
 
-                MarkerTag tag = new MarkerTag(marcador.getPosition().latitude, marcador.getPosition().longitude, circle);
+                MarkerTag tag = new MarkerTag(marcador.getPosition().latitude, marcador.getPosition().longitude, circle, false);
                 tag.setStreet(getStreet(latLng, c, g));
 
                 //Pega Referencia do Firebase
@@ -402,8 +401,6 @@ public class MarkerDialog {
                 mDatabase.child("Marker").child(itemId).child("fim").setValue(getCreationDate());
                 insertFim(markerTag, timeAdd);
                 mDatabase.child("Marker").child(itemId).child("idUser").setValue(userId);
-                mDatabase.child("Validar").child(itemId).child("idUser").setValue(userId);
-                mDatabase.child("Denunciar").child(itemId).child("idUser").setValue(userId);
                 circles.put(itemId, circle);
 
                 DatabaseReference tempDataBaseReference = mDatabase.child("Marker");
@@ -620,9 +617,8 @@ public class MarkerDialog {
 
     public void insertDenunciar(MarkerTag markerTag, String idUser, HashMap<String, Marker> markerHashMap) {
         mDatabase = ConfigFireBase.getFirebase();
-        mDatabase.child("Denunciar").child(markerTag.getId()).setValue(idUser);
+        mDatabase.child("Marker").child(markerTag.getId()).child("Denunciar").child(idUser).setValue(idUser);
         if (markerTag.getId() != null) {
-            //markerHashMap.get(markerTag.getId()).setVisible(false);
             markerHashMap.get(markerTag.getId()).remove();
             markerHashMap.remove(markerTag.getId());
             markerTag.getCircle().remove();
@@ -632,9 +628,9 @@ public class MarkerDialog {
 
     public void insertValidar(final MarkerTag markerTag, String idUser, final long time, final boolean status, final HashMap<String, Marker> markerHashMap) {
 
-        checkIfUserExists(userId, "Validar");
+
         mDatabase = ConfigFireBase.getFirebase();
-        mDatabase.child("Validar").child(markerTag.getId()).child("idUser").setValue(idUser);
+        mDatabase.child("Marker").child(markerTag.getId()).child("Validar").child(idUser).setValue(idUser);
         mDatabase.child("Marker").child(markerTag.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -660,35 +656,6 @@ public class MarkerDialog {
 
             @Override
             public void onCancelled(DatabaseError error) {
-            }
-        });
-    }
-
-    public boolean userExistsCallback(boolean exists) {
-        if (exists) {
-            Log.i(TAG, "userExistsCallback: EXISTE");
-        } else {
-            Log.i(TAG, "userExistsCallback: NÃO EXISTE");
-        }
-        return exists;
-    }
-
-    public void checkIfUserExists(String idUser, String child) {
-        mDatabase = ConfigFireBase.getFirebase();
-        mDatabase.child("Marker").child(child).child(idUser).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                try {
-                    boolean exists = (snapshot != null);
-                    userExistsCallback(exists);
-                } catch (Throwable e) {
-                    System.err.println("onCreate error: " + e);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }

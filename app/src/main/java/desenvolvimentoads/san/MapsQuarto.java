@@ -78,16 +78,21 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+
+import static android.content.ContentValues.TAG;
 
 
 public class MapsQuarto extends SupportMapFragment implements LocationListener, OnMapReadyCallback, GoogleMap.OnMapClickListener, ActionObserver, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private DatabaseReference mDatabase;
     private FirebaseDatabase firebaseDatabase;
-    private FirebaseAuth mAuth= com.google.firebase.auth.FirebaseAuth.getInstance();
+    private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
+    private String userId = currentUser.getUid();
+    //    String userId = "123";
     public static HashMap<Marker, String> mHashMap = new HashMap<Marker, String>();
     public static HashMap<String, Marker> markerHashMap = new HashMap<>();
     private static Long timestamp;
@@ -625,7 +630,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
         mCurrentLocation = location;
         getRaioFirebase(location.getLatitude(), location.getLongitude(), 5.0);
 
-
     }
 
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
@@ -650,15 +654,22 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                             LatLng latLng = new LatLng(latitude, longitude);
                             if (dataSnapshot.child("fim").getValue() != null) {
                                 if (getServerTime() < (Long) dataSnapshot.child("fim").getValue()) {
-
-                                    if (markerHashMap.get(key) == null) {
-                                        Log.i(TAG, "Entrou Criar: " + key);
-                                        markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap,key);
+                                    if (!dataSnapshot.child("Denunciar").child(userId).exists()) {
+                                        Log.i(TAG, "onDataChange: NÃO EXISTE DENUNCIA");
+                                        if (markerHashMap.get(key) == null) {
+                                            Log.i(TAG, "Entrou Criar: " + key);
+                                            markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
+//                                                MarkerOptions markerOption = new MarkerOptions();
+//                                                markerOption.position(latLng);
+//                                                mMap.addMarker(markerOption);
+                                        }
+                                    }else{
+                                        Log.i(TAG, "onDataChange: EXISTE DENUNCIA");
                                     }
                                 } else {
                                     if (markerHashMap.get(key) != null) {
                                         Log.i(TAG, "Entrou Remover: " + key);
-                                        MarkerDialog.deleteDataArrayFirebase(markerHashMap,key);
+                                        MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
                                     }
                                 }
                             }
@@ -693,45 +704,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
             }
         });
     }
-
-    public void insertDenunciar(MarkerTag markerTag, String idUser) {
-        mDatabase = ConfigFireBase.getFirebase();
-        mDatabase.child("Denunciar").child(markerTag.getId()).setValue(idUser);
-        if (markerTag.getId() != null) {
-            markerHashMap.get(markerTag.getId()).setVisible(false);
-        }
-
-    }
-
-    public void insertValidar(final MarkerTag markerTag, String idUser, final long time, final boolean positive) {
-        mDatabase = ConfigFireBase.getFirebase();
-        mDatabase.child("Validar").child(markerTag.getId()).child("idUser").setValue(idUser);
-        mDatabase.child("Marker").child(markerTag.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                try {
-                    Long fim = (Long) snapshot.child("fim").getValue();
-                    if (positive == true) {
-                        fim += time;
-                    } else {
-                        fim -= time;
-                        if (markerTag.getId() != null) {
-                            markerHashMap.get(markerTag.getId()).setVisible(false);
-                        }
-                    }
-                    mDatabase.child("Marker").child(markerTag.getId()).child("fim").setValue(fim);
-                } catch (Throwable e) {
-                    System.err.println("onCreate error: " + e);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-            }
-        });
-    }
-
-
 
     public Long getServerTime() {
         mDatabase = ConfigFireBase.getFirebase();
@@ -781,6 +753,25 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+
+    public void checkIfUserExists(final String idUser, String idMarker, String child) {
+        mDatabase = ConfigFireBase.getFirebase();
+        mDatabase.child(child).child(idMarker).child("idUser").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(TAG, "onDataChange: " + dataSnapshot.getRef());
+                String value = dataSnapshot.getValue(String.class);
+                if (idUser.equals(value)) {
+                    Log.i(TAG, "onDataChange: " + value);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
             }
         });
     }

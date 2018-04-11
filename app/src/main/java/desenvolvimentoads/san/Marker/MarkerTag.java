@@ -28,12 +28,12 @@ public class MarkerTag {
 
     }
 
-    public MarkerTag(double latitude, double longitude, Circle circle){
+    public MarkerTag(double latitude, double longitude, Circle circle, boolean validate){
         this.latitude = latitude;
         this.longitude = longitude;
         this.circle = circle;
+        this.validate = validate;
     }
-
 
 
     public String getId() {

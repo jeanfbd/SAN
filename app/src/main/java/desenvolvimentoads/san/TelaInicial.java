@@ -194,10 +194,8 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        //String userId = currentUser.getUid();
-        String userId = "123";
 
-        if (userId != null){
+        if (currentUser != null){
             mSignInButton.setVisibility(View.GONE);
 //            threadTelaInicial();
             progressBar();
