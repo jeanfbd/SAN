@@ -32,7 +32,6 @@ public class MenuInicial extends AppCompatActivity
     private GoogleApiClient googleApiClient;
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
     private FirebaseAuth firebaseAuth;
-
     private String userName;
     private String userEmail;
     private String userId;
@@ -118,7 +117,7 @@ public class MenuInicial extends AppCompatActivity
 
 
 
-                Snackbar.make(view, "Click no mapa para criar um marcador ou click novamente para Cancelar", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Clique no mapa para criar um marcador ou clique novamente para Cancelar", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 addMarkerFloatButtom();
 
@@ -141,7 +140,7 @@ public class MenuInicial extends AppCompatActivity
 
 
     public  void addMarkerFloatButtom(){
-        Log.d("olha aqui",String.valueOf(buttomAddMarkerVisivel));
+
         if(buttomAddMarkerVisivel){
        // if(btnAddMarker.isShown()){
             btnAddMarker.setVisibility(View.GONE);
@@ -158,16 +157,18 @@ public class MenuInicial extends AppCompatActivity
 
     }
 
-    public static void changeDenunciar(){
-        if(denunciar.getTitle().equals("Denunciar"))    {
+    public void changeDenunciar(){
+        if(vDenunciar)    {
             vDenunciar = false;
+            Action.getInstance().setReportNotSelected(false);
             denunciar.setTitle("Cancel");
-
+            Snackbar.make(getCurrentFocus(), "Clique no marcador que deseja denunciar", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 
         }else{
 
             denunciar.setTitle("Denunciar");
             vDenunciar = true;
+            Action.getInstance().setReportNotSelected(true);
 
         }
 
@@ -344,6 +345,12 @@ public class MenuInicial extends AppCompatActivity
         }
 
 
+
+        if(vDenunciar != action.isReportNotSelected()){
+            Log.i("Teste","Denunciar mudou..");
+            changeDenunciar();
+
+        }
 
 
     }

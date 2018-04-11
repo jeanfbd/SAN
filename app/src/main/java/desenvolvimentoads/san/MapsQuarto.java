@@ -22,9 +22,11 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -422,7 +424,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                         //Toast.makeText(getContext(), "Presta atençao " + newLatLng.toString(), Toast.LENGTH_LONG).show();
 
 
-                        if (MenuInicial.vDenunciar) {
+                        if (action.isReportNotSelected()) {
                             /* Verifico a proximidade do user com o local que ele vai por o marcador*/
                             if (markerDialog.closeToMe(newLatLng, arg0)) {
                                   /* Verifico se existe algum marcador proximo */
@@ -431,7 +433,8 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
 
                                 } else {
-                                    Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
+
+                                 Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
 
 
                                 }
@@ -468,7 +471,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
 
         mMap = googleMap;
-        mMap.setMinZoomPreference(10);
+      //  mMap.setMinZoomPreference(10);
 
         /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
         if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -585,8 +588,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Toast.makeText(getContext(), "onConnected", Toast.LENGTH_SHORT).show();
-
 
         if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED) {
@@ -608,18 +609,18 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
     @Override
     public void onConnectionSuspended(int i) {
-        Toast.makeText(getContext(), "onConnectionSuspended", Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(getContext(), "onConnectionFailed", Toast.LENGTH_SHORT).show();
+
     }
 
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(getContext(), "Location Changed", Toast.LENGTH_SHORT).show();
+
         /*Armazenando a ultima posição*/
         mCurrentLocation = location;
         getRaioFirebase(location.getLatitude(), location.getLongitude(), 5.0);

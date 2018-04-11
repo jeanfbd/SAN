@@ -13,6 +13,7 @@ public class Action {
     private static Action instance;
     private Set<ActionObserver> interessados = new HashSet<>();
     private boolean buttomAddMakerVisivel = true;
+    private boolean reportNotSelected = true;
 
     private Action() {
 
@@ -29,6 +30,25 @@ public class Action {
 
 
         return instance;
+    }
+
+    public boolean isReportNotSelected() {
+        return reportNotSelected;
+    }
+
+    public void setReportNotSelected(boolean reportNotSelected) {
+        this.reportNotSelected = reportNotSelected;
+        reportNotSelectedStateChanged();
+    }
+
+    private void reportNotSelectedStateChanged() {
+
+        for (ActionObserver interessado : interessados) {
+            interessado.notificaticarInteressados(this);
+
+
+        }
+
     }
 
     public boolean getButtomAddMakerClickado() {

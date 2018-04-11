@@ -226,7 +226,7 @@ public class MarkerDialog {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 MarkerTag markerTagMap = (MarkerTag) marker.getTag();
-                if (MenuInicial.vDenunciar) {
+                if (action.isReportNotSelected()) {
 
 
                     if (!markerTagMap.getValidate()) {
@@ -235,9 +235,7 @@ public class MarkerDialog {
                     }
 
                 } else {
-                    MenuInicial.changeDenunciar();
-
-
+                        action.setReportNotSelected(true);
                         insertDenunciar( (MarkerTag) m.get(markerTagMap.getId()).getTag(),userId,m);
 
 
@@ -442,7 +440,7 @@ public class MarkerDialog {
                 updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
                 try {
 
-//            Toast.makeText(getContext(), "Marker inserido com sucesso", Toast.LENGTH_LONG).show();
+
 
 
                 } catch (Exception e) {

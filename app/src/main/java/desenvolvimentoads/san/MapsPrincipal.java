@@ -395,7 +395,7 @@ public class MapsPrincipal extends SupportMapFragment implements LocationListene
                         Toast.makeText(getContext(), "Presta atençao " + newLatLng.toString(), Toast.LENGTH_LONG).show();
 
 
-                        if (MenuInicial.vDenunciar) {
+                        if (action.isReportNotSelected()) {
                             /* Verifico a proximidade do user com o local que ele vai por o marcador*/
                             if (markerDialog.closeToMe(newLatLng, arg0)) {
                                   /* Verifico se existe algum marcador proximo */
