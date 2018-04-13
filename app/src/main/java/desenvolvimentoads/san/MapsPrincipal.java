@@ -400,7 +400,7 @@ public class MapsPrincipal extends SupportMapFragment implements LocationListene
                             if (markerDialog.closeToMe(newLatLng, arg0)) {
                                   /* Verifico se existe algum marcador proximo */
                                 if (!markerDialog.hasNearby(marcadores, arg0)) {
-                                    markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, marcadores);
+                                    markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, marcadores, mCurrLocation);
 
 
                                 } else {
@@ -507,7 +507,7 @@ public class MapsPrincipal extends SupportMapFragment implements LocationListene
                     if (markerDialog.closeToMe(newLatLng, latLng)) {
                                   /* Verifico se existe algum marcador proximo */
                         if (!markerDialog.hasNearby(marcadores, latLng)) {
-                            markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, marcadores);
+                            markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, marcadores, mCurrLocation);
                         } else {
                             Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
 

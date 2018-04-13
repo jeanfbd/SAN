@@ -1,9 +1,14 @@
 package desenvolvimentoads.san.Marker;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +21,8 @@ import android.widget.TextView;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.firebase.geofire.core.GeoHash;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -39,9 +46,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
+import desenvolvimentoads.san.MapsQuarto;
 import desenvolvimentoads.san.MenuInicial;
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.R;
@@ -350,7 +359,7 @@ public class MarkerDialog {
     }
 
 
-    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m) {
+    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final Marker mCurrentLocation) {
 
 
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
@@ -435,6 +444,43 @@ public class MarkerDialog {
                 Map<String, Object> updates = new HashMap<>();
                 updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
                 updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
+
+
+
+                GeoFire geoFire2 = new GeoFire(mDatabase.child("MyLocation"));
+
+                GeoQuery geoQueryRadius = geoFire2.queryAtLocation(new GeoLocation(latLng.latitude, latLng.longitude), 0.5);
+                geoQueryRadius.addGeoQueryEventListener(new GeoQueryEventListener() {
+                    @Override
+                    public void onKeyEntered(String key, GeoLocation location) {
+                        sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key),c);
+                        Log.d("ENTROU", "DENTRO");
+                        mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
+                    }
+
+                    @Override
+                    public void onKeyExited(String key) {
+                        sendNotification("SAN", String.format("%s Fora do ponto de alagamento", key),c);
+                        Log.d("SAIU", "FORA");
+                        mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                    }
+
+                    @Override
+                    public void onKeyMoved(String key, GeoLocation location) {
+                        Log.d("MOVE", String.format("Movendo-se pela area de alagamento [%f/%f]", key, location.latitude, location.longitude));
+                    }
+
+                    @Override
+                    public void onGeoQueryReady() {
+
+                    }
+
+                    @Override
+                    public void onGeoQueryError(DatabaseError error) {
+                        Log.e("Error", "" + error);
+                    }
+                });
+
                 try {
 
 
@@ -482,6 +528,22 @@ public class MarkerDialog {
         alerta.show();
 
 
+    }
+
+    public void sendNotification(String title, String content, Context context) {
+        Notification.Builder builder = new Notification.Builder(context)
+                .setSmallIcon(R.mipmap.ic_maker_vermelho)
+                .setContentTitle(title)
+                .setContentText(content);
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(context, MapsQuarto.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        builder.setContentIntent(contentIntent);
+        Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.defaults |= Notification.DEFAULT_SOUND;
+
+        manager.notify(new Random().nextInt(), notification);
     }
 
     public void zoomMarker(LatLng arg0, GoogleMap googleMap) {
@@ -659,6 +721,8 @@ public class MarkerDialog {
             }
         });
     }
+
+
 
 
     public Long getServerTime() {

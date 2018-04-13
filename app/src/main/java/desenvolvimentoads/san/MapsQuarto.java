@@ -8,6 +8,9 @@ import android.*;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -60,6 +63,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.Marker.MarkerDialog;
@@ -88,6 +92,7 @@ import static android.content.ContentValues.TAG;
 public class MapsQuarto extends SupportMapFragment implements LocationListener, OnMapReadyCallback, GoogleMap.OnMapClickListener, ActionObserver, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private DatabaseReference mDatabase;
+    private GeoFire geoFire2;
     private FirebaseDatabase firebaseDatabase;
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -96,14 +101,19 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     public static HashMap<Marker, String> mHashMap = new HashMap<Marker, String>();
     public static HashMap<String, Marker> markerHashMap = new HashMap<>();
     private static Long timestamp;
-    private TelaInicial telaInicial;
 
     private static final String TAG = "MapsQuarto";
 
-    LocationRequest mLocationRequest;
+    private LocationRequest mLocationRequest;
+    private GoogleApiClient mGoogleApiClient;
+
+    private static int UPDATE_INTERVAL = 5000;
+    private static int FATEST_INTERVAL = 3000;
+    private static int DISPLACEMENT = 10;
+
     Marker mCurrLocation;
     LatLng newLatLng;
-    GoogleApiClient mGoogleApiClient;
+
 
     /*Um int randomico para o callback do metodo de request permission, só vai utilizado caso formos tratar alguma coisa com ele */
     public static final int REQUEST_PERMISSION_LOCATION = 10;
@@ -426,6 +436,27 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                             mGoogleApiClient);
                     if (mLastLocation != null) {
                         newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+
+                        //Update to Firebase
+                        GeoFire geoFire2 = new GeoFire(mDatabase.child("MyLocation"));
+                        geoFire2.setLocation("Você", new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()),
+                                new GeoFire.CompletionListener() {
+                                    @Override
+                                    public void onComplete(String key, DatabaseError error) {
+                                        //addMarker
+                                        if (mCurrLocation != null) {
+                                            mCurrLocation.remove();
+                                        }
+                                        mCurrLocation = mMap.addMarker(new MarkerOptions()
+                                                .position(newLatLng)
+                                                .title("Você")
+                                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location))
+                                        );
+                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12.0f));
+                                    }
+                                });
+
+
                         //Toast.makeText(getContext(), "Presta atençao " + newLatLng.toString(), Toast.LENGTH_LONG).show();
 
 
@@ -434,12 +465,12 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                             if (markerDialog.closeToMe(newLatLng, arg0)) {
                                   /* Verifico se existe algum marcador proximo */
                                 if (!markerDialog.hasNearby(markerHashMap, arg0)) {
-                                    markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap);
+                                    markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap, mCurrLocation);
 
 
                                 } else {
 
-                                 Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
 
 
                                 }
@@ -476,7 +507,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
 
         mMap = googleMap;
-      //  mMap.setMinZoomPreference(10);
+        //  mMap.setMinZoomPreference(10);
 
         /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
         if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -487,7 +518,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
             mMap.setOnMapClickListener(this);
             mMap.getUiSettings().setMapToolbarEnabled(false);
             mMap.getUiSettings().setZoomControlsEnabled(true);
-
 
             getRaioFirebase(-23.6202800, -45.4130600, 5.00);
             //getAllFirebase();
@@ -556,7 +586,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                     if (markerDialog.closeToMe(newLatLng, latLng)) {
                                   /* Verifico se existe algum marcador proximo */
                         if (!markerDialog.hasNearby(markerHashMap, latLng)) {
-                            markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap);
+                            markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap, mCurrLocation);
                             Log.i(TAG, "onMapClick: LAT: " + latLng.latitude + " LOG: " + latLng.longitude);
 
                         } else {
@@ -659,11 +689,12 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                                         if (markerHashMap.get(key) == null) {
                                             Log.i(TAG, "Entrou Criar: " + key);
                                             markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
+
 //                                                MarkerOptions markerOption = new MarkerOptions();
 //                                                markerOption.position(latLng);
 //                                                mMap.addMarker(markerOption);
                                         }
-                                    }else{
+                                    } else {
                                         Log.i(TAG, "onDataChange: EXISTE DENUNCIA");
                                     }
                                 } else {
@@ -753,25 +784,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-    }
-
-
-    public void checkIfUserExists(final String idUser, String idMarker, String child) {
-        mDatabase = ConfigFireBase.getFirebase();
-        mDatabase.child(child).child(idMarker).child("idUser").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.i(TAG, "onDataChange: " + dataSnapshot.getRef());
-                String value = dataSnapshot.getValue(String.class);
-                if (idUser.equals(value)) {
-                    Log.i(TAG, "onDataChange: " + value);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
             }
         });
     }

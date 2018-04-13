@@ -40,5 +40,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:10.2.0'
     compile 'com.firebase:geofire-android:2.1.1'
     compile 'com.google.android.gms:play-services-location:10.2.0'
+    //compile 'com.h6ah4i.android.widget.verticalseekbar:0.7.2'
 }
 apply plugin: 'com.google.gms.google-services'
