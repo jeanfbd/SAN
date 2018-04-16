@@ -437,25 +437,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                     if (mLastLocation != null) {
                         newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
 
-                        //Update to Firebase
-                        GeoFire geoFire2 = new GeoFire(mDatabase.child("MyLocation"));
-                        geoFire2.setLocation("Você", new GeoLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude()),
-                                new GeoFire.CompletionListener() {
-                                    @Override
-                                    public void onComplete(String key, DatabaseError error) {
-                                        //addMarker
-                                        if (mCurrLocation != null) {
-                                            mCurrLocation.remove();
-                                        }
-                                        mCurrLocation = mMap.addMarker(new MarkerOptions()
-                                                .position(newLatLng)
-                                                .title("Você")
-                                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location))
-                                        );
-                                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12.0f));
-                                    }
-                                });
-
 
                         //Toast.makeText(getContext(), "Presta atençao " + newLatLng.toString(), Toast.LENGTH_LONG).show();
 
@@ -658,6 +639,26 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
         /*Armazenando a ultima posição*/
         mCurrentLocation = location;
+
+        //Update to Firebase
+        GeoFire geoFire2 = new GeoFire(mDatabase.child("MyLocation"));
+        geoFire2.setLocation("Você", new GeoLocation(location.getLatitude(), location.getLongitude()),
+                new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+                        //addMarker
+                        if (mCurrLocation != null) {
+                            mCurrLocation.remove();
+                        }
+                        mCurrLocation = mMap.addMarker(new MarkerOptions()
+                                .position(newLatLng)
+                                .title("Você")
+                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location))
+                        );
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12.0f));
+                    }
+                });
+
         getRaioFirebase(location.getLatitude(), location.getLongitude(), 5.0);
 
     }

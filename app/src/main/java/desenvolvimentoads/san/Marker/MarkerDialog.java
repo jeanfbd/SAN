@@ -455,14 +455,14 @@ public class MarkerDialog {
                     public void onKeyEntered(String key, GeoLocation location) {
                         sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key),c);
                         Log.d("ENTROU", "DENTRO");
-                        mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
+                        //mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                     }
 
                     @Override
                     public void onKeyExited(String key) {
                         sendNotification("SAN", String.format("%s Fora do ponto de alagamento", key),c);
                         Log.d("SAIU", "FORA");
-                        mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                       // mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
                     }
 
                     @Override
