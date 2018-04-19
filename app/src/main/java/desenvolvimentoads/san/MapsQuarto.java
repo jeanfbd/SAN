@@ -94,10 +94,10 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     private DatabaseReference mDatabase;
     private GeoFire geoFire2;
     private FirebaseDatabase firebaseDatabase;
-    private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
-    private FirebaseUser currentUser = mAuth.getCurrentUser();
-    private String userId = currentUser.getUid();
-    //    String userId = "123";
+ //   private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
+   // private FirebaseUser currentUser = mAuth.getCurrentUser();
+ //   private String userId = currentUser.getUid();
+    String userId = "123";
     public static HashMap<Marker, String> mHashMap = new HashMap<Marker, String>();
     public static HashMap<String, Marker> markerHashMap = new HashMap<>();
     private static Long timestamp;
@@ -111,6 +111,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     private static int FATEST_INTERVAL = 3000;
     private static int DISPLACEMENT = 10;
 
+    MarkerTag myCurrentLocationTag;
     Marker mCurrLocation;
     LatLng newLatLng;
 
@@ -639,6 +640,19 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
         /*Armazenando a ultima posição*/
         mCurrentLocation = location;
+        newLatLng = new LatLng(location.getLatitude(),location.getLongitude()) ;
+
+
+        if(myCurrentLocationTag == null){
+            myCurrentLocationTag = new MarkerTag();
+            myCurrentLocationTag.setId("MyCurrentTag");
+            myCurrentLocationTag.setValidate(true);
+            myCurrentLocationTag.setLatitude(location.getLatitude());
+            myCurrentLocationTag.setLongitude(location.getLongitude());
+        }else{
+            myCurrentLocationTag.setLatitude(location.getLatitude());
+            myCurrentLocationTag.setLongitude(location.getLongitude());
+        }
 
         //Update to Firebase
         GeoFire geoFire2 = new GeoFire(mDatabase.child("MyLocation"));
@@ -655,7 +669,8 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                                 .title("Você")
                                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location))
                         );
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12.0f));
+                        mCurrLocation.setTag(myCurrentLocationTag);
+                //        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12.0f));
                     }
                 });
 
