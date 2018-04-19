@@ -447,7 +447,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                             if (markerDialog.closeToMe(newLatLng, arg0)) {
                                   /* Verifico se existe algum marcador proximo */
                                 if (!markerDialog.hasNearby(markerHashMap, arg0)) {
-                                    markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap, mCurrLocation);
+                                    markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap);
 
 
                                 } else {
@@ -568,7 +568,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                     if (markerDialog.closeToMe(newLatLng, latLng)) {
                                   /* Verifico se existe algum marcador proximo */
                         if (!markerDialog.hasNearby(markerHashMap, latLng)) {
-                            markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap, mCurrLocation);
+                            markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap);
                             Log.i(TAG, "onMapClick: LAT: " + latLng.latitude + " LOG: " + latLng.longitude);
 
                         } else {

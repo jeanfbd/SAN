@@ -69,13 +69,13 @@ public class MarkerDialog {
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
 
-  //  String userId = currentUser.getUid();
+   // String userId = currentUser.getUid();
     String userId = "123";
     HashMap<String, Circle> circles = new HashMap<String, Circle>();
     Long creationDate;
 
 
-    long timeAdd = 120000;
+    long timeAdd = 12000;
     long timestamp;
 
     Marker marcador;
@@ -94,15 +94,9 @@ public class MarkerDialog {
         MarkerTag markerTag = (MarkerTag) m.get(key).getTag();
 
         if (markerTag.getId() == key) {
-
-
-            //   circle.remove();
-
             m.get(key).remove();
             m.remove(key);
             markerTag.getCircle().remove();
-            //  marker.remove();
-
         }
 
 
@@ -359,7 +353,8 @@ public class MarkerDialog {
     }
 
 
-    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final Marker mCurrentLocation) {
+    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m) {
+
 
 
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
@@ -445,58 +440,12 @@ public class MarkerDialog {
                 updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
                 updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
 
-
-
-                GeoFire geoFire2 = new GeoFire(mDatabase.child("MyLocation"));
-
-                GeoQuery geoQueryRadius = geoFire2.queryAtLocation(new GeoLocation(latLng.latitude, latLng.longitude), 0.5);
-                geoQueryRadius.addGeoQueryEventListener(new GeoQueryEventListener() {
-                    @Override
-                    public void onKeyEntered(String key, GeoLocation location) {
-                        sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key),c);
-                        Log.d("ENTROU", "DENTRO");
-                        //mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
-                    }
-
-                    @Override
-                    public void onKeyExited(String key) {
-                        sendNotification("SAN", String.format("%s Fora do ponto de alagamento", key),c);
-                        Log.d("SAIU", "FORA");
-                       // mCurrentLocation.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
-                    }
-
-                    @Override
-                    public void onKeyMoved(String key, GeoLocation location) {
-                        Log.d("MOVE", String.format("Movendo-se pela area de alagamento", key, location.latitude, location.longitude));
-                    }
-
-                    @Override
-                    public void onGeoQueryReady() {
-
-                    }
-
-                    @Override
-                    public void onGeoQueryError(DatabaseError error) {
-                        Log.e("Error", "" + error);
-                    }
-                });
-
-                try {
-
-
-
-
-                } catch (Exception e) {
-
-                }
-
                 action.setButtomAddMakerClickado(true);
                 zoomMarker(latLng, googleMapFinal);
-
                 m.put(itemId, marcador);
-
-
+                action.setItemId(itemId);
             }
+
         });
 
         cancel.setOnClickListener(new View.OnClickListener() {
@@ -526,24 +475,6 @@ public class MarkerDialog {
         alerta = builder.create();
 
         alerta.show();
-
-
-    }
-
-    public void sendNotification(String title, String content, Context context) {
-        Notification.Builder builder = new Notification.Builder(context)
-                .setSmallIcon(R.mipmap.ic_maker_vermelho)
-                .setContentTitle(title)
-                .setContentText(content);
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = new Intent(context, MapsQuarto.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        builder.setContentIntent(contentIntent);
-        Notification notification = builder.build();
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.defaults |= Notification.DEFAULT_SOUND;
-
-        manager.notify(new Random().nextInt(), notification);
     }
 
     public void zoomMarker(LatLng arg0, GoogleMap googleMap) {

@@ -14,6 +14,7 @@ public class Action {
     private Set<ActionObserver> interessados = new HashSet<>();
     private boolean buttomAddMakerVisivel = true;
     private boolean reportNotSelected = true;
+    private String itemId;
 
     private Action() {
 
@@ -51,6 +52,23 @@ public class Action {
 
     }
 
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
+        Log.d("Atualizou marker",String.valueOf(this.itemId = itemId));
+        itemIdStateChanged();
+    }
+
+    private void itemIdStateChanged(){
+        for (ActionObserver interessado : interessados) {
+            interessado.notificaticarInteressados(this);
+
+        }
+    }
+
     public boolean getButtomAddMakerClickado() {
         return buttomAddMakerVisivel;
     }
@@ -72,7 +90,7 @@ public class Action {
 
     }
 
-     private void buttonAddMarkerStateChanged() {
+    private void buttonAddMarkerStateChanged() {
 
         for (ActionObserver interessado : interessados) {
             interessado.notificaticarInteressados(this);
@@ -81,5 +99,7 @@ public class Action {
         }
 
     }
+
+
 
 }

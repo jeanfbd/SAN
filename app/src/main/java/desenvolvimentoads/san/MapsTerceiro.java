@@ -9,11 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -36,13 +38,26 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
-public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+import desenvolvimentoads.san.DAO.ConfigFireBase;
+import desenvolvimentoads.san.Marker.MarkerDialog;
+import desenvolvimentoads.san.Marker.MarkerTag;
+import desenvolvimentoads.san.Observer.Action;
+import desenvolvimentoads.san.Observer.ActionObserver;
+
+public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ActionObserver {
 
     private GoogleMap mMap;
 
@@ -52,23 +67,48 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
-    private Location mLasLocation;
+    private Location mLastLocation;
 
     private static int UPDATE_INTERVAL = 5000;
     private static int FATEST_INTERVAL = 3000;
     private static int DISPLACEMENT = 10;
 
-    DatabaseReference mDatabaseReference;
+    private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
+    private FirebaseUser currentUser = mAuth.getCurrentUser();
+   // private String userId = currentUser.getUid();
+    String userId = "123";
+    private DatabaseReference mDatabaseReference;
+    private FirebaseDatabase firebaseDatabase;
+
     GeoFire geoFire;
+    GeoQuery geoQuery;
+    GeoQuery geoQuery2;
+    Geocoder geocoder2;
     Marker mCurrent;
+    Marker marcador = null;
+    LatLng newLatLng;
+
+    private long timestamp;
+
+    private boolean buttomAddMarkerVisivel;
+    private String itemId;
+    Action action = Action.getInstance();
+
+    MarkerTag myCurrentLocationTag;
+    /* Classe com os metodos dos markers */
+    MarkerDialog markerDialog = new MarkerDialog();
+
+    public static HashMap<String, Marker> markerHashMap = new HashMap<>();
+    public static HashMap<String, GeoQueryEventListener> notificationHashMap = new HashMap<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
 
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference("MyLocation");
-        geoFire = new GeoFire(mDatabaseReference);
+        mDatabaseReference = ConfigFireBase.getFirebase();
+        firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
+        geoFire = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/MyLocation/"));
         setUpLocation();
     }
 
@@ -91,11 +131,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            mMap.getUiSettings().setMapToolbarEnabled(false);
-            mMap.getUiSettings().setZoomControlsEnabled(true);
-
             //Request runtime permission
             ActivityCompat.requestPermissions(getActivity(), new String[]{
                     Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -115,13 +150,28 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        mLasLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLasLocation != null) {
-            final double latitude = mLasLocation.getLatitude();
-            final double longitude = mLasLocation.getLongitude();
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+
+        if (mLastLocation != null) {
+            final double latitude = mLastLocation.getLatitude();
+            final double longitude = mLastLocation.getLongitude();
+
+
+
+            if(myCurrentLocationTag == null){
+                myCurrentLocationTag = new MarkerTag();
+                myCurrentLocationTag.setId("MyCurrentTag");
+                myCurrentLocationTag.setValidate(true);
+                myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
+                myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
+            }else{
+                myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
+                myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
+            }
 
             //Update to Firebase
-            geoFire.setLocation("Você", new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
+            geoFire.setLocation(userId, new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
                 @Override
                 public void onComplete(String key, DatabaseError error) {
                     //addMarker
@@ -134,12 +184,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location)));
                     }
                     //Move Camera to this Position
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 12.0f));
+                    mCurrent.setTag(myCurrentLocationTag);
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
 
                 }
             });
-
-
             Log.d(TAG, String.format("Sua Localização mudou: %f/%f", latitude, longitude));
         } else {
             Log.d(TAG, "Não foi possível obter a ultima localização");
@@ -181,7 +230,90 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+        action.registraInteressados(this);
+        buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
+        geocoder2 = new Geocoder(getContext());
+
+         /*Adiciona o listener no infoWindows(tag) do marker*/
+        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                //  marker.showInfoWindow();
+                //.makeText(getContext(), "Clickou", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        /*Criando o listener do click longo*/
+        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+
+            @Override
+            public void onMapLongClick(LatLng arg0) {
+                // TODO Auto-generated method stub
+
+                if (mLastLocation != null) {
+                    newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    if (action.isReportNotSelected()) {
+                            /* Verifico a proximidade do user com o local que ele vai por o marcador*/
+                        if (markerDialog.closeToMe(newLatLng, arg0)) {
+                                  /* Verifico se existe algum marcador proximo */
+                            if (!markerDialog.hasNearby(markerHashMap, arg0)) {
+                                markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap);
+//                                itemId = action.getItemId();
+                                Log.d(TAG, "Action ID: "+itemId);
+
+
+                            } else {
+                                Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
+                            }
+
+                        } else {
+                            Toast.makeText(getContext(), "Você precisa estar proximo do ponto a ser marcado", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                } else {
+                    Toast.makeText(getContext(), " Não foram encontrados os dados da ultima localização", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        /*Criando o listener click on marker*/
+        googleMap = markerDialog.setMarkerClick(googleMap, getContext(), markerHashMap);
+
+
+        /*Criando o listener do drag*/
+        googleMap = markerDialog.setListenerDragDiag(googleMap, marcador, getContext(), getView());
+
         mMap = googleMap;
+
+        /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
+        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            mMap.setOnMapClickListener(this);
+            mMap.getUiSettings().setMapToolbarEnabled(false);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+
+            getRaioFirebase(-23.6202800, -45.4130600, 5.00);
+
+            /*Listener responsavel adicionar o botão da localização*/
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
+                    return false;
+                }
+            });
+
+        } else {
+            //Request runtime permission
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, MY_PERMISSION_REQUEST_CODE);
+        }
+
 
         LatLng dangerous_area = new LatLng(-23.6202800, -45.4130600);
         mMap.addCircle(new CircleOptions()
@@ -194,50 +326,70 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         );
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.6202800, -45.4130600), 15.0f));
+    }
 
-        //Add GeoQuery
-        GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(dangerous_area.latitude, dangerous_area.longitude), 0.5);
+    @Override
+    public void onMapClick(LatLng latLng) {
+        if (mLastLocation != null) {
+            newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            //Toast.makeText(getContext(), "Presta atençao " + latLng.toString(), Toast.LENGTH_LONG).show();
+            getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 5.0);
 
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            public void onKeyEntered(String key, GeoLocation location) {
-                if (mCurrent != null) {
-                    mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
+
+                    /*Aqui é normal*/
+
+
+            if (!buttomAddMarkerVisivel) {
+
+
+              /* Verifico a proximidade do user com o local que ele vai por o marcador*/
+                if (markerDialog.closeToMe(newLatLng, latLng)) {
+                                  /* Verifico se existe algum marcador proximo */
+                    if (!markerDialog.hasNearby(markerHashMap, latLng)) {
+                        markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap);
+                        Log.i(TAG, "onMapClick: LAT: " + latLng.latitude + " LOG: " + latLng.longitude);
+
+                    } else {
+                        Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
+
+                    }
+
+                } else {
+                    Toast.makeText(getContext(), " É necessario estar proximo ao local a ser marcado", Toast.LENGTH_LONG).show();
+
                 }
-                sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key), getContext());
-                Log.d("ENTROU", "DENTRO");
 
+            } else {
+
+
+                Toast.makeText(getContext(), "Coordenadas: " + latLng.toString(), Toast.LENGTH_LONG).show();
             }
 
-            @Override
-            public void onKeyExited(String key) {
-                if (mCurrent != null) {
-                    mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
-                }
-                sendNotification("SAN", String.format("%s Fora do ponto de alagamento", key), getContext());
-                Log.d("SAIU", "FORA");
-            }
 
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-                Log.d("MOVE", String.format("Movendo-se pela area de alagamento [%f/%f]", key, location.latitude, location.longitude));
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-                Log.e("Error", "" + error);
-            }
-        });
+        } else {
+            Toast.makeText(getContext(), " Não foram encontrados os dados da ultima localização", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        mLasLocation = location;
+        mLastLocation = location;
+        getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 5.0);
         displayLocation();
+
+
+        if(geoQuery2 != null){
+            geoQuery2.removeAllListeners();
+
+        }
+
+        notificationHashMap.clear();
+        notificationHashMap = new HashMap<>();
+        geoQuery2 = null;
+        geoQuery2 = geoFire.queryAtLocation(new GeoLocation(location.getLatitude(),location.getLongitude() ), 0.5);
+        Log.i("teste","geoqeury mudou?");
+
+
     }
 
     @Override
@@ -281,4 +433,206 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         manager.notify(new Random().nextInt(), notification);
     }
 
+    @Override
+    public void notificaticarInteressados(Action action) {
+        buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
+
+        if(action.getItemId() != null){
+
+            if(itemId != null){
+
+                if(!itemId.equals(action.getItemId())){
+                    itemId = action.getItemId();
+                    Log.i("teste","itemid status :"+itemId);
+                    LatLng newLatLangTemp =  markerHashMap.get(itemId).getPosition();
+                    createListenerNotification(itemId, newLatLangTemp.latitude, newLatLangTemp.longitude);
+
+
+                }
+
+
+            }else{
+                itemId = action.getItemId();
+                Log.i("teste","itemid status :"+itemId);
+                LatLng newLatLangTemp =  markerHashMap.get(itemId).getPosition();
+                createListenerNotification(itemId, newLatLangTemp.latitude, newLatLangTemp.longitude);
+
+
+
+            }
+
+
+
+
+        }
+
+
+
+
+    }
+
+    public void getRaioFirebase(Double lat, Double lng, Double radius) {
+        getServerTime();
+        if (geoQuery != null){
+            geoQuery.removeAllListeners();
+        }
+        mDatabaseReference = ConfigFireBase.getFirebase();
+        firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
+        GeoFire geoFire2 = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
+
+        final GeoQuery geoQuery = geoFire2.queryAtLocation(new GeoLocation(lat, lng), radius);
+
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(final String key, GeoLocation location) {
+                mDatabaseReference = ConfigFireBase.getFirebase();
+                mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                            double latitude = (double) dataSnapshot.child("position").child("latitude").getValue();
+                            double longitude = (double) dataSnapshot.child("position").child("longitude").getValue();
+                            LatLng latLng = new LatLng(latitude, longitude);
+                            if (dataSnapshot.child("fim").getValue() != null) {
+                                Log.i(TAG, "Servertime: "+getServerTime());
+                                Log.i(TAG, "MarkerTime: "+ dataSnapshot.child("fim").getValue());
+                                Log.i(TAG, "Condição: "+(getServerTime() < (Long) dataSnapshot.child("fim").getValue()));
+                                if (getServerTime() < (Long) dataSnapshot.child("fim").getValue()) {
+                                    Log.i(TAG, "onDataChange: NÃO EXISTE DENUNCIA");
+                                    if (markerHashMap.get(key) == null) {
+                                        Log.i(TAG, "Entrou Criar: " + key);
+                                        markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
+                                        createListenerNotification(key, latitude, longitude);
+                                    }
+                                } else {
+                                    if (markerHashMap.get(key) != null) {
+                                        Log.i(TAG, "Entrou Remover: " + key);
+                                        MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
+                                        Log.d(TAG, "Notifications: "+notificationHashMap.size());
+                                        Log.i("teste" ,"key : " + key);
+                                        removeListenerNotification(key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
+    }
+
+    public void createListenerNotification(String idMarker, double latitude, double longitude) {
+        //Add GeoQuery
+       //  geoQuery = geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 0.5);
+
+        GeoQueryEventListener notificationListener = new GeoQueryEventListener() {
+            public void onKeyEntered(String key, GeoLocation location) {
+                if (mCurrent != null) {
+                    mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
+                }
+                sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key), getContext());
+                Log.d("ENTROU", "DENTRO");
+
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                if (mCurrent != null) {
+                    mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                }
+                sendNotification("SAN", String.format("%s Fora do ponto de alagamento", key), getContext());
+                Log.d("SAIU", "FORA");
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.e("Error", "" + error);
+            }
+        };
+        notificationHashMap.put(idMarker, notificationListener);
+        geoQuery2.addGeoQueryEventListener(notificationListener);
+              Log.d(TAG, "idMarker Listener: "+idMarker);
+
+
+        Log.i("teste","hashmap notification populado ? "+notificationHashMap.size());
+
+        Log.i("teste","geoquery string add "+geoQuery2.toString());
+        Log.i("teste","geoquery string add listener"+notificationListener.toString());
+        for (String testekey : notificationHashMap.keySet()) {
+            Log.i("teste","key -> "+testekey);
+        }
+
+    }
+
+
+    public void removeListenerNotification(final String idMarker) {
+        if (notificationHashMap != null){
+            Log.i("teste","idMarker -> "+idMarker);
+            Log.i("teste","hashmap notification "+notificationHashMap.size());
+            for (String testekey : notificationHashMap.keySet()) {
+                Log.i("teste","key -> "+testekey);
+            }
+
+            Log.i("teste","geoquery string remover "+geoQuery2.toString());
+            Log.i("teste","geoquery string remove listener"+notificationHashMap.get(idMarker).toString());
+            geoQuery2.removeGeoQueryEventListener(notificationHashMap.get(idMarker));
+
+
+        }
+
+    }
+
+    public Long getServerTime() {
+        mDatabaseReference = ConfigFireBase.getFirebase();
+        final Long[] timestampServer = new Long[1];
+        mDatabaseReference.child("current_timestamp").setValue(ServerValue.TIMESTAMP);
+        mDatabaseReference.child("current_timestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                timestampServer[0] = (Long) dataSnapshot.getValue();
+                timestamp = timestampServer[0];
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return timestamp;
+    }
 }

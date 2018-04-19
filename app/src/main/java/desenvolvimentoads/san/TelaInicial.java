@@ -204,14 +204,14 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
 //        }
 //        mAuth.addAuthStateListener(mAuthListener);
 
-     //   FirebaseUser currentUser = mAuth.getCurrentUser();
+       FirebaseUser currentUser = mAuth.getCurrentUser();
 
 
-      //  if (currentUser != null){
-     //       mSignInButton.setVisibility(View.GONE);
+        if (currentUser != null){
+          mSignInButton.setVisibility(View.GONE);
 //            threadTelaInicial();
-        //    progressBar();
-  //      }
+            progressBar();
+      }
     }
 
     @Override
