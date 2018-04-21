@@ -34,6 +34,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -100,6 +101,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public static HashMap<String, Marker> markerHashMap = new HashMap<>();
     public static HashMap<String, GeoQueryEventListener> notificationHashMap = new HashMap<>();
+
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -326,6 +330,77 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         );
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.6202800, -45.4130600), 15.0f));
+
+        rebuildMap();
+
+    }
+
+
+    public void rebuildMap(){
+
+        mMap.clear();
+        Marker marker1;
+        MarkerOptions markerOption;
+        if(markerHashMap.size() >= 1){
+
+            for(Map.Entry<String, Marker> markTemp: markerHashMap.entrySet()){
+                Log.i("restart","tag...");
+
+                Circle circle;
+                markerOption = new MarkerOptions();
+                MarkerTag tagTemp =( MarkerTag) markTemp.getValue().getTag();
+                LatLng latLng  = tagTemp.getPosition();
+
+                //     Log.i("restart","tag..."+tag.getPosition());
+                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
+
+                circle = mMap.addCircle(new CircleOptions()
+                        .center(tagTemp.getPosition())
+                        .radius(500)
+                        .strokeWidth(10)
+                        .strokeColor(Color.argb(128, 173, 216, 230))
+                        .fillColor(Color.argb(24, 30, 144, 255))
+                        .clickable(true));
+
+                mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+
+                    @Override
+                    public void onCircleClick(Circle circle) {
+                        // Flip the r, g and b components of the circle's
+                        // stroke color.
+                        int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+                        circle.setStrokeColor(strokeColor);
+                    }
+                });
+                MarkerTag tag = new MarkerTag(tagTemp.getPosition().latitude, tagTemp.getPosition().longitude, circle, tagTemp.getValidate());
+                tag.setId(tagTemp.getId());
+                if(tag.getValidate()){
+                    tag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
+                } else {
+                    tag.getCircle().setStrokeColor(Color.argb(128, 224, 158, 90));
+                }
+                marker1 = markTemp.getValue();
+                marker1.remove();
+
+                marker1 = mMap.addMarker(markerOption);
+                marker1.setTag(tag);
+                markerHashMap.put(tagTemp.getId(),marker1);
+
+            }
+
+            Log.i("restart","foi restaurado.."+markerHashMap.size());
+
+        }
+
+        markerOption = new MarkerOptions();
+        //   MarkerTag tag =( MarkerTag) markTemp.getValue().getTag();
+        //     Log.i("restart","tag..."+tag.getPosition());
+        markerOption.position(new LatLng (21.22,22)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
+
+        marker1 = mMap.addMarker(markerOption);
+
+
+
     }
 
     @Override
@@ -382,6 +457,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             geoQuery2.removeAllListeners();
 
         }
+        if(mCurrent !=null){
+            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
+        }
 
         notificationHashMap.clear();
         notificationHashMap = new HashMap<>();
@@ -398,6 +476,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         startLocationsUpdates();
 
     }
+
 
     private void startLocationsUpdates() {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -555,7 +634,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 if (mCurrent != null) {
                     mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                 }
-                sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key), getContext());
+                sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key),getContext());
                 Log.d("ENTROU", "DENTRO");
 
             }

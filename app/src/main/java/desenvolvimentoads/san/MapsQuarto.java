@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Geocoder;
 
 import android.location.Location;
@@ -115,7 +116,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     Marker mCurrLocation;
     LatLng newLatLng;
 
-
     /*Um int randomico para o callback do metodo de request permission, só vai utilizado caso formos tratar alguma coisa com ele */
     public static final int REQUEST_PERMISSION_LOCATION = 10;
 
@@ -149,9 +149,17 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getMapAsync(this);
-    }
 
+
+        getMapAsync(this);
+
+    }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the user's current game state
+        Log.i("restart", "saved bundle");
+         super.onSaveInstanceState(savedInstanceState);
+    }
 
     public void checkPermission() {
 
@@ -402,6 +410,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
+
         action.registraInteressados(this);
         buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
         geocoder2 = new Geocoder(getContext());
@@ -533,11 +542,81 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
         NotificationApp notificationApp = new NotificationApp(getView());
         notificationApp.notification();
 
+         rebuildMap();
 
-        /*Teste do serviço de thread*/
-       /* Intent intent = new Intent(getContext(),ServiceThread.class);
-        getContext().startService(intent);*/
+
     }
+
+
+    /*recria o mapa quando o fragmento é destruido apagando as referencias antigas dos markers e circles e criando novas  */
+    public void rebuildMap(){
+
+            mMap.clear();
+            Marker marker1;
+            MarkerOptions markerOption;
+            if(markerHashMap.size() >= 1){
+
+                for(Map.Entry<String, Marker> markTemp: markerHashMap.entrySet()){
+                    Log.i("restart","tag...");
+
+                   Circle circle;
+                    markerOption = new MarkerOptions();
+                    MarkerTag tagTemp =( MarkerTag) markTemp.getValue().getTag();
+                    LatLng latLng  = tagTemp.getPosition();
+
+               //     Log.i("restart","tag..."+tag.getPosition());
+                   markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
+
+                    circle = mMap.addCircle(new CircleOptions()
+                            .center(tagTemp.getPosition())
+                            .radius(500)
+                            .strokeWidth(10)
+                            .strokeColor(Color.argb(128, 173, 216, 230))
+                            .fillColor(Color.argb(24, 30, 144, 255))
+                            .clickable(true));
+
+                    mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+
+                        @Override
+                        public void onCircleClick(Circle circle) {
+                            // Flip the r, g and b components of the circle's
+                            // stroke color.
+                            int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+                            circle.setStrokeColor(strokeColor);
+                        }
+                    });
+                    MarkerTag tag = new MarkerTag(tagTemp.getPosition().latitude, tagTemp.getPosition().longitude, circle, tagTemp.getValidate());
+                    tag.setId(tagTemp.getId());
+                    if(tag.getValidate()){
+                    tag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
+                    } else {
+                    tag.getCircle().setStrokeColor(Color.argb(128, 224, 158, 90));
+                    }
+                    marker1 = markTemp.getValue();
+                    marker1.remove();
+
+                    marker1 = mMap.addMarker(markerOption);
+                    marker1.setTag(tag);
+                    markerHashMap.put(tagTemp.getId(),marker1);
+
+                }
+
+                Log.i("restart","foi restaurado.."+markerHashMap.size());
+
+            }
+
+            markerOption = new MarkerOptions();
+            //   MarkerTag tag =( MarkerTag) markTemp.getValue().getTag();
+            //     Log.i("restart","tag..."+tag.getPosition());
+            markerOption.position(new LatLng (21.22,22)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
+
+            marker1 = mMap.addMarker(markerOption);
+
+
+
+    }
+
+
 
 
     /*Override do metodo onMapClick..*/
@@ -634,6 +713,15 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
     }
 
+    @Override
+    public void onResume() {
+        Log.i("restart","resume actived");
+        //  rebuild = true;
+       // rebuildControl = 2;
+        super.onResume();
+
+
+    }
 
     @Override
     public void onLocationChanged(Location location) {
