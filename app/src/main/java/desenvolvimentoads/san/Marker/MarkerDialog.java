@@ -75,7 +75,7 @@ public class MarkerDialog {
     Long creationDate;
 
 
-    long timeAdd = 12000;
+    long timeAdd = 60000;
     long timestamp;
 
     Marker marcador;
@@ -219,6 +219,38 @@ public class MarkerDialog {
 
     }
 
+    public Boolean closeToMeToHash(final LatLng myPosition, final LatLng latLng,HashMap<String, String> alertHashMap, String idmaker, double radiusValue ) {
+
+        double proximity = RADIUS * radiusValue;
+
+
+        double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
+        double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
+        double newMakerRadianLng = Math.toRadians(latLng.longitude);
+
+
+        double searchNearby = 6371 *
+                Math.acos(
+                        Math.cos(Math.toRadians(myPosition.latitude)) *
+                                newMarkerCosLat *
+                                Math.cos(Math.toRadians(myPosition.longitude) - newMakerRadianLng) +
+                                Math.sin(Math.toRadians(myPosition.latitude)) *
+                                        newMarkerSinLat
+                );
+        if (searchNearby <= proximity) {
+
+            alertHashMap.put(idmaker,idmaker);
+            return true;
+
+
+        }
+
+
+        return false;
+
+
+    }
+
     /*Adicionando o listener dos marker para poder deletar e validar*/
     public GoogleMap setMarkerClick(GoogleMap googleMap, Context c, final HashMap<String, Marker> m) {
 
@@ -305,7 +337,7 @@ public class MarkerDialog {
         btCancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
 
-
+            Log.i("teste","cancel pressed !!!");
                 alerta.dismiss();
 
 
@@ -451,6 +483,7 @@ public class MarkerDialog {
         cancel.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
 
+                Log.i("teste","cancel pressed !!!");
                 alerta.dismiss();
                 if (!Action.getInstance().getButtomAddMakerClickado()) {
 
