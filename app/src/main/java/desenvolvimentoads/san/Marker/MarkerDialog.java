@@ -126,7 +126,7 @@ public class MarkerDialog {
 
         tag.setId(key);
 
-        if (true) {
+        if (validou) {
             tag.setValidate(true);
             tag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
         } else {

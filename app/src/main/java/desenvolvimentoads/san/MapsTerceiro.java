@@ -160,11 +160,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
     private void displayLocation() {
-if(false){
+        if (false) {
 
-}
-        if (ActivityCompat.checkSelfPermission((Activity)mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission((Activity)mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        }
+        if (ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //Request runtime permission
             ActivityCompat.requestPermissions(getActivity(), new String[]{
@@ -176,22 +176,18 @@ if(false){
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
 
-
-
-
             if (mLastLocation != null) {
                 final double latitude = mLastLocation.getLatitude();
                 final double longitude = mLastLocation.getLongitude();
 
 
-
-                if(myCurrentLocationTag == null){
+                if (myCurrentLocationTag == null) {
                     myCurrentLocationTag = new MarkerTag();
                     myCurrentLocationTag.setId("MyCurrentTag");
                     myCurrentLocationTag.setValidate(true);
                     myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
                     myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
-                }else{
+                } else {
                     myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
                     myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
                 }
@@ -214,7 +210,7 @@ if(false){
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
 
 
-                        if(alertHashMap !=null) {
+                        if (alertHashMap != null) {
 
                             if (alertHashMap.size() == 0) {
                                 if (mCurrent != null) {
@@ -237,11 +233,7 @@ if(false){
             }
 
 
-            }
-
-
-
-
+        }
 
 
     }
@@ -311,7 +303,7 @@ if(false){
                             if (!markerDialog.hasNearby(markerHashMap, arg0)) {
                                 markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap);
 //                                itemId = action.getItemId();
-                                Log.d(TAG, "Action ID: "+itemId);
+                                Log.d(TAG, "Action ID: " + itemId);
 
 
                             } else {
@@ -386,22 +378,23 @@ if(false){
         rebuildMap();
 
     }
-    public void rebuildGeoQuery2(){
 
-        if(alertHashMap !=null){
+    public void rebuildGeoQuery2() {
+
+        if (alertHashMap != null) {
             alertHashMap.clear();
 
-            if(mCurrent !=null){
+            if (mCurrent != null) {
                 mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
             }
 
-            if(mLastLocation != null){
+            if (mLastLocation != null) {
 
 
-                for(String key : markerHashMap.keySet()){
-                    Log.i("teste","rebuildGeoQuery2 marker hash key "+key);
-                    LatLng latLng = new LatLng(markerHashMap.get(key).getPosition().latitude,markerHashMap.get(key).getPosition().longitude);
-                    if(markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),latLng,alertHashMap,key,0.001)){
+                for (String key : markerHashMap.keySet()) {
+                    Log.i("teste", "rebuildGeoQuery2 marker hash key " + key);
+                    LatLng latLng = new LatLng(markerHashMap.get(key).getPosition().latitude, markerHashMap.get(key).getPosition().longitude);
+                    if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, 0.001)) {
                         if (mCurrent != null) {
                             mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                         }
@@ -413,11 +406,11 @@ if(false){
             }
 
 
-            if(alertHashMap.size()==0){
+            if (alertHashMap.size() == 0) {
                 if (mCurrent != null) {
                     mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
                 }
-            }else{
+            } else {
                 if (mCurrent != null) {
                     mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                 }
@@ -425,28 +418,27 @@ if(false){
             }
 
 
-
         }
 
     }
 
 
-    public void rebuildMap(){
-        Log.i("teste","inicio rebuilding...");
+    public void rebuildMap() {
+        Log.i("teste", "inicio rebuilding...");
 
         rebuildGeoQuery2();
 
         Marker marker1;
         MarkerOptions markerOption;
-        if(markerHashMap.size() >= 1){
+        if (markerHashMap.size() >= 1) {
 
-            for(Map.Entry<String, Marker> markTemp: markerHashMap.entrySet()){
-                Log.i("teste","tag...");
+            for (Map.Entry<String, Marker> markTemp : markerHashMap.entrySet()) {
+                Log.i("teste", "tag...");
 
                 Circle circle;
                 markerOption = new MarkerOptions();
-                MarkerTag tagTemp =( MarkerTag) markTemp.getValue().getTag();
-                LatLng latLng  = tagTemp.getPosition();
+                MarkerTag tagTemp = (MarkerTag) markTemp.getValue().getTag();
+                LatLng latLng = tagTemp.getPosition();
 
                 //     Log.i("restart","tag..."+tag.getPosition());
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
@@ -471,7 +463,7 @@ if(false){
                 });
                 MarkerTag tag = new MarkerTag(tagTemp.getPosition().latitude, tagTemp.getPosition().longitude, circle, tagTemp.getValidate());
                 tag.setId(tagTemp.getId());
-                if(tag.getValidate()){
+                if (tag.getValidate()) {
                     tag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
                 } else {
                     tag.getCircle().setStrokeColor(Color.argb(128, 224, 158, 90));
@@ -481,11 +473,11 @@ if(false){
 
                 marker1 = mMap.addMarker(markerOption);
                 marker1.setTag(tag);
-                markerHashMap.put(tag.getId(),marker1);
+                markerHashMap.put(tag.getId(), marker1);
 
             }
 
-            Log.i("teste","foi restaurado.."+markerHashMap.size());
+            Log.i("teste", "foi restaurado.." + markerHashMap.size());
 
 
         }
@@ -493,11 +485,11 @@ if(false){
         markerOption = new MarkerOptions();
         //   MarkerTag tag =( MarkerTag) markTemp.getValue().getTag();
         //     Log.i("restart","tag..."+tag.getPosition());
-        markerOption.position(new LatLng (21.22,22)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
+        markerOption.position(new LatLng(21.22, 22)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
 
         marker1 = mMap.addMarker(markerOption);
 
-        Log.i("teste","fim rebuilding...");
+        Log.i("teste", "fim rebuilding...");
 
 
     }
@@ -548,18 +540,18 @@ if(false){
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i("teste" ,"markerhashmap size : " + markerHashMap.size());
+        Log.i("teste", "markerhashmap size : " + markerHashMap.size());
 
         mLastLocation = location;
 
-        if(mLastLocation !=null){
+        if (mLastLocation != null) {
             getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 5.0);
             displayLocation();
 
             myLat = location.getLatitude();
             myLong = location.getLongitude();
 
-            if(mCurrent !=null){
+            if (mCurrent != null) {
                 mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
             }
 
@@ -567,15 +559,14 @@ if(false){
         }
 
 
-
         rebuildGeoQuery2();
 
 
-        }
+    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-       // displayLocation();
+        // displayLocation();
         startLocationsUpdates();
 
     }
@@ -599,12 +590,12 @@ if(false){
 
     }
 
-   // public void sendNotification(String title, String content, Context context) {
-   public void sendNotification(){
+    // public void sendNotification(String title, String content, Context context) {
+    public void sendNotification() {
 
         /*Notificação*/
-      //  NotificationApp notificationApp = new NotificationApp(getView());
-      //  notificationApp.notification();
+        //  NotificationApp notificationApp = new NotificationApp(getView());
+        //  notificationApp.notification();
 
      /*
 
@@ -630,27 +621,26 @@ if(false){
     public void notificaticarInteressados(Action action) {
         buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
 
-        if(action.getItemId() != null){
+        if (action.getItemId() != null) {
 
-            if(itemId != null){
+            if (itemId != null) {
 
-                if(mLastLocation != null){
+                if (mLastLocation != null) {
 
-                    if(!itemId.equals(action.getItemId())){
+                    if (!itemId.equals(action.getItemId())) {
                         itemId = action.getItemId();
-                        Log.i("teste","itemid status :"+itemId);
+                        Log.i("teste", "itemid status :" + itemId);
 
-                        if(markerHashMap.containsKey(itemId)) {
-                            Log.i("teste","itemid status contains :"+itemId);
-                            LatLng newLatLangTemp =  markerHashMap.get(itemId).getPosition();
+                        if (markerHashMap.containsKey(itemId)) {
+                            Log.i("teste", "itemid status contains :" + itemId);
+                            LatLng newLatLangTemp = markerHashMap.get(itemId).getPosition();
 
-                            if(markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),newLatLangTemp,alertHashMap,itemId,0.001)){
+                            if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), newLatLangTemp, alertHashMap, itemId, 0.001)) {
                                 if (mCurrent != null) {
                                     mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                                 }
 
                             }
-
 
 
                         }
@@ -659,17 +649,17 @@ if(false){
                 }
 
 
-                } else{
+            } else {
                 itemId = action.getItemId();
-                Log.i("teste","itemid status :"+itemId);
+                Log.i("teste", "itemid status :" + itemId);
 
-                if(mLastLocation != null){
-                    if(markerHashMap.containsKey(itemId)){
-                        Log.i("teste","itemid status contains :"+itemId);
-                        LatLng newLatLangTemp =  markerHashMap.get(itemId).getPosition();
+                if (mLastLocation != null) {
+                    if (markerHashMap.containsKey(itemId)) {
+                        Log.i("teste", "itemid status contains :" + itemId);
+                        LatLng newLatLangTemp = markerHashMap.get(itemId).getPosition();
 
 
-                        if(markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),newLatLangTemp,alertHashMap,itemId,0.001)){
+                        if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), newLatLangTemp, alertHashMap, itemId, 0.001)) {
                             if (mCurrent != null) {
                                 mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                             }
@@ -684,21 +674,14 @@ if(false){
             }
 
 
-
-
-            }
-
-
-
-
         }
 
 
-
-
+    }
 
 
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
+        hashMapClear();
         getServerTime();
 
         mDatabaseReference = ConfigFireBase.getFirebase();
@@ -706,104 +689,102 @@ if(false){
         GeoFire geoFire2 = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
 
         final GeoQuery geoQuery = geoFire2.queryAtLocation(new GeoLocation(lat, lng), radius);
-if(mLastLocation !=null){
-    geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-        @Override
-        public void onKeyEntered(final String key, GeoLocation location) {
-            mDatabaseReference = ConfigFireBase.getFirebase();
-            mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+        if (mLastLocation != null) {
+            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                        double latitude = (double) dataSnapshot.child("latitude").getValue();
-                        double longitude = (double) dataSnapshot.child("longitude").getValue();
-                        LatLng latLng = new LatLng(latitude, longitude);
-                        if (dataSnapshot.child("fim").getValue() != null) {
-                            Log.i(TAG, "Servertime: "+getServerTime());
-                            Log.i(TAG, "MarkerTime: "+ dataSnapshot.child("fim").getValue());
-                            Log.i(TAG, "Condição: "+(getServerTime() < (Long) dataSnapshot.child("fim").getValue()));
-                            if (getServerTime() < (Long) dataSnapshot.child("fim").getValue()) {
-                                Log.i(TAG, "onDataChange: NÃO EXISTE DENUNCIA");
-                                if (markerHashMap.get(key) == null) {
-                                    Log.i(TAG, "Entrou Criar: " + key);
-                                    markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
-
-                                    if(markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),latLng,alertHashMap,key,0.001)){
-                                        if (mCurrent != null) {
-                                            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
-                                        }
-
-
-                                    }
-
-                                }
-                            } else {
-                                if (markerHashMap.get(key) != null) {
-                                    Log.i(TAG, "Entrou Remover: " + key);
-                                    MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
-                                    Log.d(TAG, "Notifications: "+notificationHashMap.size());
-
-
-                                    Log.i("teste" ,"key : " + key);
-
-                                    if(alertHashMap.containsKey(key)){
-                                        alertHashMap.remove(key);
-                                        if(alertHashMap.size()==0){
-                                            if (mCurrent != null) {
-                                                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                public void onKeyEntered(final String key, GeoLocation location) {
+                    mDatabaseReference = ConfigFireBase.getFirebase();
+                    mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                                double latitude = (double) dataSnapshot.child("latitude").getValue();
+                                double longitude = (double) dataSnapshot.child("longitude").getValue();
+                                LatLng latLng = new LatLng(latitude, longitude);
+                                if (dataSnapshot.child("fim").getValue() != null) {
+                                    Log.i(TAG, "Servertime: " + getServerTime());
+                                    Log.i(TAG, "MarkerTime: " + dataSnapshot.child("fim").getValue());
+                                    Log.i(TAG, "Condição TEMPO: " + (getServerTime() < (Long) dataSnapshot.child("fim").getValue()));
+                                    Log.i(TAG, "Condição DENUNCIA: " + (!dataSnapshot.child("Denunciar").child(userId).exists()));
+                                    Log.i(TAG, "Condição VALIDOU: " + (dataSnapshot.child("Validar").child(userId).exists()));
+                                    if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
+                                        Log.i(TAG, "onDataChange: NÃO EXISTE DENUNCIA");
+                                        if (markerHashMap.get(key) == null) {
+                                            Log.i(TAG, "Entrou Criar: " + key);
+                                            markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
+                                            if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, 0.001)) {
+                                                if (mCurrent != null) {
+                                                    mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
+                                                }
                                             }
                                         }
+                                    } else {
+                                        if (markerHashMap.get(key) != null) {
+                                            Log.i(TAG, "Entrou Remover: " + key);
+                                            MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
+                                            Log.d(TAG, "Notifications: " + notificationHashMap.size());
 
+
+                                            Log.i("teste", "key : " + key);
+
+                                            if (alertHashMap.containsKey(key)) {
+                                                alertHashMap.remove(key);
+                                                if (alertHashMap.size() == 0) {
+                                                    if (mCurrent != null) {
+                                                        mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                                                    }
+                                                }
+
+                                            }
+
+                                        }
                                     }
-
                                 }
                             }
                         }
-                    }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
+                public void onKeyExited(String key) {
+
+                }
+
+                @Override
+                public void onKeyMoved(String key, GeoLocation location) {
+
+                }
+
+                @Override
+                public void onGeoQueryReady() {
+
+                }
+
+                @Override
+                public void onGeoQueryError(DatabaseError error) {
 
                 }
             });
-        }
-
-        @Override
-        public void onKeyExited(String key) {
 
         }
-
-        @Override
-        public void onKeyMoved(String key, GeoLocation location) {
-
-        }
-
-        @Override
-        public void onGeoQueryReady() {
-
-        }
-
-        @Override
-        public void onGeoQueryError(DatabaseError error) {
-
-        }
-    });
-
-}
 
     }
 
     public void createListenerNotification(String idMarker, double latitude, double longitude) {
         //Add GeoQuery
-       //  geoQuery = geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 0.5);
-        Log.i("teste","createListenerNotification Started ");
+        //  geoQuery = geoFire.queryAtLocation(new GeoLocation(latitude, longitude), 0.5);
+        Log.i("teste", "createListenerNotification Started ");
         notificationListener = new GeoQueryEventListener() {
             public void onKeyEntered(String key, GeoLocation location) {
                 if (mCurrent != null) {
                     mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                 }
-               // sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key),getContext());
+                // sendNotification("SAN", String.format("%s Existe um ponto de alagamento próximo", key),getContext());
                 sendNotification();
                 Log.d("ENTROU", "DENTRO");
 
@@ -814,7 +795,7 @@ if(mLastLocation !=null){
                 if (mCurrent != null) {
                     mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
                 }
-             //   sendNotification("SAN", String.format("%s Fora do ponto de alagamento", key), getContext());
+                //   sendNotification("SAN", String.format("%s Fora do ponto de alagamento", key), getContext());
                 sendNotification();
                 Log.d("SAIU", "FORA");
             }
@@ -836,63 +817,73 @@ if(mLastLocation !=null){
         };
 
 
-
-            notificationHashMap.put(idMarker, notificationListener);
-          //  geoQuery2.addGeoQueryEventListener(notificationListener);
-
-
-     //   Log.i("teste"," Geoquery2 is String  inserted in "+     geoQuery2.toString()+ " idmaker "+idMarker);
+        notificationHashMap.put(idMarker, notificationListener);
+        //  geoQuery2.addGeoQueryEventListener(notificationListener);
 
 
+        //   Log.i("teste"," Geoquery2 is String  inserted in "+     geoQuery2.toString()+ " idmaker "+idMarker);
 
-        Log.d(TAG, "idMarker Listener added : "+idMarker);
+
+        Log.d(TAG, "idMarker Listener added : " + idMarker);
 
 
-        Log.i("teste","hashmap notification size  "+notificationHashMap.size());
-        Log.i("teste","hashmap notification  keys list has started ");
+        Log.i("teste", "hashmap notification size  " + notificationHashMap.size());
+        Log.i("teste", "hashmap notification  keys list has started ");
         for (String testekey : notificationHashMap.keySet()) {
-            Log.i("teste","key -> "+testekey);
+            Log.i("teste", "key -> " + testekey);
         }
 
 
-        Log.i("teste","createListenerNotification has finished ");
+        Log.i("teste", "createListenerNotification has finished ");
     }
 
 
     public void removeListenerNotification(final String idMarker) {
-        Log.i("teste","Remove listener started "+notificationHashMap.size());
-        if (notificationHashMap != null){
-            Log.i("teste","hashmap notification "+notificationHashMap.size());
+        Log.i("teste", "Remove listener started " + notificationHashMap.size());
+        if (notificationHashMap != null) {
+            Log.i("teste", "hashmap notification " + notificationHashMap.size());
             //Log.i("teste","idMarker a reser removido -> "+idMarker+ " memory listener "+notificationHashMap.get(idMarker).toString());
 
             for (String testekey : notificationHashMap.keySet()) {
-                Log.i("teste","key dentro do hash -> "+testekey);
+                Log.i("teste", "key dentro do hash -> " + testekey);
             }
 
-           // Log.i("teste","geoquery string remove listener"+notificationHashMap.get(idMarker).toString());
+            // Log.i("teste","geoquery string remove listener"+notificationHashMap.get(idMarker).toString());
 
-            if(geoQuery2 == null){
-                Log.i("teste"," Geoquery2 is null");
+            if (geoQuery2 == null) {
+                Log.i("teste", " Geoquery2 is null");
 
 
-            }else{
-                Log.i("teste"," Geoquery2 is not null String "+     geoQuery2.toString());
-                Log.i("teste"," Geoquery2 is String to remove "+    geoQuery2.toString()+ " idmaker "+idMarker);
-
-            }
-
-            if(notificationHashMap.get(idMarker) != null){
-                Log.i("teste","hashmap notification is not a null key ");
-
+            } else {
+                Log.i("teste", " Geoquery2 is not null String " + geoQuery2.toString());
+                Log.i("teste", " Geoquery2 is String to remove " + geoQuery2.toString() + " idmaker " + idMarker);
 
             }
-         //   geoQuery2.removeGeoQueryEventListener(notificationHashMap.get(idMarker));
+
+            if (notificationHashMap.get(idMarker) != null) {
+                Log.i("teste", "hashmap notification is not a null key ");
+
+
+            }
+            //   geoQuery2.removeGeoQueryEventListener(notificationHashMap.get(idMarker));
             notificationHashMap.remove(idMarker);
-            Log.i("teste","Remove listener finished "+notificationHashMap.size());
+            Log.i("teste", "Remove listener finished " + notificationHashMap.size());
 
         }
 
     }
+
+    public void hashMapClear() {
+        HashMap<String, Marker> markerHashMapTemp = markerHashMap;
+        for (Map.Entry<String, Marker> markerTemp : markerHashMapTemp.entrySet()) {
+            MarkerTag markerTag = (MarkerTag) markerHashMapTemp.get(markerTemp.getKey()).getTag();
+            markerTag.getCircle().remove();
+            markerTemp.getValue().remove();
+            markerHashMapTemp.get(markerTemp.getKey()).remove();
+        }
+        markerHashMap.clear();
+    }
+
 
     public Long getServerTime() {
         mDatabaseReference = ConfigFireBase.getFirebase();
