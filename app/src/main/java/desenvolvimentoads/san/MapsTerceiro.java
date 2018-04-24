@@ -58,6 +58,7 @@ import desenvolvimentoads.san.Marker.MarkerDialog;
 import desenvolvimentoads.san.Marker.MarkerTag;
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
+import desenvolvimentoads.san.Observer.GeoSingleton;
 import desenvolvimentoads.san.notification.NotificationApp;
 
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ActionObserver {
@@ -78,13 +79,13 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
-   // private String userId = currentUser.getUid();
+    // private String userId = currentUser.getUid();
     String userId = "123";
     private DatabaseReference mDatabaseReference;
     private FirebaseDatabase firebaseDatabase;
 
     GeoFire geoFire;
-
+    GeoSingleton geoSingleton = GeoSingleton.getInstance();
 
 
     GeoQuery geoQuery2;
@@ -93,7 +94,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     Marker marcador = null;
     LatLng newLatLng;
     double myLat = 0;
-    double myLong =0;
+    double myLong = 0;
 
     private long timestamp;
 
@@ -115,7 +116,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
-
 
 
         mDatabaseReference = ConfigFireBase.getFirebase();
@@ -159,57 +159,67 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private void displayLocation() {
 
-        if (ActivityCompat.checkSelfPermission(this.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            return;
-        }
+            //Request runtime permission
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, MY_PERMISSION_REQUEST_CODE);
+        } else {
+
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
 
 
 
 
-        if (mLastLocation != null) {
-            final double latitude = mLastLocation.getLatitude();
-            final double longitude = mLastLocation.getLongitude();
+            if (mLastLocation != null) {
+                final double latitude = mLastLocation.getLatitude();
+                final double longitude = mLastLocation.getLongitude();
 
 
 
-            if(myCurrentLocationTag == null){
-                myCurrentLocationTag = new MarkerTag();
-                myCurrentLocationTag.setId("MyCurrentTag");
-                myCurrentLocationTag.setValidate(true);
-                myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
-                myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
-            }else{
-                myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
-                myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
+                if(myCurrentLocationTag == null){
+                    myCurrentLocationTag = new MarkerTag();
+                    myCurrentLocationTag.setId("MyCurrentTag");
+                    myCurrentLocationTag.setValidate(true);
+                    myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
+                    myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
+                }else{
+                    myCurrentLocationTag.setLatitude(mLastLocation.getLatitude());
+                    myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
+                }
+
+                //Update to Firebase
+                geoFire.setLocation(userId, new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+                        //addMarker
+                        if (mCurrent != null) {
+                            mCurrent.setPosition(new LatLng(latitude, longitude));
+                        } else {
+                            mCurrent = mMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(latitude, longitude))
+                                    .title("Você")
+                                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location)));
+                        }
+                        //Move Camera to this Position
+                        mCurrent.setTag(myCurrentLocationTag);
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
+
+                    }
+                });
+                Log.d(TAG, String.format("Sua Localização mudou: %f/%f", latitude, longitude));
+            } else {
+                Log.d(TAG, "Não foi possível obter a ultima localização");
             }
 
-            //Update to Firebase
-            geoFire.setLocation(userId, new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
-                @Override
-                public void onComplete(String key, DatabaseError error) {
-                    //addMarker
-                    if (mCurrent != null) {
-                        mCurrent.setPosition(new LatLng(latitude, longitude));
-                    } else {
-                        mCurrent = mMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(latitude, longitude))
-                                .title("Você")
-                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location)));
-                    }
-                    //Move Camera to this Position
-                    mCurrent.setTag(myCurrentLocationTag);
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
 
-                }
-            });
-            Log.d(TAG, String.format("Sua Localização mudou: %f/%f", latitude, longitude));
-        } else {
-            Log.d(TAG, "Não foi possível obter a ultima localização");
         }
+
+
     }
 
     private void createLocationRequest() {
@@ -354,9 +364,24 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         Log.i("teste","rebuildGeoQuery2 marker hash size "+markerHashMap.size());
         notificationHashMap.clear();
         notificationHashMap = new HashMap<>();
+        if(geoSingleton.getGeoQuery() == null){
 
-        geoQuery2 = null;
-        geoQuery2 = geoFire.queryAtLocation(new GeoLocation(myLat,myLong ), 0.5);
+            if(geoQuery2 == null){
+                geoQuery2 = geoFire.queryAtLocation(new GeoLocation(myLat,myLong ), 0.5);
+                geoSingleton.setGeoQuery(geoQuery2);
+            }else{
+                geoQuery2.removeAllListeners();
+                geoSingleton.setGeoQuery(geoQuery2);
+            }
+
+        } else{
+
+            geoQuery2 = geoSingleton.getGeoQuery();
+            geoQuery2.removeAllListeners();
+        }
+
+     //   geoQuery2 = null;
+      //  geoQuery2 = geoFire.queryAtLocation(new GeoLocation(myLat,myLong ), 0.5);
 
        // geoQuery2.removeAllListeners();
         Log.i("teste"," REBUILD geoFire AQUI "+     geoFire.toString());
