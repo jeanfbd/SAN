@@ -86,6 +86,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     GeoFire geoFire;
     GeoSingleton geoSingleton = GeoSingleton.getInstance();
+    Context mContext;
 
 
     GeoQuery geoQuery2;
@@ -117,7 +118,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         super.onCreate(savedInstanceState);
         getMapAsync(this);
 
-
+        mContext = getContext();
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
         geoFire = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/MyLocation/"));
@@ -159,8 +160,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private void displayLocation() {
 
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission((Activity)mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission((Activity)mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //Request runtime permission
             ActivityCompat.requestPermissions(getActivity(), new String[]{
@@ -646,8 +647,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                            double latitude = (double) dataSnapshot.child("position").child("latitude").getValue();
-                            double longitude = (double) dataSnapshot.child("position").child("longitude").getValue();
+                            double latitude = (double) dataSnapshot.child("latitude").getValue();
+                            double longitude = (double) dataSnapshot.child("longitude").getValue();
                             LatLng latLng = new LatLng(latitude, longitude);
                             if (dataSnapshot.child("fim").getValue() != null) {
                                 Log.i(TAG, "Servertime: "+getServerTime());
@@ -773,7 +774,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         Log.i("teste","Remove listener started "+notificationHashMap.size());
         if (notificationHashMap != null){
             Log.i("teste","hashmap notification "+notificationHashMap.size());
-            Log.i("teste","idMarker a reser removido -> "+idMarker+ " memory listener "+notificationHashMap.get(idMarker).toString());
+            //Log.i("teste","idMarker a reser removido -> "+idMarker+ " memory listener "+notificationHashMap.get(idMarker).toString());
 
             for (String testekey : notificationHashMap.keySet()) {
                 Log.i("teste","key dentro do hash -> "+testekey);

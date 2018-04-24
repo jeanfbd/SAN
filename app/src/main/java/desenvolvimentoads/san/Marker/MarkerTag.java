@@ -28,7 +28,7 @@ public class MarkerTag {
 
     }
 
-    public MarkerTag(double latitude, double longitude, Circle circle, boolean validate){
+    public MarkerTag(double latitude, double longitude, Circle circle, boolean validate) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.circle = circle;
@@ -68,6 +68,7 @@ public class MarkerTag {
         this.street = street;
     }
 
+    @Exclude
     public LatLng getPosition() {
         return new LatLng(latitude, longitude);
     }
