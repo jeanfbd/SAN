@@ -8,6 +8,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Geocoder;
@@ -114,6 +115,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     GeoQueryEventListener notificationListener;
     public static HashMap<String, String> alertHashMap = new HashMap<>();
 
+    /*SharedPrefers*/
+    SharedPreferences myPreferences;
+    SharedPreferences.Editor edit;
+    double latPrefers;
+    double lngPrefers;
+    String latString;
+    String lngString;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,20 +134,37 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
         geoFire = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/MyLocation/"));
         setUpLocation();
+        myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
+        latString = myPreferences.getString("lat", null);
+        lngString = myPreferences.getString("lng", null);
+        if(latString !=null && lngString !=null){
+            latPrefers = Double.valueOf(latString);
+            lngPrefers = Double.valueOf(lngString);
+        }
+
+
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        Log.i("teste", "permission terceiro called ");
         switch (requestCode) {
+
             case MY_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (checkPlayService()) {
                         buildGoogleApiClient();
                         createLocationRequest();
-                        //displayLocation();
+                        displayLocation();
+                        Log.i("teste", "permission terceiro accepted ");
+
                     }
                 }
+
                 break;
+            default:
+                Log.i("teste","Permission neged!!!");
         }
     }
 
@@ -150,6 +177,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION
             }, MY_PERMISSION_REQUEST_CODE);
+
+
         } else {
             if (checkPlayService()) {
                 buildGoogleApiClient();
@@ -160,10 +189,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
     private void displayLocation() {
-        if (false) {
-
-        }
-        if (ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+       if (ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //Request runtime permission
@@ -172,7 +198,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     Manifest.permission.ACCESS_FINE_LOCATION
             }, MY_PERMISSION_REQUEST_CODE);
         } else {
-
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
 
@@ -290,10 +315,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         /*Criando o listener do click longo*/
         googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
 
+
             @Override
             public void onMapLongClick(LatLng arg0) {
                 // TODO Auto-generated method stub
-
+                checkPermission();
                 if (mLastLocation != null) {
                     newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     if (action.isReportNotSelected()) {
@@ -328,52 +354,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         googleMap = markerDialog.setListenerDragDiag(googleMap, marcador, getContext(), getView());
 
         mMap = googleMap;
+        mMap.setOnMapClickListener(this);
 
-        /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
-        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            mMap.setOnMapClickListener(this);
-            mMap.getUiSettings().setMapToolbarEnabled(false);
-            mMap.getUiSettings().setZoomControlsEnabled(true);
+        mapConfig();
 
-            getRaioFirebase(-23.6202800, -45.4130600, 5.00);
-
-            /*Listener responsavel adicionar o botão da localização*/
-            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-                @Override
-                public boolean onMyLocationButtonClick() {
-                    if (mLastLocation != null) {
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
-
-                    }
-
-
-                    return false;
-                }
-            });
-
-        } else {
-            //Request runtime permission
-            ActivityCompat.requestPermissions(getActivity(), new String[]{
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-            }, MY_PERMISSION_REQUEST_CODE);
-        }
-
-
-        LatLng dangerous_area = new LatLng(-23.6202800, -45.4130600);
-        mMap.addCircle(new CircleOptions()
-                .center(dangerous_area)
-                .radius(500)
-                .strokeColor(Color.BLUE)
-                .fillColor(0x22000FF)
-                .strokeWidth(5.0f)
-
-        );
-
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.6202800, -45.4130600), 15.0f));
+     //   mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.6202800, -45.4130600), 15.0f));
         mMap.clear();
         rebuildMap();
 
@@ -482,12 +467,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
         }
 
-        markerOption = new MarkerOptions();
-        //   MarkerTag tag =( MarkerTag) markTemp.getValue().getTag();
-        //     Log.i("restart","tag..."+tag.getPosition());
-        markerOption.position(new LatLng(21.22, 22)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
 
-        marker1 = mMap.addMarker(markerOption);
 
         Log.i("teste", "fim rebuilding...");
 
@@ -496,6 +476,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onMapClick(LatLng latLng) {
+        Log.i("teste", "mapClick pressed ");
+        checkPermission();
         if (mLastLocation != null) {
             newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             //Toast.makeText(getContext(), "Presta atençao " + latLng.toString(), Toast.LENGTH_LONG).show();
@@ -550,6 +532,14 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             myLat = location.getLatitude();
             myLong = location.getLongitude();
+
+            myPreferences = this.getActivity().getSharedPreferences("Location",Context.MODE_PRIVATE);
+            edit = myPreferences.edit();
+            edit.putString("lat",String.valueOf(mLastLocation.getLatitude()));
+            edit.commit();
+
+            edit.putString("lng",String.valueOf(mLastLocation.getLongitude()));
+            edit.commit();
 
             if (mCurrent != null) {
                 mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
@@ -902,5 +892,79 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }
         });
         return timestamp;
+    }
+
+    public void checkPermission(){
+
+        if(MenuInicial.permissionOk){
+            mapConfig();
+            setUpLocation();
+            Log.i("teste", "permission ok and checked");
+            MenuInicial.permissionOk = false;
+        }else{
+            Log.i("teste", "permission ok and checked  ??");
+
+
+        }
+
+    }
+
+
+    public void mapConfig(){
+
+        /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
+        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+            mMap.getUiSettings().setMapToolbarEnabled(false);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+
+
+            if(latString !=null && lngString !=null){
+                getRaioFirebase(latPrefers, lngPrefers, 5.00);
+                Log.i("teste", "prefers getRaio inicial ok...");
+
+            }
+
+
+
+            /*Listener responsavel adicionar o botão da localização*/
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+
+
+
+                    if (mLastLocation != null) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
+
+                    }else{
+
+                        if(latString !=null && lngString !=null){
+
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latPrefers, lngPrefers)));
+                            Log.i("teste", "prefers camera ok...");
+
+                        }
+
+
+                    }
+
+
+
+
+                    return false;
+                }
+            });
+
+        } else {
+            //Request runtime permission
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, MY_PERMISSION_REQUEST_CODE);
+        }
     }
 }

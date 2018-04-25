@@ -605,14 +605,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
             }
 
-            markerOption = new MarkerOptions();
-            //   MarkerTag tag =( MarkerTag) markTemp.getValue().getTag();
-            //     Log.i("restart","tag..."+tag.getPosition());
-            markerOption.position(new LatLng (21.22,22)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
-
-            marker1 = mMap.addMarker(markerOption);
-
-
 
     }
 
