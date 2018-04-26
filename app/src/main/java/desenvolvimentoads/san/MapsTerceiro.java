@@ -4,9 +4,6 @@ package desenvolvimentoads.san;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,7 +28,6 @@ import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -63,15 +59,13 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.Marker.MarkerDialog;
 import desenvolvimentoads.san.Marker.MarkerTag;
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
-import desenvolvimentoads.san.Observer.GeoSingleton;
-import desenvolvimentoads.san.notification.NotificationApp;
+import desenvolvimentoads.san.Observer.SharedContext;
 
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ActionObserver {
 
@@ -85,8 +79,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
 
-    private static int UPDATE_INTERVAL = 60000;
-    private static int FATEST_INTERVAL = 10000;
+    private static int UPDATE_INTERVAL = 40000;
+    private static int FATEST_INTERVAL = 20000;
     private static int DISPLACEMENT = 0;
 
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
@@ -97,7 +91,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     private FirebaseDatabase firebaseDatabase;
 
     GeoFire geoFire;
-    GeoSingleton geoSingleton = GeoSingleton.getInstance();
     Context mContext;
 
 
@@ -125,19 +118,21 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     GeoQueryEventListener notificationListener;
     public static HashMap<String, String> alertHashMap = new HashMap<>();
-
-    /*SharedPrefers*/
+        /*SharedPrefers*/
     SharedPreferences myPreferences;
     SharedPreferences.Editor edit;
     double latPrefers;
     double lngPrefers;
     String latString;
     String lngString;
+    SharedContext sharedContext = SharedContext.getInstance();
+
 
     protected LocationSettingsRequest mLocationSettingsRequest;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     /*da para usar como controle para verificar se deixamos ligado ou não o update*/
     boolean mRequestingLocationUpdates;
+    boolean mapRebuildOk = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -151,7 +146,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         setUpLocation();
 
         /*usando o prefers para popular the last location from user..*/
-        myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
+        myPreferences = getContext().getSharedPreferences("Location",Context.MODE_PRIVATE);
         latString = myPreferences.getString("lat", null);
         lngString = myPreferences.getString("lng", null);
         if(latString !=null && lngString !=null){
@@ -377,7 +372,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
     protected void startLocationUpdates() {
 
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
             Log.i("teste","location pronto331 ?");
@@ -753,13 +748,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             myLat = location.getLatitude();
             myLong = location.getLongitude();
 
-            myPreferences = this.getActivity().getSharedPreferences("Location",Context.MODE_PRIVATE);
-            edit = myPreferences.edit();
-            edit.putString("lat",String.valueOf(mLastLocation.getLatitude()));
-            edit.commit();
+                sharedContext.createPrefers("location","lat",String.valueOf(mLastLocation.getLatitude()));
+                sharedContext.createPrefers("location","lng",String.valueOf(mLastLocation.getLongitude()));
 
-            edit.putString("lng",String.valueOf(mLastLocation.getLongitude()));
-            edit.commit();
+
 
             if (mCurrent != null) {
                 mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
@@ -774,24 +766,69 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
+
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         // displayLocation();
+        Log.i("teste", "OnConnected !!!Q");
         startLocationsUpdates();
 
     }
 
 /*Em teoria se voce da stop seria aqui que daria o start*/
     private void startLocationsUpdates() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            Log.i("teste", "permission track This one has called ");
-            return;
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                Log.i("teste", "checkGpsPermission Rationale");
+                //     try {
+                // Show the dialog by calling startResolutionForResult(), and check the result
+                // in onActivityResult().
+
+                //
+                // User selected the Never Ask Again Option Change settings in app settings manually
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                alertDialogBuilder.setTitle("Change Permissions in Settings");
+                alertDialogBuilder
+                        .setMessage("" +
+                                "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                        .setCancelable(false)
+                        .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                                intent.setData(uri);
+                                startActivityForResult(intent, REQUEST_CHECK_SETTINGS);     // step 6
+                            }
+                        });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+
+
+            } else {
+
+                Log.i("teste", "checkGpsPermission normal");
+                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
+
+            }
+
+        }else{
+            Log.i("teste", "permission track This one has called 2");
+
+            recreateGoogleRefers();
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+
+
+
         }
 
-        recreateGoogleRefers();
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override
@@ -1096,6 +1133,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             markerHashMapTemp.get(markerTemp.getKey()).remove();
         }
         markerHashMap.clear();
+        if (mCurrent != null) {
+            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+        }
     }
 
 
@@ -1160,6 +1200,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             }
 
+/*Se o user mudar durante o uso o location e botar never ask again e voltar o location para true, ae essa parte faz a checagem novamente...*/
+        }else if(mapRebuildOk == false){
+            mapConfig();
+            setUpLocation();
+            MenuInicial.permissionOk = false;
 
         }
     }
@@ -1174,6 +1219,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             Log.i("teste", "permission ok and checked");
             MenuInicial.permissionOk = false;
         }else{
+
             Log.i("teste", "permission ok and checked  ??");
 
 
@@ -1230,6 +1276,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     return false;
                 }
             });
+
+            mapRebuildOk = true;
+
 
         } else {
             //Request runtime permission

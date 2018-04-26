@@ -33,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
+import desenvolvimentoads.san.Observer.SharedContext;
 
 public class MenuInicial extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener,ActionObserver {
@@ -55,12 +56,15 @@ public class MenuInicial extends AppCompatActivity
     static MenuItem denunciar;
     public static Boolean vDenunciar = true;
     public static Boolean permissionOk=false;
+    SharedContext sharedContext = SharedContext.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Action.getInstance().registraInteressados(this);
         buttomAddMarkerVisivel = Action.getInstance().getButtomAddMakerClickado();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu_inicial);
+        sharedContext.setContext(this.getBaseContext());
 
 /*
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
