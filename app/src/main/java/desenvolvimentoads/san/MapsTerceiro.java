@@ -3,17 +3,21 @@ package desenvolvimentoads.san;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -26,11 +30,18 @@ import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -65,7 +76,7 @@ import desenvolvimentoads.san.notification.NotificationApp;
 public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ActionObserver {
 
     private GoogleMap mMap;
-
+    int RQS_GooglePlayServices = 0;
     private static final int MY_PERMISSION_REQUEST_CODE = 2508;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 1991;
     private static final String TAG = "MapsTerceiro";
@@ -74,9 +85,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
 
-    private static int UPDATE_INTERVAL = 5000;
-    private static int FATEST_INTERVAL = 3000;
-    private static int DISPLACEMENT = 10;
+    private static int UPDATE_INTERVAL = 60000;
+    private static int FATEST_INTERVAL = 10000;
+    private static int DISPLACEMENT = 0;
 
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -123,6 +134,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     String latString;
     String lngString;
 
+    protected LocationSettingsRequest mLocationSettingsRequest;
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    /*da para usar como controle para verificar se deixamos ligado ou não o update*/
+    boolean mRequestingLocationUpdates;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -134,6 +149,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
         geoFire = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/MyLocation/"));
         setUpLocation();
+
+        /*usando o prefers para popular the last location from user..*/
         myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
         latString = myPreferences.getString("lat", null);
         lngString = myPreferences.getString("lng", null);
@@ -148,17 +165,18 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+       /*isso tudo esta sendo ignorado por que esta indo para o menu inicial no super..*/
         Log.i("teste", "permission terceiro called ");
         switch (requestCode) {
 
             case MY_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (checkPlayService()) {
-                        buildGoogleApiClient();
-                        createLocationRequest();
-                        displayLocation();
-                        Log.i("teste", "permission terceiro accepted ");
 
+                    buildGoogleApiClient();
+                    createLocationRequest();
+                    buildLocationSettingsRequest();
+                    if (checkPlayService()) {
+                        displayLocation();
                     }
                 }
 
@@ -167,7 +185,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 Log.i("teste","Permission neged!!!");
         }
     }
-
+/*0*/
     private void setUpLocation() {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -180,14 +198,247 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
         } else {
+            buildGoogleApiClient();
+            createLocationRequest();
+            buildLocationSettingsRequest();
             if (checkPlayService()) {
-                buildGoogleApiClient();
-                createLocationRequest();
+
+
                 displayLocation();
             }
         }
     }
 
+
+
+
+    /*1*/
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
+
+    }
+
+    /*3*/
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FATEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+
+
+
+    }
+
+    /* 3.2 - Construindo o location Settings request*/
+    protected void buildLocationSettingsRequest() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
+    }
+    /*3.5*/
+    private boolean checkPlayService() {
+
+        /*Se npegar a instancia do googleservice o fused não funciona -.-*/
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int resultCode = googleAPI.isGooglePlayServicesAvailable(getActivity());
+        if (resultCode == ConnectionResult.SUCCESS) {
+            mGoogleApiClient.connect();
+            return true;
+        } else {
+            googleAPI.getErrorDialog(getActivity(), resultCode, RQS_GooglePlayServices);
+
+            return false;
+
+        }
+    }
+    /* 4 - criando o method que irá checar o status do locationSettings */
+    protected void checkLocationSettings() {
+
+
+
+
+        recreateGoogleRefers();
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(
+                        mGoogleApiClient,
+                        mLocationSettingsRequest
+                );
+        Log.i("teste","location pronto 1?");
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+
+            /* 5 Aqui que controla caso o location não estiver pronto*/
+            @Override
+            public void onResult(LocationSettingsResult locationSettingsResult) {
+
+                Log.i("teste","location pronto2 ?");
+                final Status status = locationSettingsResult.getStatus();
+                switch (status.getStatusCode()) {
+                    /*Pronto.. as outras opções são opcionais a tirando a required ali.*/
+                    case LocationSettingsStatusCodes.SUCCESS:
+
+
+                        //Toast.makeText(getContext(), "Location is already on.", Toast.LENGTH_SHORT).show();
+                        mapConfig();
+                        startLocationUpdates();
+                        Log.i("teste","location pronto3 ?");
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+
+                        //Toast.makeText(getContext(), "Location dialog will be open", Toast.LENGTH_SHORT).show();
+
+                        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            Log.i("teste","location pronto4 ?");
+
+                            /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
+                            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                                Log.i("teste","location pronto5 ?");
+                                //     try {
+                                // Show the dialog by calling startResolutionForResult(), and check the result
+                                // in onActivityResult().
+
+                                //
+                                // User selected the Never Ask Again Option Change settings in app settings manually
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                                alertDialogBuilder.setTitle("Change Permissions in Settings");
+                                alertDialogBuilder
+                                        .setMessage("" +
+                                                "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                                        .setCancelable(false)
+                                        .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                                Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                                                intent.setData(uri);
+                                                startActivityForResult(intent, REQUEST_CHECK_SETTINGS);     // step 6
+                                            }
+                                        });
+
+                                AlertDialog alertDialog = alertDialogBuilder.create();
+                                alertDialog.show();
+
+
+                            } else {
+
+                                Log.i("teste","location pronto7 ?");
+                                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
+
+                            }
+
+
+                        } else {
+                            Log.i("teste","location pronto8 ?");
+
+                        }
+
+
+                        //move to step 6 in onActivityResult to check what action user has taken on settings dialog
+                        //    status.startResolutionForResult(getActivity(), REQUEST_CHECK_SETTINGS);
+                        //   } catch (IntentSender.SendIntentException e) {
+
+                        //    }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        Log.i("teste","location pronto9 ?");
+                        break;
+                }
+            }
+        });
+    }
+
+    /*Aqui que vai ser o callback do status resolution do step 4/5 quando o user faz uma ação ali no settings do android para mudar o location aqui q verifica mas nem sempre funciona o ok*/
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            // Check for the integer request code originally supplied to startResolutionForResult().
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        Log.i("Teste", "User agreed to make required location settings changes.");
+                        mapConfig();
+                        startLocationUpdates();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Log.i("Teste", "User chose not to make required location settings changes.");
+                        /*Geralmente ele cai aqui mesmo qdo mudamos o location para ok, ae ele faz uma volta danada e verifica tudo dnovo. para dar certo no final*/
+                        checkLocationSettings();
+                        break;
+                }
+                break;
+        }
+    }
+    protected void startLocationUpdates() {
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+            Log.i("teste","location pronto331 ?");
+        } else {
+
+            Log.i("teste","location pronto332 ?");
+            goAndDetectLocation();
+        }
+
+    }
+
+
+    public void goAndDetectLocation() {
+
+        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
+            Log.i("teste","location pronto33222 ?");
+        } else {
+
+           /* LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Toast.makeText(getContext(),""+LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient),
+                    Toast.LENGTH_SHORT).show();
+*/Log.i("teste","location pronto33333 ?");
+            recreateGoogleRefers();
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient,
+                    mLocationRequest, this
+            ).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(Status status) {
+                /* usa isso para saber se esta habilitado o location updates*/
+                    mRequestingLocationUpdates = true;
+                }
+            });
+
+
+        }
+
+    }
+
+    /*é bom para colocar qdo o app entrar em resumo para parar o fused..*/
+    protected void stopLocationUpdates() {
+        // It is a good practice to remove location requests when the activity is in a paused or
+        // stopped state. Doing so helps battery performance and is especially
+        // recommended in applications that request frequent location updates.
+        recreateGoogleRefers();
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient,
+                this
+        ).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(Status status) {
+/* usa isso para saber se esta habilitado o location updates*/
+                mRequestingLocationUpdates = false;
+                //   setButtonsEnabledState();
+            }
+        });
+    }
+
+    /*4*/
     private void displayLocation() {
        if (ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -198,8 +449,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     Manifest.permission.ACCESS_FINE_LOCATION
             }, MY_PERMISSION_REQUEST_CODE);
         } else {
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Log.i("teste","fused  "+mLastLocation);
 
             if (mLastLocation != null) {
                 final double latitude = mLastLocation.getLatitude();
@@ -263,39 +515,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-    private void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FATEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
-
-    }
-
-    private void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-        mGoogleApiClient.connect();
-
-    }
-
-    private boolean checkPlayService() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getContext());
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, getActivity(), PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Toast.makeText(getContext(), "Dispositivo não suportado", Toast.LENGTH_SHORT).show();
-
-            }
-            return false;
-        }
-        return true;
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -319,6 +538,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             @Override
             public void onMapLongClick(LatLng arg0) {
                 // TODO Auto-generated method stub
+                checkGpsPermission();
                 checkPermission();
                 if (mLastLocation != null) {
                     newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
@@ -476,7 +696,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onMapClick(LatLng latLng) {
-        Log.i("teste", "mapClick pressed ");
+        checkGpsPermission();
         checkPermission();
         if (mLastLocation != null) {
             newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
@@ -561,12 +781,16 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-
+/*Em teoria se voce da stop seria aqui que daria o start*/
     private void startLocationsUpdates() {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            Log.i("teste", "permission track This one has called ");
             return;
         }
+
+        recreateGoogleRefers();
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
@@ -893,6 +1117,54 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         });
         return timestamp;
     }
+    public void checkGpsPermission() {
+        Log.i("teste", "checkGpsPermission >.< ");
+        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.i("teste", "checkGpsPermission ?");
+
+            /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                Log.i("teste", "checkGpsPermission Rationale");
+                //     try {
+                // Show the dialog by calling startResolutionForResult(), and check the result
+                // in onActivityResult().
+
+                //
+                // User selected the Never Ask Again Option Change settings in app settings manually
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                alertDialogBuilder.setTitle("Change Permissions in Settings");
+                alertDialogBuilder
+                        .setMessage("" +
+                                "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                        .setCancelable(false)
+                        .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                                intent.setData(uri);
+                                startActivityForResult(intent, REQUEST_CHECK_SETTINGS);     // step 6
+                            }
+                        });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+
+
+            } else {
+
+                Log.i("teste", "checkGpsPermission normal");
+                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
+
+            }
+
+
+        }
+    }
+
+
 
     public void checkPermission(){
 
@@ -966,5 +1238,19 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     Manifest.permission.ACCESS_FINE_LOCATION
             }, MY_PERMISSION_REQUEST_CODE);
         }
+    }
+
+    public void recreateGoogleRefers(){
+
+        if(mGoogleApiClient == null){
+            buildGoogleApiClient();
+            checkPlayService();
+        }
+
+        if(mLocationSettingsRequest == null){
+            createLocationRequest();
+            buildLocationSettingsRequest();
+        }
+
     }
 }

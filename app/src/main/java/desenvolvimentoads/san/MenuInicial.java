@@ -1,9 +1,14 @@
 package desenvolvimentoads.san;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -362,7 +367,7 @@ public class MenuInicial extends AppCompatActivity
 
 
     }
-
+    /*Se fosse necessario mudar algo apos as permissões*/
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
@@ -374,9 +379,56 @@ public class MenuInicial extends AppCompatActivity
 
                     Log.i("teste", "permission terceiro accepted ");
                     permissionOk =true;
+                }else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                        Log.i("teste", "checkGpsPermission Rationale");
+                        //     try {
+                        // Show the dialog by calling startResolutionForResult(), and check the result
+                        // in onActivityResult().
+
+                        //
+                        // User selected the Never Ask Again Option Change settings in app settings manually
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                        alertDialogBuilder.setTitle("Change Permissions in Settings 1");
+                        alertDialogBuilder
+                                .setMessage("" +
+                                        "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                                .setCancelable(false)
+                                .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getBaseContext().getPackageName(), null);
+                                        intent.setData(uri);
+                                        startActivity(intent);// step 6
+                                    }
+                                });
+
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                    } else {
+                        /*never asked selecionado...*/
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                        alertDialogBuilder.setTitle("Permissão necessaria");
+                        alertDialogBuilder
+                                .setMessage("" +
+                                        "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                                .setCancelable(false)
+                                .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getBaseContext().getPackageName(), null);
+                                        intent.setData(uri);
+                                        startActivity(intent);// step 6
+                                    }
+                                });
+
+                        AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+                    }
                 }
-
-
                 break;
 
             default:

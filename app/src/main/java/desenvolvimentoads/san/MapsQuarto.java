@@ -164,28 +164,49 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     public void checkPermission() {
 
         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.i("teste", "location pronto4 ?");
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this.getActivity(),
+            /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                Log.i("teste", "location pronto5 ?");
+                //     try {
+                // Show the dialog by calling startResolutionForResult(), and check the result
+                // in onActivityResult().
+
+                //
+                // User selected the Never Ask Again Option Change settings in app settings manually
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                alertDialogBuilder.setTitle("Change Permissions in Settings");
+                alertDialogBuilder
+                        .setMessage("" +
+                                "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                        .setCancelable(false)
+                        .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                                intent.setData(uri);
+                                startActivityForResult(intent, REQUEST_CHECK_SETTINGS);     // step 6
+                            }
+                        });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
 
 
             } else {
 
-
-                ActivityCompat.requestPermissions(this.getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+                Log.i("teste", "location pronto7 ?");
+                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
 
 
             }
 
 
-        } else {
-
-
         }
-
-
     }
-
     /*Se fosse necessario mudar algo apos as permissões*/
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -219,8 +240,12 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
         int resultCode = googleAPI.isGooglePlayServicesAvailable(getActivity());
         if (resultCode == ConnectionResult.SUCCESS) {
             mGoogleApiClient.connect();
+
         } else {
             googleAPI.getErrorDialog(getActivity(), resultCode, RQS_GooglePlayServices);
+
+
+
         }
 
     }
@@ -717,7 +742,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
     @Override
     public void onLocationChanged(Location location) {
-
+        Log.i("teste","changed location");
         /*Armazenando a ultima posição*/
         mCurrentLocation = location;
         newLatLng = new LatLng(location.getLatitude(),location.getLongitude()) ;
@@ -767,69 +792,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
         final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lng), radius);
 
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(final String key, GeoLocation location) {
-                mDatabase = ConfigFireBase.getFirebase();
-                mDatabase.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                            double latitude = (double) dataSnapshot.child("position").child("latitude").getValue();
-                            double longitude = (double) dataSnapshot.child("position").child("longitude").getValue();
-                            LatLng latLng = new LatLng(latitude, longitude);
-                            if (dataSnapshot.child("fim").getValue() != null) {
-                                if (getServerTime() < (Long) dataSnapshot.child("fim").getValue()) {
-                                    if (!dataSnapshot.child("Denunciar").child(userId).exists()) {
-                                        Log.i(TAG, "onDataChange: NÃO EXISTE DENUNCIA");
-                                        if (markerHashMap.get(key) == null) {
-                                            Log.i(TAG, "Entrou Criar: " + key);
-                                            markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
 
-//                                                MarkerOptions markerOption = new MarkerOptions();
-//                                                markerOption.position(latLng);
-//                                                mMap.addMarker(markerOption);
-                                        }
-                                    } else {
-                                        Log.i(TAG, "onDataChange: EXISTE DENUNCIA");
-                                    }
-                                } else {
-                                    if (markerHashMap.get(key) != null) {
-                                        Log.i(TAG, "Entrou Remover: " + key);
-                                        MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            @Override
-            public void onKeyExited(String key) {
-
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-
-            }
-        });
     }
 
     public Long getServerTime() {
