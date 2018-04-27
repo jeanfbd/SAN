@@ -1,6 +1,8 @@
 package desenvolvimentoads.san;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -36,11 +38,10 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.Marker.MarkerTag;
+import desenvolvimentoads.san.Observer.SharedContext;
 
 public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
 
@@ -56,6 +57,14 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
     private FirebaseDatabase firebaseDatabase;
     public static HashMap<Marker, MarkerTag> markerHashMap = new HashMap<>();
 
+    /*SharedPrefers*/
+    SharedPreferences myPreferences;
+    SharedPreferences.Editor edit;
+    double latPrefers;
+    double lngPrefers;
+    String latString;
+    String lngString;
+
     private long timestamp;
 
 
@@ -63,16 +72,30 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
+
+       /*usando o prefers para popular the last location from user..*/
+        myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
+        latString = myPreferences.getString("lat", null);
+        lngString = myPreferences.getString("lng", null);
+        Log.d(TAG, "SharedPreferences: "+lngString);
+        if (latString != null && lngString != null) {
+            latPrefers = Double.valueOf(latString);
+            lngPrefers = Double.valueOf(lngString);
+            Log.d(TAG, "onCreate: LAT: " + latPrefers);
+            Log.d(TAG, "onCreate: LNG: " + lngString);
+        }
     }
 
     @Override
     public void onMapClick(LatLng latLng) {
-
+        getRaioOldFirebase(latLng.latitude, latLng.longitude, 50.0);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        mapConfig();
 
         mMap.setInfoWindowAdapter(new InfoWindowAdapter() {
 
@@ -85,108 +108,100 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
             // Defines the contents of the InfoWindow
             @Override
             public View getInfoContents(Marker arg0) {
-                MarkerTag markerTag = markerHashMap.get(arg0);
-
                 LayoutInflater li = LayoutInflater.from(getContext());
                 View v = li.inflate(R.layout.info_window_layout, null);
 
-                TextView street = (TextView) v.findViewById(R.id.street);
+                if (markerHashMap != null) {
+                    MarkerTag markerTag = markerHashMap.get(arg0);
 
-                TextView location = (TextView) v.findViewById(R.id.location);
+                    TextView street = (TextView) v.findViewById(R.id.street);
 
-                TextView datetime = (TextView) v.findViewById(R.id.datetime);
+                    TextView location = (TextView) v.findViewById(R.id.location);
 
-                ImageView markerimage = (ImageView) v.findViewById(R.id.markerimage);
+                    TextView datetime = (TextView) v.findViewById(R.id.datetime);
 
-                markerimage.setImageResource(R.mipmap.ic_maker_cinza);
+                    ImageView markerimage = (ImageView) v.findViewById(R.id.markerimage);
 
-                street.setText(markerTag.getStreet());
+                    markerimage.setImageResource(R.mipmap.ic_maker_cinza);
 
-                location.setText("Latitude: "+markerTag.getPosition().latitude+"\nLongitude: "+markerTag.getPosition().longitude);
+                    street.setText(markerTag.getStreet());
 
-                datetime.setText(convertTime(Long.parseLong(markerTag.getId())));
+                    location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
 
+                    datetime.setText(convertTime(Long.parseLong(markerTag.getId())));
+                }
                 return v;
 
             }
         });
-
-        mapConfig();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.61989710864952, -45.41503362357616), 16.0f));
-        getRaioOldFirebase(-23.61989710864952, -45.41503362357616, 50.0);
     }
 
 
     public void getRaioOldFirebase(Double lat, Double lng, Double radius) {
         getServerTime();
 //        hashMapClear();
-        Log.d(TAG, "getRaioOldFirebase: ");
 
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
         GeoFire geoFire2 = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
 
         final GeoQuery geoQuery = geoFire2.queryAtLocation(new GeoLocation(lat, lng), radius);
-            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                @Override
-                public void onKeyEntered(final String key, GeoLocation location) {
-                    mDatabaseReference = ConfigFireBase.getFirebase();
-                    mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                                MarkerTag markerTag = dataSnapshot.getValue(MarkerTag.class);
-                                markerTag.setId(""+dataSnapshot.child("fim").getValue());
-                                Log.d(TAG, "MarkerTag: "+markerTag.getId());
-                                Log.d(TAG, "MarkerTag: "+markerTag.getStreet());
-                                if (dataSnapshot.child("fim").getValue() != null) {
-                                    MarkerOptions markerOption = new MarkerOptions();
-                                    markerOption.position(markerTag.getPosition());
-                                    markerOption.title((String) dataSnapshot.child("street").getValue());
-                                    Log.d(TAG, "onDataChange: Achou Datasnapshot");
-                                    if (getServerTime() > (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
-                                        Log.d(TAG, "onDataChange: Achou Marker pra inserir");
-                                        if (dataSnapshot.child("idUser").getValue().equals(userId)) {
-                                            markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
-                                        } else {
-                                            if (dataSnapshot.child("Validar").child(userId).exists()) {
-                                                markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
-                                            }
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(final String key, GeoLocation location) {
+                mDatabaseReference = ConfigFireBase.getFirebase();
+                mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                            MarkerTag markerTag = dataSnapshot.getValue(MarkerTag.class);
+                            markerTag.setId("" + dataSnapshot.child("fim").getValue());
+                            if (dataSnapshot.child("fim").getValue() != null) {
+                                MarkerOptions markerOption = new MarkerOptions();
+                                markerOption.position(markerTag.getPosition());
+                                markerOption.title((String) dataSnapshot.child("street").getValue());
+                                if (getServerTime() > (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
+                                    if (dataSnapshot.child("idUser").getValue().equals(userId)) {
+                                        markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
+                                    } else {
+                                        if (dataSnapshot.child("Validar").child(userId).exists()) {
+                                            markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
                                         }
-                                        Marker marker = mMap.addMarker(markerOption);
-                                        markerHashMap.put(marker, markerTag);
                                     }
+                                    Marker marker = mMap.addMarker(markerOption);
+                                    markerHashMap.put(marker, markerTag);
                                 }
                             }
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-                }
+                    }
+                });
+            }
 
-                @Override
-                public void onKeyExited(String key) {
+            @Override
+            public void onKeyExited(String key) {
 
-                }
+            }
 
-                @Override
-                public void onKeyMoved(String key, GeoLocation location) {
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
 
-                }
+            }
 
-                @Override
-                public void onGeoQueryReady() {
+            @Override
+            public void onGeoQueryReady() {
 
-                }
+            }
 
-                @Override
-                public void onGeoQueryError(DatabaseError error) {
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
 
-                }
-            });
+            }
+        });
 
     }
 
@@ -210,7 +225,6 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
     }
 
 
-
     public void mapConfig() {
         if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED) {
@@ -219,17 +233,34 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
             mMap.getUiSettings().setMapToolbarEnabled(false);
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMap.setOnMarkerClickListener(this);
+            mMap.setOnMapClickListener(this);
+
+            if (latString != null && lngString != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latPrefers, lngPrefers), 16.0f));
+                getRaioOldFirebase(latPrefers, lngPrefers, 50.0);
+            }
+
+        /*Listener responsavel adicionar o botão da localização*/
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+                    if (latString != null && lngString != null) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latPrefers, lngPrefers)));
+                    }
+                    return false;
+                }
+            });
         }
     }
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        Log.d(TAG, "onMarkerClick: Clicou: "+marker.getTitle());
+        Log.d(TAG, "onMarkerClick: Clicou: " + marker.getTitle());
 
         return false;
     }
 
-    public String convertTime(long time){
+    public String convertTime(long time) {
         Date date = new Date(time);
         Format format = new SimpleDateFormat("dd/MM/yyyy-HH:mm:ss");
 
