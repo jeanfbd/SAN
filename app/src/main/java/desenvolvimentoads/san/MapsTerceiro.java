@@ -299,26 +299,23 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                 // Show the dialog by calling startResolutionForResult(), and check the result
                                 // in onActivityResult().
 
-                                //
                                 // User selected the Never Ask Again Option Change settings in app settings manually
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                                alertDialogBuilder.setTitle("Change Permissions in Settings");
+                                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                                alertDialogBuilder.setTitle("   Olá    ");
                                 alertDialogBuilder
                                         .setMessage("" +
-                                                "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar."+"" +
+                                                "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
                                         .setCancelable(false)
-                                        .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
-                                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                                Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
-                                                intent.setData(uri);
-                                                startActivityForResult(intent, REQUEST_CHECK_SETTINGS);     // step 6
+                                                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
                                             }
                                         });
 
                                 AlertDialog alertDialog = alertDialogBuilder.create();
                                 alertDialog.show();
-
 
                             } else {
 
@@ -748,8 +745,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             myLat = location.getLatitude();
             myLong = location.getLongitude();
 
-                sharedContext.createPrefers("location","lat",String.valueOf(mLastLocation.getLatitude()));
-                sharedContext.createPrefers("location","lng",String.valueOf(mLastLocation.getLongitude()));
+                sharedContext.createPrefers("Location","lat",String.valueOf(mLastLocation.getLatitude()));
+                sharedContext.createPrefers("Location","lng",String.valueOf(mLastLocation.getLongitude()));
 
 
 
@@ -792,18 +789,17 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 //
                 // User selected the Never Ask Again Option Change settings in app settings manually
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                alertDialogBuilder.setTitle("Change Permissions in Settings");
+                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                alertDialogBuilder.setTitle("   Olá    ");
                 alertDialogBuilder
                         .setMessage("" +
-                                "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar."+"" +
+                                "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
                         .setCancelable(false)
-                        .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
-                                intent.setData(uri);
-                                startActivityForResult(intent, REQUEST_CHECK_SETTINGS);     // step 6
+                                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
                             }
                         });
 
@@ -1173,18 +1169,18 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 //
                 // User selected the Never Ask Again Option Change settings in app settings manually
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                alertDialogBuilder.setTitle("Change Permissions in Settings");
+                // User selected the Never Ask Again Option Change settings in app settings manually
+                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                alertDialogBuilder.setTitle("   Olá    ");
                 alertDialogBuilder
                         .setMessage("" +
-                                "\nClick SETTINGS to Manually Set\n" + "Permissions to use Location")
+                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar."+"" +
+                                "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
                         .setCancelable(false)
-                        .setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
-                                intent.setData(uri);
-                                startActivityForResult(intent, REQUEST_CHECK_SETTINGS);     // step 6
+                                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
                             }
                         });
 
@@ -1194,8 +1190,38 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             } else {
 
-                Log.i("teste", "checkGpsPermission normal");
-                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
+                if(sharedContext.isFirstTimeAskingPermission("Location")){
+                    Log.i("teste", "checkGpsPermission normal");
+                    sharedContext.firstTimeAskingPermission("Location",false);
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
+                }else{
+
+                    /*never asked selecionado...*/
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                    alertDialogBuilder.setTitle("Permissão necessaria");
+                    alertDialogBuilder
+                            .setMessage("" +
+                                    "\n O App San utiliza de dados da localização para seu funcionamento." + "\n Ao selecionar para nunca mais ser requisitado permissão e negar o aplicativo deixa de funcionar."
+                                    +"\n Para que ele funcione agora será necessario mudar manualmente a permission do location nas configurações do App")
+                            .setCancelable(false)
+                            .setPositiveButton("Configurações", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
+                                    intent.setData(uri);
+                                    startActivity(intent);// step 6
+
+                                }
+                            });
+
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+
+                }
+
+
 
 
             }

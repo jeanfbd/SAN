@@ -38,7 +38,7 @@
             android:visibility="visible"
             app:backgroundTint="@android:color/transparent"
             app:elevation="5dp"
-            app:fabSize="mini"
+            app:fabSize="normal"
             app:layout_anchor="@+id/include"
             app:layout_anchorGravity="right|center_vertical"
             app:srcCompat="@android:drawable/ic_delete" />
@@ -52,7 +52,7 @@
             android:visibility="visible"
             app:backgroundTint="@android:color/transparent"
             app:elevation="5dp"
-            app:fabSize="mini"
+            app:fabSize="normal"
             app:layout_anchor="@+id/include"
             app:layout_anchorGravity="right|center_vertical"
             app:rippleColor="@color/common_google_signin_btn_text_dark_disabled"
