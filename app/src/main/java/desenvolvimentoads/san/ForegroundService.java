@@ -345,12 +345,9 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
         recreateGoogleRefers();
-        if(LocationServices.FusedLocationApi.removeLocationUpdates(
+        LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient,
-                locationListenerGPS) !=null) {
-
-
-        }
+                locationListenerGPS);
     }
 
     /*4*/

@@ -133,6 +133,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     /*da para usar como controle para verificar se deixamos ligado ou não o update*/
     boolean mRequestingLocationUpdates;
     boolean mapRebuildOk = false;
+    boolean started= false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -200,7 +201,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                 displayLocation();
+                checkLocationSettings();
             }
+
         }
     }
 
@@ -254,7 +257,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
     /* 4 - criando o method que irá checar o status do locationSettings */
     protected void checkLocationSettings() {
-
+        Log.i("teste", "CHECKLOCATION ");
 
 
 
@@ -264,6 +267,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         mGoogleApiClient,
                         mLocationSettingsRequest
                 );
+
         Log.i("teste","location pronto 1?");
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
 
@@ -405,6 +409,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     mRequestingLocationUpdates = true;
                 }
             });
+            started = true;
 
 
         }
@@ -773,7 +778,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-/*Em teoria se voce da stop seria aqui que daria o start*/
+/*Em teoria se voce da stop seria aqui que daria o start, é bem melhor que o outro metodo que esta tem quase o mesmo nome sem o S*/
     private void startLocationsUpdates() {
 
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -1331,14 +1336,22 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onStop() {
+        Log.i("teste", "STOP TERCEIRO  ??");
         super.onStop();
+        if(started){
+            Log.i("teste", "STOPLOCATION CALLED");
+            stopLocationUpdates();
+        }
 
 
     }
     @Override
     public void onResume() {
-
+        Log.i("teste", "RESUME TERCEIRO ??");
         super.onResume();
+        if(started){
+            startLocationsUpdates();
+        }
 
 
     }
