@@ -583,6 +583,35 @@ public class MenuInicial extends AppCompatActivity
 
 
         }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i("teste", "In Stop main");
+        if(!ForegroundService.IS_SERVICE_RUNNING){
+            Intent service = new Intent(MenuInicial.this, ForegroundService.class);
+            service.setAction(ForegroundService.START);
+            startService(service);
+        }
+
+
+    }
+
+    @Override
+    public void onResume() {
+        Log.i("teste", "In Resume main");
+        super.onResume();
+
+        if(ForegroundService.IS_SERVICE_RUNNING){
+            Intent service = new Intent(MenuInicial.this, ForegroundService.class);
+            service.setAction(ForegroundService.STOP);
+            startService(service);
+        }
+
+
+    }
+
+
     }
 
 

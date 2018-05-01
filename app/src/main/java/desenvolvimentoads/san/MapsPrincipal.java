@@ -577,7 +577,7 @@ public class MapsPrincipal extends SupportMapFragment implements LocationListene
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(getContext(), "Location Changed", Toast.LENGTH_SHORT).show();
+
         /*Armazenando a ultima posição*/
         mCurrentLocation = location;
 

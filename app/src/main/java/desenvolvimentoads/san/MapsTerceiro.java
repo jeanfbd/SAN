@@ -218,7 +218,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-    /*3*/
+    /*2*/
     private void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL);
@@ -230,7 +230,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-    /* 3.2 - Construindo o location Settings request*/
+    /* 3 - Construindo o location Settings request*/
     protected void buildLocationSettingsRequest() {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
@@ -1328,4 +1328,20 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
 
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+
+    }
+    @Override
+    public void onResume() {
+
+        super.onResume();
+
+
+    }
+
+
 }
