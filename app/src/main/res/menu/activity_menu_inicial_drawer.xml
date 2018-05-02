@@ -5,24 +5,20 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_all_marker"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_allmarkers"
             android:title="Todos Marcadores" />
         <item
             android:id="@+id/nav_user_marker"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_marker"
             android:title="Marcadores do Usuário" />
         <item
-            android:id="@+id/nav_user_disable"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Marcadores Inativos do sistema" />
-        <item
-            android:id="@+id/nav_integracao"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Integração" />
-        <item
             android:id="@+id/nav_tutorial"
-            android:icon="@android:drawable/ic_menu_help"
+            android:icon="@drawable/ic_help"
             android:title="Tutorial" />
+        <item
+            android:id="@+id/nav_sign_out"
+            android:icon="@drawable/ic_logout"
+            android:title="Logout" />
 
     </group>
 

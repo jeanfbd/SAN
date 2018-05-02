@@ -95,10 +95,10 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
     private DatabaseReference mDatabase;
     private GeoFire geoFire2;
     private FirebaseDatabase firebaseDatabase;
- //   private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
-   // private FirebaseUser currentUser = mAuth.getCurrentUser();
- //   private String userId = currentUser.getUid();
-    String userId = "123";
+    private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
+    private FirebaseUser currentUser = mAuth.getCurrentUser();
+    private String userId = currentUser.getUid();
+    //String userId = "123";
     public static HashMap<Marker, String> mHashMap = new HashMap<Marker, String>();
     public static HashMap<String, Marker> markerHashMap = new HashMap<>();
     private static Long timestamp;
@@ -154,11 +154,12 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
         getMapAsync(this);
 
     }
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Save the user's current game state
         Log.i("restart", "saved bundle");
-         super.onSaveInstanceState(savedInstanceState);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public void checkPermission() {
@@ -207,6 +208,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
         }
     }
+
     /*Se fosse necessario mudar algo apos as permissões*/
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -243,7 +245,6 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
         } else {
             googleAPI.getErrorDialog(getActivity(), resultCode, RQS_GooglePlayServices);
-
 
 
         }
@@ -567,73 +568,71 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
         NotificationApp notificationApp = new NotificationApp(getView());
         notificationApp.notification();
 
-         rebuildMap();
+        rebuildMap();
 
 
     }
 
 
     /*recria o mapa quando o fragmento é destruido apagando as referencias antigas dos markers e circles e criando novas  */
-    public void rebuildMap(){
+    public void rebuildMap() {
 
-            mMap.clear();
-            Marker marker1;
-            MarkerOptions markerOption;
-            if(markerHashMap.size() >= 1){
+        mMap.clear();
+        Marker marker1;
+        MarkerOptions markerOption;
+        if (markerHashMap.size() >= 1) {
 
-                for(Map.Entry<String, Marker> markTemp: markerHashMap.entrySet()){
-                    Log.i("restart","tag...");
+            for (Map.Entry<String, Marker> markTemp : markerHashMap.entrySet()) {
+                Log.i("restart", "tag...");
 
-                   Circle circle;
-                    markerOption = new MarkerOptions();
-                    MarkerTag tagTemp =( MarkerTag) markTemp.getValue().getTag();
-                    LatLng latLng  = tagTemp.getPosition();
+                Circle circle;
+                markerOption = new MarkerOptions();
+                MarkerTag tagTemp = (MarkerTag) markTemp.getValue().getTag();
+                LatLng latLng = tagTemp.getPosition();
 
-               //     Log.i("restart","tag..."+tag.getPosition());
-                   markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
+                //     Log.i("restart","tag..."+tag.getPosition());
+                markerOption.position(latLng).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_vermelho_star));
 
-                    circle = mMap.addCircle(new CircleOptions()
-                            .center(tagTemp.getPosition())
-                            .radius(500)
-                            .strokeWidth(10)
-                            .strokeColor(Color.argb(128, 173, 216, 230))
-                            .fillColor(Color.argb(24, 30, 144, 255))
-                            .clickable(true));
+                circle = mMap.addCircle(new CircleOptions()
+                        .center(tagTemp.getPosition())
+                        .radius(500)
+                        .strokeWidth(10)
+                        .strokeColor(Color.argb(128, 173, 216, 230))
+                        .fillColor(Color.argb(24, 30, 144, 255))
+                        .clickable(true));
 
-                    mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+                mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
 
-                        @Override
-                        public void onCircleClick(Circle circle) {
-                            // Flip the r, g and b components of the circle's
-                            // stroke color.
-                            int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
-                            circle.setStrokeColor(strokeColor);
-                        }
-                    });
-                    MarkerTag tag = new MarkerTag(tagTemp.getPosition().latitude, tagTemp.getPosition().longitude, circle, tagTemp.getValidate());
-                    tag.setId(tagTemp.getId());
-                    if(tag.getValidate()){
-                    tag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
-                    } else {
-                    tag.getCircle().setStrokeColor(Color.argb(128, 224, 158, 90));
+                    @Override
+                    public void onCircleClick(Circle circle) {
+                        // Flip the r, g and b components of the circle's
+                        // stroke color.
+                        int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+                        circle.setStrokeColor(strokeColor);
                     }
-                    marker1 = markTemp.getValue();
-                    marker1.remove();
-
-                    marker1 = mMap.addMarker(markerOption);
-                    marker1.setTag(tag);
-                    markerHashMap.put(tagTemp.getId(),marker1);
-
+                });
+                MarkerTag tag = new MarkerTag(tagTemp.getPosition().latitude, tagTemp.getPosition().longitude, circle, tagTemp.getValidate());
+                tag.setId(tagTemp.getId());
+                if (tag.getValidate()) {
+                    tag.getCircle().setStrokeColor(Color.argb(128, 2, 158, 90));
+                } else {
+                    tag.getCircle().setStrokeColor(Color.argb(128, 224, 158, 90));
                 }
+                marker1 = markTemp.getValue();
+                marker1.remove();
 
-                Log.i("restart","foi restaurado.."+markerHashMap.size());
+                marker1 = mMap.addMarker(markerOption);
+                marker1.setTag(tag);
+                markerHashMap.put(tagTemp.getId(), marker1);
 
             }
 
+            Log.i("restart", "foi restaurado.." + markerHashMap.size());
+
+        }
+
 
     }
-
-
 
 
     /*Override do metodo onMapClick..*/
@@ -732,9 +731,9 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
     @Override
     public void onResume() {
-        Log.i("restart","resume actived");
+        Log.i("restart", "resume actived");
         //  rebuild = true;
-       // rebuildControl = 2;
+        // rebuildControl = 2;
         super.onResume();
 
 
@@ -742,19 +741,19 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i("teste","changed location");
+        Log.i("teste", "changed location");
         /*Armazenando a ultima posição*/
         mCurrentLocation = location;
-        newLatLng = new LatLng(location.getLatitude(),location.getLongitude()) ;
+        newLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
 
-        if(myCurrentLocationTag == null){
+        if (myCurrentLocationTag == null) {
             myCurrentLocationTag = new MarkerTag();
             myCurrentLocationTag.setId("MyCurrentTag");
             myCurrentLocationTag.setValidate(true);
             myCurrentLocationTag.setLatitude(location.getLatitude());
             myCurrentLocationTag.setLongitude(location.getLongitude());
-        }else{
+        } else {
             myCurrentLocationTag.setLatitude(location.getLatitude());
             myCurrentLocationTag.setLongitude(location.getLongitude());
         }
@@ -775,7 +774,7 @@ public class MapsQuarto extends SupportMapFragment implements LocationListener, 
                                 .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location))
                         );
                         mCurrLocation.setTag(myCurrentLocationTag);
-                //        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12.0f));
+                        //        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newLatLng, 12.0f));
                     }
                 });
 

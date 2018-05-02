@@ -51,8 +51,8 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
-    // private String userId = currentUser.getUid();
-    String userId = "123";
+    private String userId = currentUser.getUid();
+    //String userId = "123";
     private DatabaseReference mDatabaseReference;
     private FirebaseDatabase firebaseDatabase;
     public static HashMap<Marker, MarkerTag> markerHashMap = new HashMap<>();
@@ -77,7 +77,7 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
         myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
         latString = myPreferences.getString("lat", null);
         lngString = myPreferences.getString("lng", null);
-        Log.d(TAG, "SharedPreferences: "+lngString);
+        Log.d(TAG, "SharedPreferences: " + lngString);
         if (latString != null && lngString != null) {
             latPrefers = Double.valueOf(latString);
             lngPrefers = Double.valueOf(lngString);
@@ -134,6 +134,13 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
             }
         });
+
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                marker.hideInfoWindow();
+            }
+        });
     }
 
 
@@ -163,10 +170,9 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                                 if (getServerTime() > (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
                                     if (dataSnapshot.child("idUser").getValue().equals(userId)) {
                                         markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
-                                    } else {
-                                        if (dataSnapshot.child("Validar").child(userId).exists()) {
-                                            markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
-                                        }
+                                    }
+                                    if (dataSnapshot.child("Validar").child(userId).exists()) {
+                                        markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
                                     }
                                     Marker marker = mMap.addMarker(markerOption);
                                     markerHashMap.put(marker, markerTag);

@@ -69,8 +69,8 @@ public class MarkerDialog {
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
 
-   // String userId = currentUser.getUid();
-    String userId = "123";
+    String userId = currentUser.getUid();
+    //String userId = "123";
     HashMap<String, Circle> circles = new HashMap<String, Circle>();
     Long creationDate;
 
