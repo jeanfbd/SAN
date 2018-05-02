@@ -70,6 +70,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     GeoFire geoFire;
     String userId ="123";
     HashMap<String, String> foregroundHashMap = new HashMap<>();
+    LocationListener locationListenerGPS;
 
     @Override
     public void onCreate() {
@@ -97,18 +98,18 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         if (intent.getAction().equals(START)) {
             Log.i("teste", "Received Start Foreground Intent ");
             IS_SERVICE_RUNNING = true;
-            showNotification();
-
+            setUpLocation();
 
             //  Toast.makeText(this, "Service Started!", Toast.LENGTH_SHORT).show();
         } else if (intent.getAction().equals(STOP)) {
             Log.i("teste", "Received Stop Foreground Intent");
             if(started){
+
                 Log.i("teste", "started");
                 stopLocationUpdates();
-                IS_SERVICE_RUNNING = false;
                 stopForeground(true);
                 stopSelf();
+
             }
 
         }
@@ -136,7 +137,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         startForeground(ID_FOREGROUND_SERVICE,
                 notification);
 
-        setUpLocation();
+
 
     }
 
@@ -145,6 +146,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         super.onDestroy();
         Log.i("teste", "In onDestroy");
         Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
+        IS_SERVICE_RUNNING = false;
     }
 
     @Override
@@ -178,7 +180,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             displayLocation();
             checkLocationSettings();
             started = true;
-
+            showNotification();
         }
 
     }
@@ -232,7 +234,23 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     /* 4 - criando o method que irá checar o status do locationSettings */
     protected void checkLocationSettings() {
 
+        locationListenerGPS = new LocationListener() {
+            @Override
+            public void onLocationChanged(android.location.Location location) {
+        if(IS_SERVICE_RUNNING){
+             Log.i("teste","location ok esta mudando..");
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                getRaioFirebase(latitude,longitude,5.0);
 
+        }
+
+
+
+
+            }
+
+        };
         recreateGoogleRefers();
         PendingResult<LocationSettingsResult> result =
                 LocationServices.SettingsApi.checkLocationSettings(
@@ -275,20 +293,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
     }
 
-    LocationListener locationListenerGPS = new LocationListener() {
-        @Override
-        public void onLocationChanged(android.location.Location location) {
 
-
-            Log.i("teste","location ok esta mudando..");
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-             getRaioFirebase(latitude,longitude,5.0);
-
-
-        }
-
-    };
 
         public void notification(){
 
@@ -345,9 +350,19 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
         recreateGoogleRefers();
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient,
-                locationListenerGPS);
+
+        if(mGoogleApiClient.isConnected()){
+            LocationServices.FusedLocationApi.removeLocationUpdates(
+                    mGoogleApiClient,
+                    locationListenerGPS);
+        }else{
+
+        }
+
+    }
+    public void teste(){
+
+
     }
 
     /*4*/

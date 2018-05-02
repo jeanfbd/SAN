@@ -2,12 +2,14 @@ package desenvolvimentoads.san;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -28,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -260,7 +263,7 @@ public class MenuInicial extends AppCompatActivity
                 setTitle("Marcadores do Usuário");
                 break;
             case R.id.nav_user_disable:
-                showFragment(new MapsTerceiro(), "Marcadores Inativos do sistema");
+                showFragment(new MapsTerceiro(), "3 Marcadores Inativos do sistema");
                 setTitle("Marcadores Inativos do sistema");
                 break;
             case R.id.nav_integracao:
@@ -588,28 +591,52 @@ public class MenuInicial extends AppCompatActivity
     public void onStop() {
         super.onStop();
         Log.i("teste", "In Stop main");
-        if(!ForegroundService.IS_SERVICE_RUNNING){
-            Intent service = new Intent(MenuInicial.this, ForegroundService.class);
-            service.setAction(ForegroundService.START);
-            startService(service);
-        }
+
+
+            if(!ForegroundService.IS_SERVICE_RUNNING){
+                Intent service = new Intent(MenuInicial.this, ForegroundService.class);
+                service.setAction(ForegroundService.START);
+                startService(service);
+            }
+
+
+
 
 
     }
-
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;}
     @Override
     public void onResume() {
-        Log.i("teste", "In Resume main");
         super.onResume();
+        Log.i("teste", "In Resume main");
 
-        if(ForegroundService.IS_SERVICE_RUNNING){
-            Intent service = new Intent(MenuInicial.this, ForegroundService.class);
-            service.setAction(ForegroundService.STOP);
-            startService(service);
+
+
+
+
+
+        if(isMyServiceRunning(ForegroundService.class)){
+
+
+                Log.i("teste", "shutdown");
+                Intent service = new Intent(MenuInicial.this, ForegroundService.class);
+                service.setAction(ForegroundService.STOP);
+                startService(service);
+
+
+            Log.i("teste", "In Resume is running"+ForegroundService.IS_SERVICE_RUNNING);
+
         }
 
-
     }
+
 
 
     }
