@@ -41,24 +41,18 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
-import desenvolvimentoads.san.MapsQuarto;
-import desenvolvimentoads.san.MenuInicial;
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.R;
-import desenvolvimentoads.san.TelaInicial;
-
-import static android.content.ContentValues.TAG;
-
-//import desenvolvimentoads.san.Model.MarkerBD;
 
 /**
  * Created by master on 19/07/2017.
@@ -298,13 +292,18 @@ public class MarkerDialog {
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle("Validação");
         final Button btDislike = (Button) view.findViewById(R.id.btDislike);
-        final TextView streetText = (TextView) view.findViewById(R.id.txInfo);
         final Button btValidate = (Button) view.findViewById(R.id.btLike);
-        Button btCancel = (Button) view.findViewById(R.id.btCancel);
-        final ImageView vermelho = (ImageView) view.findViewById(R.id.btThree);
-        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+        final Button btCancel = (Button) view.findViewById(R.id.btCancel);
+        final TextView street = (TextView) view.findViewById(R.id.street);
+        final TextView location = (TextView) view.findViewById(R.id.location);
+        final TextView datetime = (TextView) view.findViewById(R.id.datetime);
+        final ImageView markerimage = (ImageView) view.findViewById(R.id.markerimage);
 
-        streetText.setText(markerTag.getStreet());
+
+        markerimage.setImageResource(R.mipmap.ic_maker_vermelho);
+        street.setText(markerTag.getStreet());
+        location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
+        datetime.setText(convertTime(0));
 
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
@@ -427,14 +426,14 @@ public class MarkerDialog {
                 final String itemId = mDatabase.child("Marker").push().getKey();
                 //Faz referencia da key na tag do marcador
                 tag.setId(itemId);
-
                 marcador.setTag(tag);
                 marcador.setDraggable(false);
 
                 MarkerTag markerTag = (MarkerTag) marcador.getTag();
                 //Persiste os dados sobre a chave itemId
                 mDatabase.child("Marker").child(itemId).setValue(markerTag);
-                mDatabase.child("Marker").child(itemId).child("fim").setValue(getCreationDate());
+                //mDatabase.child("Marker").child(itemId).child("fim").setValue(getCreationDate());
+
                 insertFim(markerTag, timeAdd);
                 mDatabase.child("Marker").child(itemId).child("idUser").setValue(userId);
                 circles.put(itemId, circle);
@@ -495,12 +494,14 @@ public class MarkerDialog {
         });
 
 
-        final TextView tvChoosed = (TextView) view.findViewById(R.id.tvChoosed);
-        tvChoosed.setText(getStreet(latLng, c, g));
+        final TextView street = (TextView) view.findViewById(R.id.street);
+        street.setText(getStreet(latLng, c, g));
 
+        final ImageView vermelho = (ImageView) view.findViewById(R.id.markerimage);
+        vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
 
-        final ImageView vermelho = (ImageView) view.findViewById(R.id.red_star);
-        vermelho.setImageResource(R.mipmap.ic_maker_vermelho);
+        final TextView location = (TextView) view.findViewById(R.id.location);
+        location.setText("Latitude: " + latLng.latitude + "\nLongitude: " + latLng.longitude);
 
 
         builder.setView(view);
@@ -708,17 +709,10 @@ public class MarkerDialog {
         return timestamp;
     }
 
+    public String convertTime(long time) {
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("dd/MM/yyyy-HH:mm:ss");
 
-    public java.util.Map<String, String> getCreationDate() {
-        return ServerValue.TIMESTAMP;
-    }
-
-    @Exclude
-    public Long getCreationDateLong() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Long creationDate) {
-        this.creationDate = creationDate;
+        return format.format(date);
     }
 }

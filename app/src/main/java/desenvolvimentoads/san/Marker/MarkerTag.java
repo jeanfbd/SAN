@@ -4,6 +4,7 @@ package desenvolvimentoads.san.Marker;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.Exclude;
+import com.google.firebase.database.ServerValue;
 
 /**
  * Created by master on 22/07/2017.
@@ -12,9 +13,11 @@ import com.google.firebase.database.Exclude;
 public class MarkerTag {
 
     private String id;
+    private String idUser;
     private double latitude;
     private double longitude;
     private String street;
+    private Long fim;
 
     @Exclude
     private boolean validate = false;
@@ -25,7 +28,6 @@ public class MarkerTag {
     private com.google.android.gms.maps.model.LatLng mapsLatLng;
 
     public MarkerTag() {
-
     }
 
     public MarkerTag(double latitude, double longitude, Circle circle, boolean validate) {
@@ -66,6 +68,27 @@ public class MarkerTag {
 
     public void setStreet(String street) {
         this.street = street;
+    }
+
+    public String getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(String idUser) {
+        this.idUser = idUser;
+    }
+
+    public java.util.Map<String, String> getFim() {
+        return ServerValue.TIMESTAMP;
+    }
+
+    public void setFim(Long fim) {
+        this.fim = fim;
+    }
+
+    @Exclude
+    public Long getFimLong() {
+        return fim;
     }
 
     @Exclude

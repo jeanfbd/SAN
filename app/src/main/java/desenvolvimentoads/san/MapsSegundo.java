@@ -122,13 +122,19 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
                     ImageView markerimage = (ImageView) v.findViewById(R.id.markerimage);
 
-                    markerimage.setImageResource(R.mipmap.ic_maker_cinza);
+                    if (markerTag.getIdUser().equals(userId)){
+                        markerimage.setImageResource(R.mipmap.ic_maker_cinza);
+                    }else{
+                        markerimage.setImageResource(R.mipmap.ic_maker_cinza_star);
+                    }
+
+
 
                     street.setText(markerTag.getStreet());
 
                     location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
 
-                    datetime.setText(convertTime(Long.parseLong(markerTag.getId())));
+                    datetime.setText(convertTime(markerTag.getFimLong()));
                 }
                 return v;
 
@@ -162,7 +168,7 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot != null && dataSnapshot.getValue() != null) {
                             MarkerTag markerTag = dataSnapshot.getValue(MarkerTag.class);
-                            markerTag.setId("" + dataSnapshot.child("fim").getValue());
+                            markerTag.setFim((Long)dataSnapshot.child("fim").getValue());
                             if (dataSnapshot.child("fim").getValue() != null) {
                                 MarkerOptions markerOption = new MarkerOptions();
                                 markerOption.position(markerTag.getPosition());
