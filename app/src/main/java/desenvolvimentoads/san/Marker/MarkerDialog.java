@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
+import desenvolvimentoads.san.MenuInicial;
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.R;
 
@@ -62,9 +63,11 @@ public class MarkerDialog {
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
+    //String userId = currentUser.getUid();
 
-    String userId = currentUser.getUid();
-    //String userId = "123";
+    MenuInicial menuInicial = new MenuInicial();
+    String userId = menuInicial.getUsers();
+
     HashMap<String, Circle> circles = new HashMap<String, Circle>();
     Long creationDate;
 

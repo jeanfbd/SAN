@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
@@ -85,8 +86,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
-    private String userId = currentUser.getUid();
-//    String userId = "123";
+    //private String userId = currentUser.getUid();
+
+    MenuInicial menuInicial = new MenuInicial();
+    String userId = menuInicial.getUsers();
+
+
     private DatabaseReference mDatabaseReference;
     private FirebaseDatabase firebaseDatabase;
 
@@ -112,6 +117,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     /* Classe com os metodos dos markers */
     MarkerDialog markerDialog = new MarkerDialog();
 
+    public static HashMap<String, String> keyFirebaseHashMap = new HashMap<>();
+    public static HashMap<String, String> keyAppHashMap = new HashMap<>();
     public static HashMap<String, Marker> markerHashMap = new HashMap<>();
     public static HashMap<String, GeoQueryEventListener> notificationHashMap = new HashMap<>();
     public static final int REQUEST_PERMISSION_LOCATION = 10;
@@ -133,6 +140,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     /*da para usar como controle para verificar se deixamos ligado ou não o update*/
     boolean mRequestingLocationUpdates;
     boolean mapRebuildOk = false;
+    boolean started = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -146,10 +154,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         setUpLocation();
 
         /*usando o prefers para popular the last location from user..*/
-        myPreferences = getContext().getSharedPreferences("Location",Context.MODE_PRIVATE);
+        myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
         latString = myPreferences.getString("lat", null);
         lngString = myPreferences.getString("lng", null);
-        if(latString !=null && lngString !=null){
+        if (latString != null && lngString != null) {
             latPrefers = Double.valueOf(latString);
             lngPrefers = Double.valueOf(lngString);
         }
@@ -159,7 +167,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
        /*isso tudo esta sendo ignorado por que esta indo para o menu inicial no super..*/
         Log.i("teste", "permission terceiro called ");
         switch (requestCode) {
@@ -177,9 +185,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 break;
             default:
-                Log.i("teste","Permission neged!!!");
+                Log.i("teste", "Permission neged!!!");
         }
     }
+
     /*0*/
     private void setUpLocation() {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -200,11 +209,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                 displayLocation();
+                checkLocationSettings();
             }
+
         }
     }
-
-
 
 
     /*1*/
@@ -227,7 +236,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
 
 
-
     }
 
     /* 3 - Construindo o location Settings request*/
@@ -236,6 +244,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         builder.addLocationRequest(mLocationRequest);
         mLocationSettingsRequest = builder.build();
     }
+
     /*3.5*/
     private boolean checkPlayService() {
 
@@ -252,10 +261,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
         }
     }
+
     /* 4 - criando o method que irá checar o status do locationSettings */
     protected void checkLocationSettings() {
-
-
+        Log.i("teste", "CHECKLOCATION ");
 
 
         recreateGoogleRefers();
@@ -264,14 +273,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         mGoogleApiClient,
                         mLocationSettingsRequest
                 );
-        Log.i("teste","location pronto 1?");
+
+        Log.i("teste", "location pronto 1?");
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
 
             /* 5 Aqui que controla caso o location não estiver pronto*/
             @Override
             public void onResult(LocationSettingsResult locationSettingsResult) {
 
-                Log.i("teste","location pronto2 ?");
+                Log.i("teste", "location pronto2 ?");
                 final Status status = locationSettingsResult.getStatus();
                 switch (status.getStatusCode()) {
                     /*Pronto.. as outras opções são opcionais a tirando a required ali.*/
@@ -281,20 +291,20 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         //Toast.makeText(getContext(), "Location is already on.", Toast.LENGTH_SHORT).show();
                         mapConfig();
                         startLocationUpdates();
-                        Log.i("teste","location pronto3 ?");
+                        Log.i("teste", "location pronto3 ?");
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
 
                         //Toast.makeText(getContext(), "Location dialog will be open", Toast.LENGTH_SHORT).show();
 
                         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            Log.i("teste","location pronto4 ?");
+                            Log.i("teste", "location pronto4 ?");
 
                             /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
                             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                                     Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                                Log.i("teste","location pronto5 ?");
+                                Log.i("teste", "location pronto5 ?");
                                 //     try {
                                 // Show the dialog by calling startResolutionForResult(), and check the result
                                 // in onActivityResult().
@@ -304,7 +314,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                 alertDialogBuilder.setTitle("   Olá    ");
                                 alertDialogBuilder
                                         .setMessage("" +
-                                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar."+"" +
+                                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
                                                 "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
                                         .setCancelable(false)
                                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -319,7 +329,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                             } else {
 
-                                Log.i("teste","location pronto7 ?");
+                                Log.i("teste", "location pronto7 ?");
                                 ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
 
 
@@ -327,7 +337,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                         } else {
-                            Log.i("teste","location pronto8 ?");
+                            Log.i("teste", "location pronto8 ?");
 
                         }
 
@@ -339,7 +349,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         //    }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Log.i("teste","location pronto9 ?");
+                        Log.i("teste", "location pronto9 ?");
                         break;
                 }
             }
@@ -367,15 +377,16 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 break;
         }
     }
+
     protected void startLocationUpdates() {
 
         if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
-            Log.i("teste","location pronto331 ?");
+            Log.i("teste", "location pronto331 ?");
         } else {
 
-            Log.i("teste","location pronto332 ?");
+            Log.i("teste", "location pronto332 ?");
             goAndDetectLocation();
         }
 
@@ -387,13 +398,14 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
 
-            Log.i("teste","location pronto33222 ?");
+            Log.i("teste", "location pronto33222 ?");
         } else {
 
            /* LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             Toast.makeText(getContext(),""+LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient),
                     Toast.LENGTH_SHORT).show();
-*/Log.i("teste","location pronto33333 ?");
+*/
+            Log.i("teste", "location pronto33333 ?");
             recreateGoogleRefers();
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient,
@@ -405,6 +417,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     mRequestingLocationUpdates = true;
                 }
             });
+            started = true;
 
 
         }
@@ -432,8 +445,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     /*4*/
     private void displayLocation() {
-        if (ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission((Activity) mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //Request runtime permission
             ActivityCompat.requestPermissions(getActivity(), new String[]{
@@ -443,7 +456,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         } else {
 
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            Log.i("teste","fused  "+mLastLocation);
+            Log.i("teste", "fused  " + mLastLocation);
 
             if (mLastLocation != null) {
                 final double latitude = mLastLocation.getLatitude();
@@ -476,7 +489,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         }
                         //Move Camera to this Position
                         mCurrent.setTag(myCurrentLocationTag);
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
+                        //    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
 
 
                         if (alertHashMap != null) {
@@ -569,6 +582,17 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         mMap.setOnMapClickListener(this);
 
         mapConfig();
+
+        if (mapRebuildOk) {
+            if (latString != null && lngString != null) {
+
+
+                getRaioFirebase(latPrefers, lngPrefers, 5.00);
+                Log.i("teste", "prefers getRaio inicial ok...");
+
+            }
+
+        }
 
         //   mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.6202800, -45.4130600), 15.0f));
         mMap.clear();
@@ -680,7 +704,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
 
 
-
         Log.i("teste", "fim rebuilding...");
 
 
@@ -690,6 +713,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void onMapClick(LatLng latLng) {
         checkGpsPermission();
         checkPermission();
+        Log.i("teste", "Map clicked");
         if (mLastLocation != null) {
             newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             //Toast.makeText(getContext(), "Presta atençao " + latLng.toString(), Toast.LENGTH_LONG).show();
@@ -734,9 +758,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i("teste", "markerhashmap size : " + markerHashMap.size());
+        Log.i("teste", "Location changed markerhashmap size : " + markerHashMap.size());
 
         mLastLocation = location;
+        if (mCurrent != null) {
+            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
+        }
 
         if (mLastLocation != null) {
             getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 5.0);
@@ -745,14 +772,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             myLat = location.getLatitude();
             myLong = location.getLongitude();
 
-            sharedContext.createPrefers("Location","lat",String.valueOf(mLastLocation.getLatitude()));
-            sharedContext.createPrefers("Location","lng",String.valueOf(mLastLocation.getLongitude()));
-
-
-
-            if (mCurrent != null) {
-                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
-            }
+            sharedContext.createPrefers("Location", "lat", String.valueOf(mLastLocation.getLatitude()));
+            sharedContext.createPrefers("Location", "lng", String.valueOf(mLastLocation.getLongitude()));
 
 
         }
@@ -764,16 +785,18 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
 
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         // displayLocation();
         Log.i("teste", "OnConnected !!!Q");
-        startLocationsUpdates();
+        if (started) {
+            startLocationsUpdates();
+        }
+
 
     }
 
-    /*Em teoria se voce da stop seria aqui que daria o start*/
+    /*Em teoria se voce da stop seria aqui que daria o start, é bem melhor que o outro metodo que esta tem quase o mesmo nome sem o S*/
     private void startLocationsUpdates() {
 
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -793,7 +816,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 alertDialogBuilder.setTitle("   Olá    ");
                 alertDialogBuilder
                         .setMessage("" +
-                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar."+"" +
+                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
                                 "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
                         .setCancelable(false)
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -815,12 +838,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             }
 
-        }else{
+        } else {
             Log.i("teste", "permission track This one has called 2");
 
             recreateGoogleRefers();
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-
 
 
         }
@@ -845,6 +867,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         //  notificationApp.notification();
 
      /*
+
         Notification.Builder builder = new Notification.Builder(context)
                 .setSmallIcon(R.mipmap.ic_maker_vermelho)
                 .setContentTitle(title)
@@ -856,7 +879,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         Notification notification = builder.build();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         notification.defaults |= Notification.DEFAULT_SOUND;
+
         manager.notify(new Random().nextInt(), notification);
+
     */
     }
 
@@ -925,95 +950,98 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
-        hashMapClear();
-        getServerTime();
+        if (true) {
+            getServerTime();
+            Log.i("teste", "getraiofirebase ");
+            mDatabaseReference = ConfigFireBase.getFirebase();
+            firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
+            GeoFire geoFire2 = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
 
-        mDatabaseReference = ConfigFireBase.getFirebase();
-        firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
-        GeoFire geoFire2 = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
-
-        final GeoQuery geoQuery = geoFire2.queryAtLocation(new GeoLocation(lat, lng), radius);
-        if (mLastLocation != null) {
-            geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
-                @Override
-                public void onKeyEntered(final String key, GeoLocation location) {
-                    mDatabaseReference = ConfigFireBase.getFirebase();
-                    mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                                double latitude = (double) dataSnapshot.child("latitude").getValue();
-                                double longitude = (double) dataSnapshot.child("longitude").getValue();
-                                LatLng latLng = new LatLng(latitude, longitude);
-                                if (dataSnapshot.child("fim").getValue() != null) {
-                                    Log.i(TAG, "Servertime: " + getServerTime());
-                                    Log.i(TAG, "MarkerTime: " + dataSnapshot.child("fim").getValue());
-                                    Log.i(TAG, "Condição TEMPO: " + (getServerTime() < (Long) dataSnapshot.child("fim").getValue()));
-                                    Log.i(TAG, "Condição DENUNCIA: " + (!dataSnapshot.child("Denunciar").child(userId).exists()));
-                                    Log.i(TAG, "Condição VALIDOU: " + (dataSnapshot.child("Validar").child(userId).exists()));
-                                    if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
-                                        Log.i(TAG, "onDataChange: NÃO EXISTE DENUNCIA");
-                                        if (markerHashMap.get(key) == null) {
-                                            Log.i(TAG, "Entrou Criar: " + key);
-                                            markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
-                                            if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, 0.001)) {
-                                                if (mCurrent != null) {
-                                                    mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        if (markerHashMap.get(key) != null) {
-                                            Log.i(TAG, "Entrou Remover: " + key);
-                                            MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
-                                            Log.d(TAG, "Notifications: " + notificationHashMap.size());
-
-
-                                            Log.i("teste", "key : " + key);
-
-                                            if (alertHashMap.containsKey(key)) {
-                                                alertHashMap.remove(key);
-                                                if (alertHashMap.size() == 0) {
+            final GeoQuery geoQuery = geoFire2.queryAtLocation(new GeoLocation(lat, lng), radius);
+            if (mLastLocation != null) {
+                geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+                    @Override
+                    public void onKeyEntered(final String key, GeoLocation location) {
+                        keyFirebaseHashMap.clear();
+                        mDatabaseReference = ConfigFireBase.getFirebase();
+                        mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                                    double latitude = (double) dataSnapshot.child("latitude").getValue();
+                                    double longitude = (double) dataSnapshot.child("longitude").getValue();
+                                    LatLng latLng = new LatLng(latitude, longitude);
+                                    if (dataSnapshot.child("fim").getValue() != null) {
+                                        Log.i(TAG, "Servertime: " + getServerTime());
+                                        Log.i(TAG, "MarkerTime: " + dataSnapshot.child("fim").getValue());
+                                        Log.i(TAG, "Condição TEMPO: " + (getServerTime() < (Long) dataSnapshot.child("fim").getValue()));
+                                        Log.i(TAG, "Condição DENUNCIA: " + (!dataSnapshot.child("Denunciar").child(userId).exists()));
+                                        Log.i(TAG, "Condição VALIDOU: " + (dataSnapshot.child("Validar").child(userId).exists()));
+                                        if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
+                                            Log.i(TAG, "onDataChange: NÃO EXISTE DENUNCIA");
+                                            if (markerHashMap.get(key) == null) {
+                                                Log.i(TAG, "Entrou Criar: " + key);
+                                                markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, markerHashMap, key, dataSnapshot.child("Validar").child(userId).exists());
+                                                if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, 0.001)) {
                                                     if (mCurrent != null) {
-                                                        mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                                                        mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                                                     }
                                                 }
+                                            }
+                                        } else {
+                                            if (markerHashMap.get(key) != null) {
+                                                Log.i(TAG, "Entrou Remover: " + key);
+                                                MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
+                                                Log.d(TAG, "Notifications: " + notificationHashMap.size());
+
+
+                                                Log.i("teste", "key : " + key);
+
+                                                if (alertHashMap.containsKey(key)) {
+                                                    alertHashMap.remove(key);
+                                                    if (alertHashMap.size() == 0) {
+                                                        if (mCurrent != null) {
+                                                            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                                                        }
+                                                    }
+
+                                                }
 
                                             }
-
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        }
-                    });
-                }
+                            }
+                        });
+                    }
 
-                @Override
-                public void onKeyExited(String key) {
+                    @Override
+                    public void onKeyExited(String key) {
 
-                }
+                    }
 
-                @Override
-                public void onKeyMoved(String key, GeoLocation location) {
+                    @Override
+                    public void onKeyMoved(String key, GeoLocation location) {
 
-                }
+                    }
 
-                @Override
-                public void onGeoQueryReady() {
+                    @Override
+                    public void onGeoQueryReady() {
 
-                }
+                    }
 
-                @Override
-                public void onGeoQueryError(DatabaseError error) {
+                    @Override
+                    public void onGeoQueryError(DatabaseError error) {
 
-                }
-            });
+                    }
+                });
+
+            }
 
         }
 
@@ -1117,7 +1145,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-    public void hashMapClear() {
+    public boolean hashMapClear() {
         HashMap<String, Marker> markerHashMapTemp = markerHashMap;
         for (Map.Entry<String, Marker> markerTemp : markerHashMapTemp.entrySet()) {
             MarkerTag markerTag = (MarkerTag) markerHashMapTemp.get(markerTemp.getKey()).getTag();
@@ -1129,6 +1157,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         if (mCurrent != null) {
             mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
         }
+
+        return true;
+
     }
 
 
@@ -1150,6 +1181,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         });
         return timestamp;
     }
+
     public void checkGpsPermission() {
         Log.i("teste", "checkGpsPermission >.< ");
         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -1171,7 +1203,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 alertDialogBuilder.setTitle("   Olá    ");
                 alertDialogBuilder
                         .setMessage("" +
-                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar."+"" +
+                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
                                 "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
                         .setCancelable(false)
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -1188,12 +1220,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             } else {
 
 
-                if(sharedContext.isFirstTimeAskingPermission("Location")){
+                if (sharedContext.isFirstTimeAskingPermission("Location")) {
                     Log.i("teste", "checkGpsPermission normal");
-                    sharedContext.firstTimeAskingPermission("Location",false);
+                    sharedContext.firstTimeAskingPermission("Location", false);
                     ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
 
-                }else{
+                } else {
 
                     /*never asked selecionado...*/
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
@@ -1201,7 +1233,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     alertDialogBuilder
                             .setMessage("" +
                                     "\n O App San utiliza de dados da localização para seu funcionamento." + "\n Ao selecionar para nunca mais ser requisitado permissão e negar o aplicativo deixa de funcionar."
-                                    +"\n Para que ele funcione agora será necessario mudar manualmente a permission do location nas configurações do App")
+                                    + "\n Para que ele funcione agora será necessario mudar manualmente a permission do location nas configurações do App")
                             .setCancelable(false)
                             .setPositiveButton("Configurações", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -1219,12 +1251,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 }
 
 
-
-
             }
 
 /*Se o user mudar durante o uso o location e botar never ask again e voltar o location para true, ae essa parte faz a checagem novamente...*/
-        }else if(mapRebuildOk == false){
+        } else if (mapRebuildOk == false) {
             mapConfig();
             setUpLocation();
             MenuInicial.permissionOk = false;
@@ -1233,15 +1263,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
 
+    public void checkPermission() {
+        displayLocation();
 
-    public void checkPermission(){
-
-        if(MenuInicial.permissionOk){
+        if (MenuInicial.permissionOk) {
             mapConfig();
             setUpLocation();
             Log.i("teste", "permission ok and checked");
             MenuInicial.permissionOk = false;
-        }else{
+        } else {
 
             Log.i("teste", "permission ok and checked  ??");
 
@@ -1251,7 +1281,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     }
 
 
-    public void mapConfig(){
+    public void mapConfig() {
 
         /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
         if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -1263,13 +1293,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             mMap.getUiSettings().setZoomControlsEnabled(true);
 
 
-            if(latString !=null && lngString !=null){
-                getRaioFirebase(latPrefers, lngPrefers, 5.00);
-                Log.i("teste", "prefers getRaio inicial ok...");
-
-            }
-
-
 
             /*Listener responsavel adicionar o botão da localização*/
             mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
@@ -1277,13 +1300,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 public boolean onMyLocationButtonClick() {
 
 
-
                     if (mLastLocation != null) {
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
 
-                    }else{
+                    } else {
 
-                        if(latString !=null && lngString !=null){
+                        if (latString != null && lngString != null) {
 
                             mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latPrefers, lngPrefers)));
                             Log.i("teste", "prefers camera ok...");
@@ -1292,8 +1314,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                     }
-
-
 
 
                     return false;
@@ -1312,14 +1332,14 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    public void recreateGoogleRefers(){
+    public void recreateGoogleRefers() {
 
-        if(mGoogleApiClient == null){
+        if (mGoogleApiClient == null) {
             buildGoogleApiClient();
             checkPlayService();
         }
 
-        if(mLocationSettingsRequest == null){
+        if (mLocationSettingsRequest == null) {
             createLocationRequest();
             buildLocationSettingsRequest();
         }
@@ -1328,14 +1348,23 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onStop() {
+        Log.i("teste", "STOP TERCEIRO  ??");
         super.onStop();
+        if (started) {
+            Log.i("teste", "STOPLOCATION CALLED");
+            stopLocationUpdates();
+        }
 
 
     }
+
     @Override
     public void onResume() {
-
+        Log.i("teste", "RESUME TERCEIRO ??");
         super.onResume();
+        if (started) {
+            startLocationsUpdates();
+        }
 
 
     }

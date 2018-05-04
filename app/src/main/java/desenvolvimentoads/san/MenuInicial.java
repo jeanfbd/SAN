@@ -30,14 +30,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.squareup.picasso.Picasso;
 
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
@@ -51,9 +52,18 @@ public class MenuInicial extends AppCompatActivity
     private GoogleApiClient googleApiClient;
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
     private FirebaseAuth firebaseAuth;
+    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+
     private String userName;
     private String userEmail;
     private String userId;
+    private Uri photourl;
+
+    //    0 - jeanfelipe.brock@gmail.com
+//    1 - jeanbrock.felipe@gmail.com
+//    2 - felipemrk2e@gmail.com
+    private String[] users = {"Pi02YW9d7NYgPvhjmeaB1m27Aiy2", "Wpk4eUKu53hsUg9tEFAXkbuEgeg2", "pouNOiMFxgeDxOgn0GXquvvkH9G2"};
 
     private boolean buttomAddMarkerVisivel;
     private static final String TAG = "MenuInicial";
@@ -117,6 +127,37 @@ public class MenuInicial extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        if (currentUser != null) {
+            userName = currentUser.getDisplayName();
+            userEmail = currentUser.getEmail();
+            userId = currentUser.getUid();
+
+            TextView textView = (TextView) navigationView.getHeaderView(0).findViewById(R.id.textView);
+            textView.setText(userEmail);
+
+            TextView userText = (TextView) navigationView.getHeaderView(0).findViewById(R.id.userText);
+            userText.setText(userName);
+
+            if (currentUser.getPhotoUrl() != null) {
+                ImageView imageView = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.imageView);
+                Picasso.with(this).load(currentUser.getPhotoUrl()).placeholder(R.mipmap.ic_logo_san)
+                        .error(R.mipmap.ic_logo_san)
+                        .into(imageView, new com.squareup.picasso.Callback() {
+
+                                    @Override
+                                    public void onSuccess() {
+
+                                    }
+
+                                    @Override
+                                    public void onError() {
+
+                                    }
+                                }
+                        );
+            }
+        }
 
         fragmentManager = getSupportFragmentManager();
 
@@ -281,7 +322,6 @@ public class MenuInicial extends AppCompatActivity
         startActivity(intent);
 
     }
-
 
     private void showFragment(Fragment fragment, String name) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -633,6 +673,12 @@ public class MenuInicial extends AppCompatActivity
 
     }
 
+    //    0 - jeanfelipe.brock@gmail.com
+    //    1 - jeanbrock.felipe@gmail.com
+    //    2 - felipemrk2e@gmail.com
+    public String getUsers() {
+        return users[2];
+    }
 
 }
 

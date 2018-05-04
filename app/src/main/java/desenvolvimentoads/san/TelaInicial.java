@@ -96,18 +96,11 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
                 }
             }
         };
-
-//        boolean guest = true;
-//        if(guest){
+//
 //            Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
 //            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //            startActivity(intent);
 //            finish();
-//
-//
-//        }
-
-
     }
 
     public String getIdToken() {
