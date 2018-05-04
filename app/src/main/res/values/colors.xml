@@ -10,4 +10,6 @@
 
     <color name="white">#ffffff</color>
     <color name="light_grey">#e1e1e1</color>
+
+    <color name="menu_blue">#236C9C</color>
 </resources>
