@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -47,14 +48,14 @@ import desenvolvimentoads.san.Observer.SharedContext;
 public class MenuInicial extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener, ActionObserver {
 
-    public static final int REQUEST_PERMISSION_LOCATION = 10;
+
     private static final int MY_PERMISSION_REQUEST_CODE = 2508;
     private GoogleApiClient googleApiClient;
     private FirebaseAuth.AuthStateListener firebaseAuthListener;
     private FirebaseAuth firebaseAuth;
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-
+    NavigationView navigationView;
     private String userName;
     private String userEmail;
     private String userId;
@@ -74,6 +75,7 @@ public class MenuInicial extends AppCompatActivity
     static MenuItem denunciar;
     public static Boolean vDenunciar = true;
     public static Boolean permissionOk = false;
+    boolean menuStarted = false;
     SharedContext sharedContext = SharedContext.getInstance();
     Context context = this;
 
@@ -125,8 +127,10 @@ public class MenuInicial extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+
+
 
         if (currentUser != null) {
             userName = currentUser.getDisplayName();
@@ -158,6 +162,43 @@ public class MenuInicial extends AppCompatActivity
                         );
             }
         }
+
+        if (Build.VERSION.SDK_INT <= 22) {
+            permissionOk = true;
+            Log.i("teste", "------------------- BUILD VERSION ---------------------  " +Build.VERSION.SDK_INT);
+            menuStart();
+
+        }else{
+            checkPermission();
+
+        }
+
+
+
+
+    }
+    public void checkPermission(){
+
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+
+            ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_CODE);
+
+
+
+
+        }else{
+
+            menuStart();
+
+        }
+
+
+        }
+
+    public void menuStart(){
+        navigationView.setNavigationItemSelectedListener(this);
 
         fragmentManager = getSupportFragmentManager();
 
@@ -206,6 +247,7 @@ public class MenuInicial extends AppCompatActivity
             }
         });
 
+        menuStarted = true;
     }
 
 
@@ -429,6 +471,7 @@ public class MenuInicial extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         Log.i("teste", "Permission called !!!");
+        Log.i("teste", "Permission called  code "+requestCode+" mycode "+MY_PERMISSION_REQUEST_CODE);
         switch (requestCode) {
 
             case MY_PERMISSION_REQUEST_CODE:
@@ -436,6 +479,11 @@ public class MenuInicial extends AppCompatActivity
 
                     Log.i("teste", "permission terceiro accepted ");
                     permissionOk = true;
+                    if(!menuStarted){
+                        menuStart();
+
+                    }
+
                 } else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     // Should we show an explanation?
                     if (ActivityCompat.shouldShowRequestPermissionRationale(this,
@@ -457,7 +505,7 @@ public class MenuInicial extends AppCompatActivity
                                 .setCancelable(false)
                                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+                                        ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_CODE);
 
                                     }
                                 });
@@ -678,6 +726,16 @@ public class MenuInicial extends AppCompatActivity
     //    2 - felipemrk2e@gmail.com
     public String getUsers() {
         return users[2];
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i("teste", "In onDestroy Menuinicial");
+        if (ForegroundService.IS_SERVICE_RUNNING) {
+            Intent service = new Intent(MenuInicial.this, ForegroundService.class);
+            service.setAction(ForegroundService.STOP);
+            startService(service);
+        }
     }
 
 }

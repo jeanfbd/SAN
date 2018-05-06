@@ -117,7 +117,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     }
 
     private void showNotification() {
-
+        Log.i("teste", " SHOW NOTIFICATION");
 
 
         Intent stopIntent = new Intent(this, ForegroundService.class);
@@ -156,12 +156,12 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     }
 
     public void checkGpsPermission() {
-        Log.i("teste", "checkGpsPermission >.< ");
+        Log.i("teste", "------------------- METHOD CHECKPERMISSION >.< ---------------------");
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
+            Log.i("teste", "checkGpsPermission permission needed ");
 
         } else {
-            Log.i("teste", "checkGpsPermission2  ");
+            Log.i("teste", "checkGpsPermission permission ok ");
         }
 
 
@@ -169,7 +169,8 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
     /*0*/
     private void setUpLocation() {
-        Log.i("teste", "iniciou  ");
+        Log.i("teste", "------------------- METHOD 0 setUpLocation ---------------------");
+
         checkGpsPermission();
         buildGoogleApiClient();
         createLocationRequest();
@@ -178,6 +179,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
 
             displayLocation();
+            createLocationListener();
             checkLocationSettings();
             started = true;
             showNotification();
@@ -188,6 +190,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     /*1*/
 
     protected synchronized void buildGoogleApiClient() {
+        Log.i("teste", "------------------- METHOD 1 BUILDGOOGLE ---------------------");
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addApi(LocationServices.API)
@@ -197,6 +200,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
     /*2*/
     private void createLocationRequest() {
+        Log.i("teste", "------------------- METHOD 2 CREATELOCATIONRESQUEST ---------------------");
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         mLocationRequest.setFastestInterval(FATEST_INTERVAL);
@@ -208,6 +212,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
     /* 3 - Construindo o location Settings request*/
     protected void buildLocationSettingsRequest() {
+        Log.i("teste", "------------------- METHOD 3 buildLocationSettingsRequest ---------------------");
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
         mLocationSettingsRequest = builder.build();
@@ -215,7 +220,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
     /*3.5*/
     private boolean checkPlayService() {
-        Log.i("teste","checkpaly");
+        Log.i("teste", "------------------- METHOD 3.5 checkPlayService ---------------------");
         /*Se npegar a instancia do googleservice o fused não funciona -.-*/
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int resultCode = googleAPI.isGooglePlayServicesAvailable(this);
@@ -230,20 +235,21 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
         }
     }
-
-    /* 4 - criando o method que irá checar o status do locationSettings */
-    protected void checkLocationSettings() {
-
+    /*3.7*/
+    public void createLocationListener(){
+        Log.i("teste", "------------------- METHOD 3.7 createLocationListener ---------------------");
         locationListenerGPS = new LocationListener() {
             @Override
             public void onLocationChanged(android.location.Location location) {
-        if(IS_SERVICE_RUNNING){
-             Log.i("teste","location ok esta mudando..");
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                getRaioFirebase(latitude,longitude,5.0);
+                Log.i("teste", "------------------- LOCATION ON ---------------------");
 
-        }
+                if(IS_SERVICE_RUNNING){
+                    Log.i("teste","location ok esta mudando..");
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
+                    getRaioFirebase(latitude,longitude,5.0);
+
+                }
 
 
 
@@ -251,42 +257,62 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             }
 
         };
+
+    }
+
+
+    /* 4 - criando o method que irá checar o status do locationSettings */
+    protected void checkLocationSettings() {
+        Log.i("teste", "------------------- METHOD 4 checkLocationSettings ---------------------");
+
+
         recreateGoogleRefers();
         PendingResult<LocationSettingsResult> result =
                 LocationServices.SettingsApi.checkLocationSettings(
                         mGoogleApiClient,
                         mLocationSettingsRequest
                 );
-        Log.i("teste", "location pronto 1?");
+
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
 
             /* 5 Aqui que controla caso o location não estiver pronto*/
             @Override
             public void onResult(LocationSettingsResult locationSettingsResult) {
 
-                Log.i("teste", "location pronto2 ?");
+
+
                 final Status status = locationSettingsResult.getStatus();
+                Log.i("teste", "------------------- LocationSettingsResult --------------------- CODE "+status);
                 switch (status.getStatusCode()) {
                     /*Pronto.. as outras opções são opcionais a tirando a required ali.*/
                     case LocationSettingsStatusCodes.SUCCESS:
 
 
                         startLocationUpdates();
-                        Log.i("teste", "location pronto3 ?");
+                        Log.i("teste", "LocationSettingsResult started");
                         break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        if (Build.VERSION.SDK_INT <= 22) {
+                            Log.i("teste", "------------------- BUILD VERSION ---------------------  " +Build.VERSION.SDK_INT);
+                            startLocationUpdates();
 
+                        }
+                    break;
                 }
+
+
+
             }
         });
     }
 
     protected void startLocationUpdates() {
-        Log.i("teste","start");
+        Log.i("teste", "------------------- startLocationUpdates -------------------- ");
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
+            Log.i("teste", "startLocationUpdates checkSelfPermission needed");
 
         } else {
-
+            Log.i("teste", "startLocationUpdates checkSelfPermission not needed");
 
             goAndDetectLocation();
         }
@@ -329,11 +355,11 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         }
 
     public void goAndDetectLocation() {
-        Log.i("teste","goanddetect");
+        Log.i("teste","goAndDetectLocation called");
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
+            Log.i("teste","goAndDetectLocation permission needed");
         } else {
-
+            Log.i("teste","goAndDetectLocation permission not needed");
 
             // recreateGoogleRefers();
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
@@ -346,6 +372,9 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
     /*é bom para colocar qdo o app entrar em resumo para parar o fused..*/
     protected void stopLocationUpdates() {
+
+        Log.i("teste","stopLocationUpdates called");
+
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
@@ -360,15 +389,12 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         }
 
     }
-    public void teste(){
 
-
-    }
 
     /*4*/
     @SuppressLint("MissingPermission")
     private void displayLocation() {
-        Log.i("teste","display");
+        Log.i("teste","displayLocation");
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
             if (mLastLocation != null) {
@@ -381,7 +407,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     }
 
     public void recreateGoogleRefers(){
-        Log.i("teste","recreate");
+        Log.i("teste","recreateGoogleRefers ");
         if(mGoogleApiClient == null){
             buildGoogleApiClient();
             checkPlayService();

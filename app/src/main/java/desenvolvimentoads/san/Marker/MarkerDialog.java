@@ -85,16 +85,17 @@ public class MarkerDialog {
     Action action = Action.getInstance();
 
 
+
     public static void deleteDataArrayFirebase(final HashMap<String, Marker> m, final String key) {
 
 
         MarkerTag markerTag = (MarkerTag) m.get(key).getTag();
 
-        if (markerTag.getId() == key) {
+            markerTag.getCircle().remove();
             m.get(key).remove();
             m.remove(key);
-            markerTag.getCircle().remove();
-        }
+
+
 
 
     }
@@ -146,18 +147,11 @@ public class MarkerDialog {
 
     }
 
-    public HashMap<String, Circle> getCircles() {
-        return circles;
-    }
-
-    public void setCircles(HashMap<String, Circle> circles) {
-        this.circles = circles;
-    }
 
     /*Verifica se existe algum marcador proximo retornando true se existir.*/
     public Boolean hasNearby(final HashMap<String, Marker> m, final LatLng latLng) {
 
-        double proximity = RADIUS * 0.002;
+        double proximity = RADIUS * 0.001;
 
         double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
         double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
@@ -188,7 +182,7 @@ public class MarkerDialog {
     /*Verifica se a ultima posição é proxima a do local a onde o marcador sera inserido retornando true se for*/
     public Boolean closeToMe(final LatLng myPosition, final LatLng latLng) {
 
-        double proximity = RADIUS * 1.01;
+        double proximity = RADIUS * 0.001;
 
 
         double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
@@ -310,14 +304,14 @@ public class MarkerDialog {
 
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                alerta.dismiss();
+
 
 
 
 
 
                         insertValidar((MarkerTag)m.get(markerTag.getId()).getTag(), userId, timeAdd, false,m);
-
+                         alerta.dismiss();
 
             }
         });
@@ -387,7 +381,7 @@ public class MarkerDialog {
     }
 
 
-    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m) {
+    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m,final HashMap<String,String> keyAppHash) {
 
 
 
@@ -406,7 +400,7 @@ public class MarkerDialog {
 
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                alerta.dismiss();
+
 
 
                 image = R.mipmap.ic_maker_vermelho_star;
@@ -477,7 +471,10 @@ public class MarkerDialog {
                 action.setButtomAddMakerClickado(true);
                 zoomMarker(latLng, googleMapFinal);
                 m.put(itemId, marcador);
+                keyAppHash.put(itemId,itemId);
                 action.setItemId(itemId);
+                alerta.dismiss();
+
             }
 
         });
@@ -486,11 +483,13 @@ public class MarkerDialog {
             public void onClick(View arg0) {
 
                 Log.i("teste","cancel pressed !!!");
-                alerta.dismiss();
+
                 if (!Action.getInstance().getButtomAddMakerClickado()) {
 
                     Action.getInstance().setButtomAddMakerClickado(true);
                 }
+
+                alerta.dismiss();
 
 
             }
@@ -517,7 +516,7 @@ public class MarkerDialog {
     public void zoomMarker(LatLng arg0, GoogleMap googleMap) {
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(arg0)               // Sets the center of the map
-                .zoom(14)                   // Sets the zoom
+                .zoom(13)                   // Sets the zoom
                 //      .bearing(90)                // Sets the orientation of the camera to east
                 //  .tilt(30)                   // Sets the tilt of the camera to 30 degrees
                 .build();                   // Creates a CameraPosition from the builder
