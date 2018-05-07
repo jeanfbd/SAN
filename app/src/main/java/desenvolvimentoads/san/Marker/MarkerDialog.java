@@ -468,13 +468,13 @@ public class MarkerDialog {
                         }
                     }
                 });
-/*
+
                 GeoHash geoHash = new GeoHash(new GeoLocation(marcador.getPosition().latitude, marcador.getPosition().longitude));
                 Map<String, Object> updates = new HashMap<>();
                 updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
                 updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
 
-  */
+
             action.setButtomAddMakerClickado(true);
              //zoomMarker(latLng, googleMapFinal);
                 m.put(itemId, marcador);
