@@ -127,7 +127,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public static HashMap<String, GeoQueryEventListener> notificationHashMap = new HashMap<>();
     public static final int REQUEST_PERMISSION_LOCATION = 10;
     Double getRaioFirebaseRadius = 5.0;
-    Double closeToMeRadius = 0.001;
+    /*Value in Meters*/
+    Double closeToMeRadius = 1.0;
+    Double circleRadius = 12.5;
 
     GeoQueryEventListener notificationListener;
     public static HashMap<String, String> alertHashMap = new HashMap<>();
@@ -300,7 +302,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                         //Toast.makeText(getContext(), "Location is already on.", Toast.LENGTH_SHORT).show();
                         mapConfig();
-                        startLocationUpdates();
+                        startLocationsUpdates();
                         Log.i("teste", "LocationSettingsResult sucess ");
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
@@ -378,7 +380,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     case Activity.RESULT_OK:
                         Log.i("Teste", "onActivityResult User agreed to make required location settings changes.");
                         mapConfig();
-                        startLocationUpdates();
+                        startLocationsUpdates();
                         break;
                     case Activity.RESULT_CANCELED:
                         Log.i("Teste", "onActivityResult User chose not to make required location settings changes.");
@@ -390,51 +392,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    protected void startLocationUpdates() {
-        Log.i("teste", "------------------- METHOD startLocationUpdates WITHOUT S ---------------------");
-        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
-            Log.i("teste", "startLocationUpdates permissio asked");
-        } else {
-
-            Log.i("teste", "startLocationUpdates permission not needed");
-            goAndDetectLocation();
-        }
-
-    }
-
-
-    public void goAndDetectLocation() {
-        Log.i("teste", "------------------- METHOD goAndDetectLocation ---------------------");
-        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
-
-            Log.i("teste", "goAndDetectLocation permission asked");
-        } else {
-
-           /* LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            Toast.makeText(getContext(),""+LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient),
-                    Toast.LENGTH_SHORT).show();
-*/
-            Log.i("teste", "goAndDetectLocation checked and not needed ?");
-            recreateGoogleRefers();
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient,
-                    mLocationRequest, this
-            ).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(Status status) {
-                /* usa isso para saber se esta habilitado o location updates*/
-                    mRequestingLocationUpdates = true;
-                }
-            });
-            started = true;
-
-
-        }
-
-    }
 
     /*é bom para colocar qdo o app entrar em resumo para parar o fused..*/
     protected void stopLocationUpdates() {
@@ -580,11 +538,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                             } else {
-                                Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_SHORT).show();
                             }
 
                         } else {
-                            Toast.makeText(getContext(), "Você precisa estar proximo do ponto a ser marcado", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "Você precisa estar proximo do ponto a ser marcado", Toast.LENGTH_SHORT).show();
                         }
                     }
                 } else {
@@ -608,7 +566,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         if (mapRebuildOk) {
             if (latString != null && lngString != null) {
 
-
+                Log.i("teste1", "->>>> map create "+keyFirebaseHashMap.size());
                 getRaioFirebase(latPrefers, lngPrefers, getRaioFirebaseRadius);
                 Log.i("teste", " setOnMapLongClickListener prefers getRaio inicial ok...");
 
@@ -617,7 +575,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
 
         //   mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-23.6202800, -45.4130600), 15.0f));
-     //   mMap.clear();
+        mMap.clear();
         rebuildMap();
 
     }
@@ -626,7 +584,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         Log.i("teste", "rebuildGeoQuery2 ");
 
         if (alertHashMap != null) {
-            alertHashMap.clear();
+           alertHashMap = new HashMap<>();
 
         if (mLastLocation != null) {
 
@@ -685,7 +643,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 circle = mMap.addCircle(new CircleOptions()
                         .center(tagTemp.getPosition())
-                        .radius(500)
+                        .radius(circleRadius)
                         .strokeWidth(10)
                         .strokeColor(Color.argb(128, 173, 216, 230))
                         .fillColor(Color.argb(24, 30, 144, 255))
@@ -737,6 +695,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         if (mLastLocation != null) {
             newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             //Toast.makeText(getContext(), "Presta atençao " + latLng.toString(), Toast.LENGTH_LONG).show();
+            Log.i("teste1", "->>>> map click "+keyFirebaseHashMap.size());
             getRaioFirebase(latLng.latitude, latLng.longitude, getRaioFirebaseRadius);
 
 
@@ -744,30 +703,33 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
             if (!buttomAddMarkerVisivel) {
-
+                Log.i("teste", "marker not visible");
 
               /* Verifico a proximidade do user com o local que ele vai por o marcador*/
                 if (markerDialog.closeToMe(newLatLng, latLng)) {
+                    Log.i("teste", "marker not closed to me");
                                   /* Verifico se existe algum marcador proximo */
+                    Log.i("teste"," before hasneraby RAIO "+markerHashMap.size());
                     if (!markerDialog.hasNearby(markerHashMap, latLng)) {
+                        Log.i("teste", "marker not nearby");
                         markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap,keyAppHashMap);
-                        Log.i(TAG, "onMapClick: LAT: " + latLng.latitude + " LOG: " + latLng.longitude);
+
 
 
                     } else {
-                        Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_SHORT).show();
 
                     }
 
                 } else {
-                    Toast.makeText(getContext(), " É necessario estar proximo ao local a ser marcado", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), " É necessario estar proximo ao local a ser marcado", Toast.LENGTH_SHORT).show();
 
                 }
 
             } else {
 
 
-                Toast.makeText(getContext(), "Coordenadas: " + latLng.toString(), Toast.LENGTH_LONG).show();
+
             }
 
 
@@ -781,11 +743,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         Log.i("teste", "Location changed markerhashmap size : " + markerHashMap.size());
 
         mLastLocation = location;
-        if (mCurrent != null) {
-            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
-        }
 
         if (mLastLocation != null) {
+            Log.i("teste1", "->>>> Location Change "+keyFirebaseHashMap.size());
            getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius);
            displayLocation();
 
@@ -958,16 +918,20 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
 
-
             getServerTime();
             Log.i("teste", "getraiofirebase ");
-            mDatabaseReference = ConfigFireBase.getFirebase();
+
+        Log.i("teste1", "->>>> key fire antes size "+keyFirebaseHashMap.size());
+
+        Log.i("teste1", "key app antes size "+keyAppHashMap.size());
+
+        mDatabaseReference = ConfigFireBase.getFirebase();
             firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
             GeoFire geoFire2 = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
 
             final GeoQuery geoQuery = geoFire2.queryAtLocation(new GeoLocation(lat, lng), radius);
             if (mLastLocation != null) {
-                keyFirebaseHashMap.clear();
+
                 geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                     @Override
                     public void onKeyEntered(final String key, GeoLocation location) {
@@ -985,6 +949,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                         if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
                                             keyFirebaseHashMap.put(key,key);
 
+                                            Log.i("teste1", "->>>> key fire aadiciionou uma key "+key);
+
                                             if (markerHashMap.get(key) == null) {
                                                 Log.i(TAG, "Entrou Criar: " + key);
                                                 keyAppHashMap.put(key,key);
@@ -996,14 +962,18 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                                 }
                                             }
                                         } else {
+
+
                                             if(keyFirebaseHashMap.get(key) !=null){
                                                 keyFirebaseHashMap.remove(key);
+                                                Log.i("teste1", "->>>> key fire removeu uma key "+key);
                                             }
 
                                             if(keyAppHashMap.get(key) !=null){
                                                 keyAppHashMap.remove(key);
                                             }
                                             if (markerHashMap.get(key) != null) {
+                                                Log.i("teste1", "->>>> key  markerhash tbm? "+keyFirebaseHashMap.size());
                                                 Log.i(TAG, "Entrou Remover: " + key);
                                                 MarkerDialog.deleteDataArrayFirebase(markerHashMap, key);
                                                 Log.d(TAG, "Notifications: " + notificationHashMap.size());
@@ -1025,6 +995,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                         }
                                     }
                                 }
+
                             }
 
                             @Override
@@ -1057,44 +1028,62 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             }
 
+        Log.i("teste1", "- >>>>  key fire base size "+keyFirebaseHashMap.size());
+
+        Log.i("teste1", "key app base size "+keyAppHashMap.size());
+        Set keysSetFirebase = keyFirebaseHashMap.keySet();
+
+        if(keyFirebaseHashMap.size()>=1){
+          //  Set keysSetFirebase = keyFirebaseHashMap.keySet();
+            Set keysSet = keyAppHashMap.keySet();
+            Iterator iterator = keysSet.iterator();
+            List<String> keyToRemove = new ArrayList<>();
+            while(iterator.hasNext()){
+                String keyApp = String.valueOf(iterator.next());
+                if(!keyFirebaseHashMap.containsKey(keyApp)){
+
+                    keyToRemove.add(keyApp);
+
+                }
+
+            }
+
+            for(String keyApp : keyToRemove) {
+                Log.i("teste1", "key app removed "+keyApp);
+                keyAppHashMap.remove(keyApp);
+                if (markerHashMap.containsKey(keyApp)) {
+                    MarkerTag markerTag = (MarkerTag) markerHashMap.get(keyApp).getTag();
+
+                    markerTag.getCircle().remove();
+                    markerHashMap.get(keyApp).remove();
+                    markerHashMap.remove(keyApp);
 
 
-        Set keysSet = keyAppHashMap.keySet();
-        Iterator iterator = keysSet.iterator();
-        List<String> teste = new ArrayList<>();
-        while(iterator.hasNext()){
-            String keyApp = String.valueOf(iterator.next());
-            if(!keyFirebaseHashMap.containsKey(keyApp)){
+                }
+                if (alertHashMap.containsKey(keyApp)) {
+                    alertHashMap.remove(keyApp);
+                    if (alertHashMap.size() == 0) {
+                        if (mCurrent != null) {
+                            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                        }
+                    }
 
-                teste.add(keyApp);
+                }
+
+            }
+
+
+        }
+        while(keysSetFirebase.iterator().hasNext()){
+            String keyFire = String.valueOf(keysSetFirebase.iterator().next());
+            if(keyFirebaseHashMap.containsKey(keyFire)){
+                Log.i("teste1", "key fire removed "+keyFire);
+                keyFirebaseHashMap.remove(keyFire);
             }
 
         }
 
-       for(String keyApp : teste) {
 
-
-           keyAppHashMap.remove(keyApp);
-           if (markerHashMap.containsKey(keyApp)) {
-               MarkerTag markerTag = (MarkerTag) markerHashMap.get(keyApp).getTag();
-
-               markerTag.getCircle().remove();
-               markerHashMap.get(keyApp).remove();
-               markerHashMap.remove(keyApp);
-
-
-           }
-           if (alertHashMap.containsKey(keyApp)) {
-               alertHashMap.remove(keyApp);
-               if (alertHashMap.size() == 0) {
-                   if (mCurrent != null) {
-                       mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
-                   }
-               }
-
-           }
-
-       }
 
     }
 
@@ -1220,7 +1209,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
     public void mapConfig() {
-
+        Log.i("teste", " MAP CONFIG ");
         /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
         if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED) {
@@ -1257,20 +1246,24 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     return false;
                 }
             });
+            if(!mapRebuildOk){
 
-            if (mLastLocation != null) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
+                if (mLastLocation != null) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
 
-            } else {
+                } else {
 
-                if (latString != null && lngString != null) {
+                    if (latString != null && lngString != null) {
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latPrefers, lngPrefers)));
-                    Log.i("teste", "prefers camera ok...");
-                       }
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latPrefers, lngPrefers)));
+                        Log.i("teste", "prefers camera ok...");
+                    }
 
+
+                }
 
             }
+
 
 
             mapRebuildOk = true;

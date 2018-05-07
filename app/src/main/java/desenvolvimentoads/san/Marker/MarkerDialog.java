@@ -81,9 +81,11 @@ public class MarkerDialog {
     private static Circle circle = null;
     Context context;
     LatLng loc;
-    final int RADIUS = 500;
+    final double RADIUS = 12.5;
     Action action = Action.getInstance();
-
+    /* Values in meters */
+    double closeToMeRadiusInMeters = 1.0;
+    double hasNearbyRadiusInMeters = 0.025;
 
 
     public static void deleteDataArrayFirebase(final HashMap<String, Marker> m, final String key) {
@@ -140,7 +142,7 @@ public class MarkerDialog {
 
 
         action.setButtomAddMakerClickado(true);
-        zoomMarker(latLng, googleMapFinal);
+       // zoomMarker(latLng, googleMapFinal);
 
         m.put(key, marcador);
 
@@ -150,15 +152,15 @@ public class MarkerDialog {
 
     /*Verifica se existe algum marcador proximo retornando true se existir.*/
     public Boolean hasNearby(final HashMap<String, Marker> m, final LatLng latLng) {
-
-        double proximity = RADIUS * 0.001;
-
+        Log.i("teste"," hasneraby RAIO ");
+        double proximityInMeters = hasNearbyRadiusInMeters;
+        Log.i("teste"," hasneraby RAIO "+m.size());
         double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
         double newMarkerSinLat = Math.sin(Math.toRadians(latLng.latitude));
         double newMakerRadianLng = Math.toRadians(latLng.longitude);
 
         for (Map.Entry<String, Marker> markerTemp : m.entrySet()) {
-
+            Log.i("teste"," hasneraby aRRAY ");
             double searchNearby = 6371 *
                     Math.acos(
                             Math.cos(Math.toRadians(markerTemp.getValue().getPosition().latitude)) *
@@ -167,12 +169,15 @@ public class MarkerDialog {
                                     Math.sin(Math.toRadians(markerTemp.getValue().getPosition().latitude)) *
                                             newMarkerSinLat
                     );
-            if (searchNearby <= proximity) {
+            if (searchNearby <= proximityInMeters) {
 
                 return true;
 
             }
+            Log.i("teste","RAIO "+searchNearby);
+            Log.i("teste","RAIO P "+proximityInMeters);
         }
+        Log.i("teste"," hasneraby RAIO  NED");
         return false;
 
 
@@ -182,7 +187,7 @@ public class MarkerDialog {
     /*Verifica se a ultima posição é proxima a do local a onde o marcador sera inserido retornando true se for*/
     public Boolean closeToMe(final LatLng myPosition, final LatLng latLng) {
 
-        double proximity = RADIUS * 0.001;
+        double proximityInMeters = closeToMeRadiusInMeters;
 
 
         double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
@@ -198,8 +203,9 @@ public class MarkerDialog {
                                 Math.sin(Math.toRadians(myPosition.latitude)) *
                                         newMarkerSinLat
                 );
-        if (searchNearby <= proximity) {
-
+        if (searchNearby <= proximityInMeters) {
+            Log.i("teste","RAIO "+searchNearby);
+            Log.i("teste","RAIO P "+proximityInMeters);
             return true;
 
         }
@@ -212,7 +218,7 @@ public class MarkerDialog {
 
     public Boolean closeToMeToHash(final LatLng myPosition, final LatLng latLng,HashMap<String, String> alertHashMap, String idmaker, double radiusValue ) {
 
-        double proximity = RADIUS * radiusValue;
+        double proximityInMeters = radiusValue;
 
 
         double newMarkerCosLat = Math.cos(Math.toRadians(latLng.latitude));
@@ -228,7 +234,7 @@ public class MarkerDialog {
                                 Math.sin(Math.toRadians(myPosition.latitude)) *
                                         newMarkerSinLat
                 );
-        if (searchNearby <= proximity) {
+        if (searchNearby <= proximityInMeters) {
 
             alertHashMap.put(idmaker,idmaker);
             return true;
@@ -462,14 +468,15 @@ public class MarkerDialog {
                         }
                     }
                 });
-
+/*
                 GeoHash geoHash = new GeoHash(new GeoLocation(marcador.getPosition().latitude, marcador.getPosition().longitude));
                 Map<String, Object> updates = new HashMap<>();
                 updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
                 updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
 
-                action.setButtomAddMakerClickado(true);
-                zoomMarker(latLng, googleMapFinal);
+  */
+            action.setButtomAddMakerClickado(true);
+             //zoomMarker(latLng, googleMapFinal);
                 m.put(itemId, marcador);
                 keyAppHash.put(itemId,itemId);
                 action.setItemId(itemId);
