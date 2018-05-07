@@ -242,7 +242,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             @Override
             public void onLocationChanged(android.location.Location location) {
                 Log.i("teste", "------------------- LOCATION ON ---------------------");
-
+                mLastLocation = location;
                 if(IS_SERVICE_RUNNING){
                     Log.i("teste","location ok esta mudando..");
                     double latitude = location.getLatitude();
@@ -435,7 +435,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     }
 
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
-
+        Log.i("teste","called here");
         getServerTime();
 
         mDatabaseReference = ConfigFireBase.getFirebase();
@@ -443,6 +443,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
         final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lng), radius);
         if (mLastLocation != null) {
+            Log.i("teste","not null");
             geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
                 public void onKeyEntered(final String key, GeoLocation location) {
@@ -451,6 +452,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot != null && dataSnapshot.getValue() != null) {
+                                Log.i("teste","teste here");
                                 double latitude = (double) dataSnapshot.child("latitude").getValue();
                                 double longitude = (double) dataSnapshot.child("longitude").getValue();
                                 LatLng latLng = new LatLng(latitude, longitude);
@@ -460,9 +462,9 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
 
                                         Log.i("teste","Marker found");
-                                        notification();
-                                        if(foregroundHashMap.get(key) == null){
 
+                                        if(foregroundHashMap.get(key) == null){
+                                            notification();
                                             foregroundHashMap.put(key,key);
 
 
