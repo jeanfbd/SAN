@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -299,58 +300,65 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                         //Toast.makeText(getContext(), "Location is already on.", Toast.LENGTH_SHORT).show();
-                        mapConfig();
+                     //   mapConfig();
                         startLocationsUpdates();
                         Log.i("teste", "LocationSettingsResult sucess ");
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
 
-                        //Toast.makeText(getContext(), "Location dialog will be open", Toast.LENGTH_SHORT).show();
+                        if (Build.VERSION.SDK_INT <= 22) {
+                            Log.i("teste", "------------------- BUILD VERSION ---------------------  " +Build.VERSION.SDK_INT);
+                            startLocationsUpdates();
 
-                        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            Log.i("teste", "LocationSettingsResult permission not granted");
+                        }else{
+                            if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                Log.i("teste", "LocationSettingsResult permission not granted");
 
-                            /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
-                            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                                /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
+                                if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                                        Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                                Log.i("teste", "LocationSettingsResult permission rationale");
-                                //     try {
-                                // Show the dialog by calling startResolutionForResult(), and check the result
-                                // in onActivityResult().
+                                    Log.i("teste", "LocationSettingsResult permission rationale");
+                                    //     try {
+                                    // Show the dialog by calling startResolutionForResult(), and check the result
+                                    // in onActivityResult().
 
-                                // User selected the Never Ask Again Option Change settings in app settings manually
-                                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                                alertDialogBuilder.setTitle("   Olá    ");
-                                alertDialogBuilder
-                                        .setMessage("" +
-                                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
-                                                "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
-                                        .setCancelable(false)
-                                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+                                    // User selected the Never Ask Again Option Change settings in app settings manually
+                                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                                    alertDialogBuilder.setTitle("   Olá    ");
+                                    alertDialogBuilder
+                                            .setMessage("" +
+                                                    "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
+                                                    "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
+                                            .setCancelable(false)
+                                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int id) {
+                                                    ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
 
-                                            }
-                                        });
+                                                }
+                                            });
 
-                                AlertDialog alertDialog = alertDialogBuilder.create();
-                                alertDialog.show();
+                                    AlertDialog alertDialog = alertDialogBuilder.create();
+                                    alertDialog.show();
+
+                                } else {
+
+                                    Log.i("teste", "LocationSettingsResult permission rationale not needed to ask only the normal one");
+                                    ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
+
+
+                                }
+
 
                             } else {
-
-                                Log.i("teste", "LocationSettingsResult permission rationale not needed to ask only the normal one");
-                                ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
-
+                                Log.i("teste", "LocationSettingsResult permission was checked and not needed");
+                                startLocationsUpdates();
 
                             }
 
-
-                        } else {
-                            Log.i("teste", "LocationSettingsResult permission was checked and not needed");
-                            startLocationsUpdates();
-
                         }
+                        //Toast.makeText(getContext(), "Location dialog will be open", Toast.LENGTH_SHORT).show();
+
 
 
                         //move to step 6 in onActivityResult to check what action user has taken on settings dialog
