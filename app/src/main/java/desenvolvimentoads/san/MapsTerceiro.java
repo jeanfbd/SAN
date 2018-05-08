@@ -158,17 +158,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         mContext = getContext();
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
-        geoFire = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/MyLocation/"));
         setUpLocation();
 
-        /*usando o prefers para popular the last location from user..*/
-        myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
-        latString = myPreferences.getString("lat", null);
-        lngString = myPreferences.getString("lng", null);
-        if (latString != null && lngString != null) {
-            latPrefers = Double.valueOf(latString);
-            lngPrefers = Double.valueOf(lngString);
-        }
 
 
     }
@@ -184,11 +175,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 Log.i("teste", "onRequestPermissionsResult Permission MY_PERMISSION_REQUEST_CODE");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.i("teste", "onRequestPermissionsResult Permission MY_PERMISSION_REQUEST_CODE    OK!!!!!!!");
-                    buildGoogleApiClient();
+
+                   buildGoogleApiClient();
                     createLocationRequest();
                     buildLocationSettingsRequest();
                     if (checkPlayService()) {
+
+                        checkLocationSettings();
                         displayLocation();
+
                     }
                 }
 
@@ -265,9 +260,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         int resultCode = googleAPI.isGooglePlayServicesAvailable(getActivity());
         if (resultCode == ConnectionResult.SUCCESS) {
             mGoogleApiClient.connect();
+            Log.i("teste", "-------------------  checkPlayService true---------------------");
+
             return true;
         } else {
             googleAPI.getErrorDialog(getActivity(), resultCode, RQS_GooglePlayServices);
+            Log.i("teste", "-------------------  checkPlayService false---------------------");
 
             return false;
 
@@ -285,7 +283,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         mLocationSettingsRequest
                 );
 
-        Log.i("teste", "LocationSettings was created ");
+        Log.i("teste", "LocationSettingsResult was created ");
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
 
             /* 5 Aqui que controla caso o location não estiver pronto*/
@@ -429,12 +427,22 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             }, MY_PERMISSION_REQUEST_CODE);
         } else {
 
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+           // mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             Log.i("teste", "displayLocation fused  " + mLastLocation);
 
+            if (mLastLocation == null) {
+
+                if (latString != null && lngString != null) {
+                    mLastLocation = new Location("");
+                    mLastLocation.setLatitude(latPrefers);
+                    mLastLocation.setLongitude(lngPrefers);
+                    Log.i("teste", "displayLocation new one " + mLastLocation);
+                }
+
+            }
+
             if (mLastLocation != null) {
-                final double latitude = mLastLocation.getLatitude();
-                final double longitude = mLastLocation.getLongitude();
+
 
 
                 if (myCurrentLocationTag == null) {
@@ -448,50 +456,42 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     myCurrentLocationTag.setLongitude(mLastLocation.getLongitude());
                 }
 
-                //Update to Firebase
-                geoFire.setLocation(userId, new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-                        //addMarker
-                        if (mCurrent != null) {
-                            mCurrent.setPosition(new LatLng(latitude, longitude));
+
+                if (mCurrent != null) {
+                    mCurrent.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+                } else {
+
+                    mCurrent = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                            .title("Você"));
+
+                    if (alertHashMap != null) {
+
+                        if (alertHashMap.size() == 0) {
+                            if (mCurrent != null) {
+                                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                            }
                         } else {
-                            mCurrent = mMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(latitude, longitude))
-                                    .title("Você"));
-
-                            if (alertHashMap != null) {
-
-                                if (alertHashMap.size() == 0) {
-                                    if (mCurrent != null) {
-                                        mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
-                                    }
-                                } else {
-                                    if (mCurrent != null) {
-                                        mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
-                                    }
-
-
-                                }
-                            }else{
-                                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
-
+                            if (mCurrent != null) {
+                                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
                             }
 
 
                         }
-                        //Move Camera to this Position
-                        mCurrent.setTag(myCurrentLocationTag);
-                        //    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
-
-
-
+                    }else{
+                        mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location));
 
                     }
-                });
-                Log.d(TAG, String.format("Sua Localização mudou: %f/%f", latitude, longitude));
-            } else {
-                Log.d(TAG, "Não foi possível obter a ultima localização");
+
+                    //Move Camera to this Position
+                    mCurrent.setTag(myCurrentLocationTag);
+                    //    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
+
+
+
+
+                };
+
             }
 
 
@@ -502,6 +502,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+        Log.i("teste", "---------- onMapReady ---------------");
 
         action.registraInteressados(this);
         buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
@@ -554,14 +556,38 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         /*Criando o listener click on marker*/
         googleMap = markerDialog.setMarkerClick(googleMap, getContext(), markerHashMap);
 
-
         /*Criando o listener do drag*/
         googleMap = markerDialog.setListenerDragDiag(googleMap, marcador, getContext(), getView());
 
         mMap = googleMap;
         mMap.setOnMapClickListener(this);
 
+        mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+
+            @Override
+            public void onCircleClick(Circle circle) {
+                // Flip the r, g and b components of the circle's
+                // stroke color.
+                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+                circle.setStrokeColor(strokeColor);
+            }
+
+        });
+        Log.i("teste", "---------- onMapReady listeners were created with success ! ---------------");
+
+        /*usando o prefers para popular the last location from user..*/
+        myPreferences = getContext().getSharedPreferences("Location", Context.MODE_PRIVATE);
+        latString = myPreferences.getString("lat", null);
+        lngString = myPreferences.getString("lng", null);
+        if (latString != null && lngString != null) {
+            latPrefers = Double.valueOf(latString);
+            lngPrefers = Double.valueOf(lngString);
+            Log.i("teste", "Shared teste");
+        }
+
         mapConfig();
+
+
 
         if (mapRebuildOk) {
             if (latString != null && lngString != null) {
@@ -578,6 +604,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         mMap.clear();
         rebuildMap();
 
+        Log.i("teste", "---------- onMapReady has finished with success ! ---------------");
+
+
     }
 
     public void rebuildGeoQuery2() {
@@ -587,6 +616,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
            alertHashMap = new HashMap<>();
 
         if (mLastLocation != null) {
+            Log.i("teste", "rebuildGeoQuery2 mLastLocation not null ");
 
 
                 for (String key : markerHashMap.keySet()) {
@@ -614,6 +644,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 }
 
             }
+
+            Log.i("teste", "rebuildGeoQuery2 fim ");
 
 
         }
@@ -649,16 +681,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         .fillColor(Color.argb(24, 30, 144, 255))
                         .clickable(true));
 
-                mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
 
-                    @Override
-                    public void onCircleClick(Circle circle) {
-                        // Flip the r, g and b components of the circle's
-                        // stroke color.
-                        int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
-                        circle.setStrokeColor(strokeColor);
-                    }
-                });
                 MarkerTag tag = new MarkerTag(tagTemp.getPosition().latitude, tagTemp.getPosition().longitude, circle, tagTemp.getValidate());
                 tag.setId(tagTemp.getId());
                 if (tag.getValidate()) {
@@ -746,8 +769,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
         if (mLastLocation != null) {
             Log.i("teste1", "->>>> Location Change "+keyFirebaseHashMap.size());
-           getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius);
-           displayLocation();
+            displayLocation();
+            getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius);
 
             myLat = location.getLatitude();
             myLong = location.getLongitude();
@@ -1275,16 +1298,20 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     Manifest.permission.ACCESS_FINE_LOCATION
             }, MY_PERMISSION_REQUEST_CODE);
         }
+
+        Log.i("teste", " MAP CONFIG END");
     }
 
     public void recreateGoogleRefers() {
-
+        Log.i("teste", "recreateGoogleRefers");
         if (mGoogleApiClient == null) {
+            Log.i("teste", "recreateGoogleRefers mGoogleApiClient null");
             buildGoogleApiClient();
             checkPlayService();
         }
 
         if (mLocationSettingsRequest == null) {
+            Log.i("teste", "recreateGoogleRefers mLocationSettingsRequest null");
             createLocationRequest();
             buildLocationSettingsRequest();
         }

@@ -616,18 +616,6 @@ public class MarkerDialog {
                 .fillColor(Color.argb(24, 30, 144, 255))
                 .clickable(true));
 
-        googleMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
-
-            @Override
-            public void onCircleClick(Circle circle) {
-                // Flip the r, g and b components of the circle's
-                // stroke color.
-                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
-                circle.setStrokeColor(strokeColor);
-            }
-        });
-
-
     }
 
     public void insertFim(final MarkerTag markerTag, final long time) {
