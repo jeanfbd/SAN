@@ -275,6 +275,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     /* 4 - criando o method que irá checar o status do locationSettings */
     protected void checkLocationSettings() {
+
         Log.i("teste", "------------------- METHOD 4 checkLocationSettings ---------------------");
 
         recreateGoogleRefers();
@@ -308,7 +309,27 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                         if (Build.VERSION.SDK_INT <= 22) {
                             Log.i("teste", "------------------- BUILD VERSION ---------------------  " +Build.VERSION.SDK_INT);
-                            startLocationsUpdates();
+                           // startLocationsUpdates();
+                            /*never asked selecionado...*/
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                            alertDialogBuilder.setTitle("Serviço de localização");
+                            alertDialogBuilder
+                                    .setMessage("" +
+                                            "\n O App San utiliza de dados de alta precisão de localização para seu funcionamento." + "\n Atualmente não esta sendo encontrado o serviço de localização ou a alta precisão não esta ativada, possivelmente esteja desativado ou configurado a localização apenas para o dispositivo."
+                                            + "\n Por favor verifique as Configurações e o habilite, caso já esteja habilitado desabilite e habilite novamente.")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Configurações", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                            startActivity(intent);// step 6
+
+                                        }
+                                    });
+
+                            AlertDialog alertDialog = alertDialogBuilder.create();
+                            alertDialog.show();
+
+
 
                         }else{
                             if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -406,7 +427,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
-        recreateGoogleRefers();
+    //    recreateGoogleRefers();
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient,
                 this
@@ -853,7 +874,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         } else {
             Log.i("teste", "startLocationsUpdates permission NOT NEEDED");
 
-            recreateGoogleRefers();
+         //   recreateGoogleRefers();
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient,
                     mLocationRequest, this
@@ -1183,26 +1204,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 } else {
                     Log.i("teste", "checkGpsPermission permission needed and 'never ask' one was called");
-                    /*never asked selecionado...*/
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                    alertDialogBuilder.setTitle("Permissão necessaria");
-                    alertDialogBuilder
-                            .setMessage("" +
-                                    "\n O App San utiliza de dados da localização para seu funcionamento." + "\n Ao selecionar para nunca mais ser requisitado permissão e negar o aplicativo deixa de funcionar."
-                                    + "\n Para que ele funcione agora será necessario mudar manualmente a permission do location nas configurações do App")
-                            .setCancelable(false)
-                            .setPositiveButton("Configurações", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                    Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
-                                    intent.setData(uri);
-                                    startActivity(intent);// step 6
 
-                                }
-                            });
-
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
 
                 }
 

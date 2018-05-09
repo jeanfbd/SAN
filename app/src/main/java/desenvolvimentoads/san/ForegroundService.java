@@ -384,6 +384,8 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient,
                     locationListenerGPS);
+
+            Log.i("teste","stopLocationUpdates removed");
         }else{
 
         }
@@ -437,7 +439,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
         Log.i("teste","called here");
         getServerTime();
-
+        Log.i("teste","googleclient status "+mGoogleApiClient.isConnected());
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
 
@@ -464,6 +466,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                                         Log.i("teste","Marker found");
 
                                         if(foregroundHashMap.get(key) == null){
+                                            Log.i("teste","dentro da query googleclient status "+mGoogleApiClient.isConnected());
                                             notification();
                                             foregroundHashMap.put(key,key);
 

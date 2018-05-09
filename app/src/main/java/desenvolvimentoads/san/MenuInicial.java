@@ -87,11 +87,15 @@ public class MenuInicial extends AppCompatActivity
         setContentView(R.layout.activity_menu_inicial);
         sharedContext.setContext(this.getBaseContext());
         SharedPreferences mySharedPrefers = getSharedPreferences("tutorial", Context.MODE_PRIVATE);
-
         if (!mySharedPrefers.getBoolean("skip", false)) {
             firstTutorial();
 
         }
+
+
+     //     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+    //     startActivity(intent);// step 6
+
 
 /*
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
