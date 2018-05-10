@@ -204,13 +204,7 @@ public class MenuInicial extends AppCompatActivity
     public void menuStart(){
         navigationView.setNavigationItemSelectedListener(this);
 
-        fragmentManager = getSupportFragmentManager();
 
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        fragmentTransaction.add(R.id.container, new MapsTerceiro(), "MapsTerceiro");
-
-        fragmentTransaction.commitAllowingStateLoss();
 
 
         btnAddMarker = (FloatingActionButton) findViewById(R.id.fab);
@@ -252,8 +246,19 @@ public class MenuInicial extends AppCompatActivity
         });
 
         menuStarted = true;
-    }
 
+        startFragment();
+    }
+    public void startFragment(){
+        fragmentManager = getSupportFragmentManager();
+
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.add(R.id.container, new MapsTerceiro(), "MapsTerceiro");
+
+        fragmentTransaction.commitAllowingStateLoss();
+
+    }
 
     public void addMarkerFloatButtom() {
 
@@ -536,7 +541,7 @@ public class MenuInicial extends AppCompatActivity
                                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                         Uri uri = Uri.fromParts("package", getBaseContext().getPackageName(), null);
                                         intent.setData(uri);
-                                        startActivity(intent);// step 6
+                                        startActivityForResult(intent,1);// step 6
 
                                     }
                                 });
@@ -740,6 +745,16 @@ public class MenuInicial extends AppCompatActivity
             service.setAction(ForegroundService.STOP);
             startService(service);
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i("teste", "---- onActivityResult main called :') ---- ");
+        Intent intent = new Intent(MenuInicial.this, MenuInicial.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+
     }
 
 }

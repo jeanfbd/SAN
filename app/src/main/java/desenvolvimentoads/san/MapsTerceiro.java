@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -307,21 +308,21 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
 
-                        if (Build.VERSION.SDK_INT <= 22) {
-                            Log.i("teste", "------------------- BUILD VERSION ---------------------  " +Build.VERSION.SDK_INT);
-                           // startLocationsUpdates();
-                            /*never asked selecionado...*/
+
+                      if (Build.VERSION.SDK_INT <= 22) {
+                            // startLocationsUpdates();
+                           // never asked selecionado
                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                             alertDialogBuilder.setTitle("Serviço de localização");
                             alertDialogBuilder
                                     .setMessage("" +
-                                            "\n O App San utiliza de dados de alta precisão de localização para seu funcionamento." + "\n Atualmente não esta sendo encontrado o serviço de localização ou a alta precisão não esta ativada, possivelmente esteja desativado ou configurado a localização apenas para o dispositivo."
-                                            + "\n Por favor verifique as Configurações e o habilite, caso já esteja habilitado desabilite e habilite novamente.")
+                                            "\n O App San utiliza de dados de 'alta precisão' de localização para seu funcionamento." + "\n Atualmente não esta sendo encontrado o serviço de localização ou a alta precisão não esta ativada, possivelmente esteja desativado ou configurado a localização apenas para o dispositivo."
+                                            + "\n Por favor verifique as Configurações e o habilite a localização e selecione o modo ALTA PRECISÃO, caso já esteja habilitado desabilite e habilite novamente.")
                                     .setCancelable(false)
                                     .setPositiveButton("Configurações", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                            startActivity(intent);// step 6
+                                            startActivityForResult(intent,1);// step 6
 
                                         }
                                     });
@@ -394,29 +395,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 }
             }
         });
-    }
-
-    /*Aqui que vai ser o callback do status resolution do step 4/5 quando o user faz uma ação ali no settings do android para mudar o location aqui q verifica mas nem sempre funciona o ok*/
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i("teste", "------------------- METHOD ACTIVITY CALLBACK ---------------------");
-        switch (requestCode) {
-            // Check for the integer request code originally supplied to startResolutionForResult().
-            case REQUEST_CHECK_SETTINGS:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        Log.i("Teste", "onActivityResult User agreed to make required location settings changes.");
-                        mapConfig();
-                        startLocationsUpdates();
-                        break;
-                    case Activity.RESULT_CANCELED:
-                        Log.i("Teste", "onActivityResult User chose not to make required location settings changes.");
-                        /*Geralmente ele cai aqui mesmo qdo mudamos o location para ok, ae ele faz uma volta danada e verifica tudo dnovo. para dar certo no final*/
-                        checkLocationSettings();
-                        break;
-                }
-                break;
-        }
     }
 
 
