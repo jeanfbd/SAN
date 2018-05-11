@@ -1081,7 +1081,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             }
         });
-		
+        Log.i("teste1", "- >>>>  INSIDE MY RADIUS???? " + insideMyRadius);
 		if(insideMyRadius){
 			
         Log.i("teste1", "- >>>>  key fire base size " + keyFirebaseHashMap.size());
@@ -1128,6 +1128,45 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             }
 
+
+        }else{
+            //  Set keysSetFirebase = keyFirebaseHashMap.keySet();
+            Set keysSet = keyAppHashMap.keySet();
+            Iterator iterator = keysSet.iterator();
+            List<String> keyToRemove = new ArrayList<>();
+            while(iterator.hasNext()){
+                String keyApp = String.valueOf(iterator.next());
+
+
+                keyToRemove.add(keyApp);
+
+
+
+            }
+
+            for(String keyApp : keyToRemove) {
+                Log.i("teste1", "key app removed "+keyApp);
+                keyAppHashMap.remove(keyApp);
+                if (markerHashMap.containsKey(keyApp)) {
+                    MarkerTag markerTag = (MarkerTag) markerHashMap.get(keyApp).getTag();
+
+                    markerTag.getCircle().remove();
+                    markerHashMap.get(keyApp).remove();
+                    markerHashMap.remove(keyApp);
+
+
+                }
+                if (alertHashMap.containsKey(keyApp)) {
+                    alertHashMap.remove(keyApp);
+                    if (alertHashMap.size() == 0) {
+                        if (mCurrent != null) {
+                            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                        }
+                    }
+
+                }
+
+            }
 
         }
        while (keysSetFirebase.iterator().hasNext()) {
