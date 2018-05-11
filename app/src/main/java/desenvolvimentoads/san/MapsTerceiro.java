@@ -530,12 +530,13 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 checkPermission();
                 if (mLastLocation != null) {
                     newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    getRaio(arg0.latitude, arg0.longitude, getRaioFirebaseRadius, false);
                     if (action.isReportNotSelected()) {
                             /* Verifico a proximidade do user com o local que ele vai por o marcador*/
                         if (markerDialog.closeToMe(newLatLng, arg0)) {
                                   /* Verifico se existe algum marcador proximo */
                             if (!markerDialog.hasNearby(markerHashMap, arg0)) {
-                                markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap);
+                                markerDialog.dialogAdd2(arg0, getContext(), mMap, geocoder2, markerHashMap,keyAppHashMap);
 //                                itemId = action.getItemId();
                                 Log.d(TAG, "Action ID: " + itemId);
 
@@ -738,7 +739,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     Log.i("teste", " before hasneraby RAIO " + markerHashMap.size());
                     if (!markerDialog.hasNearby(markerHashMap, latLng)) {
                         Log.i("teste", "marker not nearby");
-                        markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap);
+                        markerDialog.dialogAdd2(latLng, this.getContext(), mMap, geocoder2, markerHashMap,keyAppHashMap);
 
 
                     } else {
@@ -1003,7 +1004,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    public void fetchData(final String key, final HashMap<String, Marker> HashMap, boolean insideMyRadius) {
+    public void fetchData(final String key, final HashMap<String, Marker> HashMap,final boolean insideMyRadius) {
         mDatabaseReference = ConfigFireBase.getFirebase();
         mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
