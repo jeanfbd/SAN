@@ -50,7 +50,7 @@ import java.util.HashMap;
 import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.notification.NotificationID;
 
-public class ForegroundService extends Service implements GoogleApiClient.ConnectionCallbacks{
+public class ForegroundService extends Service implements GoogleApiClient.ConnectionCallbacks {
     public static boolean IS_SERVICE_RUNNING = false;
     public static String STOP = "STOP";
     public static String START = "PLAY";
@@ -68,9 +68,10 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     private DatabaseReference mDatabaseReference;
     private FirebaseDatabase firebaseDatabase;
     GeoFire geoFire;
-    String userId ="123";
+    String userId = "123";
     HashMap<String, String> foregroundHashMap = new HashMap<>();
     LocationListener locationListenerGPS;
+    GeoQuery geoQuery;
 
     @Override
     public void onCreate() {
@@ -80,11 +81,10 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
         geoFire = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
-        if(MapsTerceiro.alertHashMap != null && MapsTerceiro.alertHashMap.size()>0){
+        if (MapsTerceiro.alertHashMap != null && MapsTerceiro.alertHashMap.size() > 0) {
             foregroundHashMap = MapsTerceiro.alertHashMap;
 
-        }
-        else{
+        } else {
 
             foregroundHashMap = new HashMap<>();
         }
@@ -103,7 +103,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             //  Toast.makeText(this, "Service Started!", Toast.LENGTH_SHORT).show();
         } else if (intent.getAction().equals(STOP)) {
             Log.i("teste", "Received Stop Foreground Intent");
-            if(started){
+            if (started) {
 
                 Log.i("teste", "started");
                 stopLocationUpdates();
@@ -138,7 +138,6 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                 notification);
 
 
-
     }
 
     @Override
@@ -147,6 +146,10 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         Log.i("teste", "In onDestroy");
         Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
         IS_SERVICE_RUNNING = false;
+        if(geoQuery !=null){
+            geoQuery.removeAllListeners();
+
+        }
     }
 
     @Override
@@ -226,32 +229,31 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         int resultCode = googleAPI.isGooglePlayServicesAvailable(this);
         if (resultCode == ConnectionResult.SUCCESS) {
             mGoogleApiClient.connect();
-            Log.i("teste","playservice connected");
+            Log.i("teste", "playservice connected");
 
             return true;
         } else {
-            Log.i("teste","playservice not connected");
+            Log.i("teste", "playservice not connected");
             return false;
 
         }
     }
+
     /*3.7*/
-    public void createLocationListener(){
+    public void createLocationListener() {
         Log.i("teste", "------------------- METHOD 3.7 createLocationListener ---------------------");
         locationListenerGPS = new LocationListener() {
             @Override
             public void onLocationChanged(android.location.Location location) {
                 Log.i("teste", "------------------- LOCATION ON ---------------------");
                 mLastLocation = location;
-                if(IS_SERVICE_RUNNING){
-                    Log.i("teste","location ok esta mudando..");
+                if (IS_SERVICE_RUNNING) {
+                    Log.i("teste", "location ok esta mudando..");
                     double latitude = location.getLatitude();
                     double longitude = location.getLongitude();
-                    getRaioFirebase(latitude,longitude,5.0);
+                    getRaioFirebase(latitude, longitude, 5.0);
 
                 }
-
-
 
 
             }
@@ -280,9 +282,8 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             public void onResult(LocationSettingsResult locationSettingsResult) {
 
 
-
                 final Status status = locationSettingsResult.getStatus();
-                Log.i("teste", "------------------- LocationSettingsResult --------------------- CODE "+status);
+                Log.i("teste", "------------------- LocationSettingsResult --------------------- CODE " + status);
                 switch (status.getStatusCode()) {
                     /*Pronto.. as outras opções são opcionais a tirando a required ali.*/
                     case LocationSettingsStatusCodes.SUCCESS:
@@ -293,13 +294,12 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         if (Build.VERSION.SDK_INT <= 22) {
-                            Log.i("teste", "------------------- BUILD VERSION ---------------------  " +Build.VERSION.SDK_INT);
+                            Log.i("teste", "------------------- BUILD VERSION ---------------------  " + Build.VERSION.SDK_INT);
                             startLocationUpdates();
 
                         }
-                    break;
+                        break;
                 }
-
 
 
             }
@@ -320,46 +320,36 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     }
 
 
-
-        public void notification(){
-
+    public void notification() {
 
 
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.ic_maker_vermelho)
+                        .setContentTitle("Alerta")
+                        .setTicker("Foram encontrados alertas proximos da sua localidade")
+                        .setContentText("Foram encontrados alertas proximos da sua localidade")
+                        .setSubText("Alerta!");
 
 
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.mipmap.ic_maker_vermelho)
-                            .setContentTitle("Alerta")
-                            .setTicker("Foram encontrados alertas proximos da sua localidade")
-                            .setContentText("Foram encontrados alertas proximos da sua localidade")
-                            .setSubText("Alerta!");
+        mBuilder.setAutoCancel(true);
+        NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        android.app.Notification n = mBuilder.build();
+        //Frescura de vibrar.
+        n.vibrate = new long[]{150, 300, 150, 600};
 
 
+        mNotificationManager.notify(NotificationID.getID(), n);
 
 
-
-
-
-            mBuilder.setAutoCancel(true);
-            NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-            android.app.Notification n = mBuilder.build();
-            //Frescura de vibrar.
-             n.vibrate = new long[]{150,300,150,600};
-
-
-
-            mNotificationManager.notify(NotificationID.getID(),n);
-
-
-        }
+    }
 
     public void goAndDetectLocation() {
-        Log.i("teste","goAndDetectLocation called");
+        Log.i("teste", "goAndDetectLocation called");
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.i("teste","goAndDetectLocation permission needed");
+            Log.i("teste", "goAndDetectLocation permission needed");
         } else {
-            Log.i("teste","goAndDetectLocation permission not needed");
+            Log.i("teste", "goAndDetectLocation permission not needed");
 
             // recreateGoogleRefers();
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
@@ -373,20 +363,20 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     /*é bom para colocar qdo o app entrar em resumo para parar o fused..*/
     protected void stopLocationUpdates() {
 
-        Log.i("teste","stopLocationUpdates called");
+        Log.i("teste", "stopLocationUpdates called");
 
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
         recreateGoogleRefers();
 
-        if(mGoogleApiClient.isConnected()){
+        if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient,
                     locationListenerGPS);
 
-            Log.i("teste","stopLocationUpdates removed");
-        }else{
+            Log.i("teste", "stopLocationUpdates removed");
+        } else {
 
         }
 
@@ -394,10 +384,16 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
 
     /*4*/
-    @SuppressLint("MissingPermission")
+
     private void displayLocation() {
-        Log.i("teste","displayLocation");
+        Log.i("teste", "displayLocation");
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
 
             if (mLastLocation != null) {
                 final double latitude = mLastLocation.getLatitude();
@@ -443,7 +439,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
 
-        final GeoQuery geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lng), radius);
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lng), radius);
         if (mLastLocation != null) {
             Log.i("teste","not null");
             geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {

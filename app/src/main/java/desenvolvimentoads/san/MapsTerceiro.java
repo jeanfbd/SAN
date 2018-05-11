@@ -1203,18 +1203,21 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
     public void checkPermission() {
+        if (Build.VERSION.SDK_INT >= 23) {
 
-        if (MenuInicial.permissionOk) {
-            mapConfig();
-            setUpLocation();
-            Log.i("teste", "checkPermission MenuInicial.permissionOk checked");
-            MenuInicial.permissionOk = false;
-        } else {
+            if (MenuInicial.permissionOk) {
+                mapConfig();
+                setUpLocation();
+                Log.i("teste", "checkPermission MenuInicial.permissionOk checked");
+                MenuInicial.permissionOk = false;
+            } else {
 
-            Log.i("teste", "checkPermission MenuInicial.permissionOk false and not checked");
+                Log.i("teste", "checkPermission MenuInicial.permissionOk false and not checked");
 
 
+            }
         }
+
 
     }
 
