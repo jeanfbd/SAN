@@ -1,7 +1,12 @@
 package desenvolvimentoads.san.Marker;
 
+
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.Exclude;
+import com.google.firebase.database.ServerValue;
+
+import java.util.Map;
 
 /**
  * Created by master on 22/07/2017.
@@ -9,50 +14,101 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class MarkerTag {
 
-Circle circle;
-LatLng position;
-int nivel;
-String Street;
-int id;
+    private String id;
+    private String idUser;
+    private double latitude;
+    private double longitude;
+    private String street;
+    private Long fim;
+    private Map<String, String> inicio;
 
-    public MarkerTag(Circle circle, LatLng position) {
+    @Exclude
+    private boolean validate = false;
+
+    @Exclude
+    private Circle circle;
+
+    private com.google.android.gms.maps.model.LatLng mapsLatLng;
+
+    public MarkerTag() {
+    }
+
+    public MarkerTag(double latitude, double longitude, Circle circle, boolean validate) {
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.circle = circle;
-        this.position = position;
-        this.nivel = 3;
+        this.validate = validate;
+        this.inicio = ServerValue.TIMESTAMP;
     }
 
 
-    public MarkerTag(Circle circle, LatLng position, int nivel) {
-        this.circle = circle;
-        this.position = position;
-        this.nivel = nivel;
-    }
-
-
-
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
     public String getStreet() {
-        return Street;
+        return street;
     }
 
     public void setStreet(String street) {
-        Street = street;
-    }
-    public int getNivel() {
-        return nivel;
+        this.street = street;
     }
 
-    public void setNivel(int nivel) {
-        this.nivel = nivel;
+    public String getIdUser() {
+        return idUser;
     }
 
+    public void setIdUser(String idUser) {
+        this.idUser = idUser;
+    }
+
+    public Map<String, String> getInicio() {
+        return inicio;
+    }
+
+    public void setInicio(Map<String, String> inicio) {
+        this.inicio = inicio;
+    }
+
+    public java.util.Map<String, String> getFim() {
+        return ServerValue.TIMESTAMP;
+    }
+
+    public void setFim(Long fim) {
+        this.fim = fim;
+    }
+
+    @Exclude
+    public Long getFimLong() {
+        return fim;
+    }
+
+    @Exclude
+    public LatLng getPosition() {
+        return new LatLng(latitude, longitude);
+    }
+
+    @Exclude
     public Circle getCircle() {
         return circle;
     }
@@ -61,13 +117,12 @@ int id;
         this.circle = circle;
     }
 
-    public LatLng getPosition() {
-        return position;
+    @Exclude
+    public Boolean getValidate() {
+        return validate;
     }
 
-    public void setPosition(LatLng position) {
-
-        this.position = position;
-
+    public void setValidate(Boolean validate) {
+        this.validate = validate;
     }
 }

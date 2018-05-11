@@ -20,7 +20,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@android:color/holo_blue_dark"
+                android:background="@color/menu_blue"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </android.support.design.widget.AppBarLayout>
@@ -37,26 +37,28 @@
             android:clickable="true"
             android:visibility="visible"
             app:backgroundTint="@android:color/transparent"
-            app:elevation="5dp"
-            app:fabSize="mini"
+            app:elevation="1dp"
+            app:fabSize="normal"
+            android:scaleType="center"
             app:layout_anchor="@+id/include"
             app:layout_anchorGravity="right|center_vertical"
             app:srcCompat="@android:drawable/ic_delete" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_marginBottom="10dp"
             android:clickable="true"
             android:visibility="visible"
             app:backgroundTint="@android:color/transparent"
-            app:elevation="5dp"
-            app:fabSize="mini"
+            app:elevation="1dp"
+            app:fabSize="normal"
+            android:scaleType="center"
             app:layout_anchor="@+id/include"
             app:layout_anchorGravity="right|center_vertical"
             app:rippleColor="@color/common_google_signin_btn_text_dark_disabled"
-            app:srcCompat="@mipmap/ic_maker_vermelho" />
+            app:srcCompat="@mipmap/ic_plus_marker" />
     </android.support.design.widget.CoordinatorLayout>
 
     <include
