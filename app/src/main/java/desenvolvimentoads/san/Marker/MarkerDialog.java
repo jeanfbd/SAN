@@ -395,7 +395,7 @@ public class MarkerDialog {
     }
 
 
-    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m) {
+    public void dialogAdd2(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final HashMap<String,String> keyAppHash) {
 
 
         //LayoutInflater é utilizado para inflar nosso layout em uma view.
@@ -487,7 +487,11 @@ public class MarkerDialog {
                 action.setButtomAddMakerClickado(true);
                 //zoomMarker(latLng, googleMapFinal);
                 m.put(itemId, marcador);
-                //keyAppHash.put(itemId,itemId);
+                if(keyAppHash != null){
+				   keyAppHash.put(itemId,itemId);
+				}	
+				
+				
                 action.setItemId(itemId);
                 alerta.dismiss();
 
