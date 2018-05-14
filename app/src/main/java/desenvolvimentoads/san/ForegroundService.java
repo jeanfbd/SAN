@@ -1,11 +1,14 @@
 package desenvolvimentoads.san;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -296,6 +299,15 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                         if (Build.VERSION.SDK_INT <= 22) {
                             Log.i("teste", "------------------- BUILD VERSION ---------------------  " + Build.VERSION.SDK_INT);
                             startLocationUpdates();
+
+                        } else {
+                            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                            } else {
+                                Log.i("teste", "LocationSettingsResult permission was checked and not needed");
+                                startLocationUpdates();
+
+                            }
 
                         }
                         break;
