@@ -90,16 +90,11 @@ public class MarkerTag {
         this.inicio = inicio;
     }
 
-    public java.util.Map<String, String> getFim() {
-        return ServerValue.TIMESTAMP;
-    }
-
     public void setFim(Long fim) {
         this.fim = fim;
     }
 
-    @Exclude
-    public Long getFimLong() {
+    public Long getFim() {
         return fim;
     }
 

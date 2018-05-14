@@ -38,12 +38,14 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.Marker.MarkerTag;
 import desenvolvimentoads.san.Observer.SharedContext;
 
-public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
+public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
 
@@ -87,12 +89,11 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
             Log.d(TAG, "onCreate: LAT: " + latPrefers);
             Log.d(TAG, "onCreate: LNG: " + lngString);
         }
+        markerHashMap.clear();
+
     }
 
-    @Override
-    public void onMapClick(LatLng latLng) {
-        getRaioOldFirebase(latLng.latitude, latLng.longitude, 50.0);
-    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -137,7 +138,7 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
                     location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
 
-                    datetime.setText(convertTime(markerTag.getFimLong()));
+                    datetime.setText(convertTime(markerTag.getFim()));
                 }
                 return v;
 
@@ -153,72 +154,54 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
     }
 
 
-    public void getRaioOldFirebase(Double lat, Double lng, Double radius) {
+    public void getOldFirebase() {
         getServerTime();
-//        hashMapClear();
+        final AtomicInteger count = new AtomicInteger();
 
         mDatabaseReference = ConfigFireBase.getFirebase();
-        firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
-        GeoFire geoFire2 = new GeoFire(firebaseDatabase.getReferenceFromUrl("https://websan-46271.firebaseio.com/marker_location/"));
 
-        final GeoQuery geoQuery = geoFire2.queryAtLocation(new GeoLocation(lat, lng), radius);
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+        mDatabaseReference = ConfigFireBase.getFirebase();
+        mDatabaseReference.child("Marker").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onKeyEntered(final String key, GeoLocation location) {
-                mDatabaseReference = ConfigFireBase.getFirebase();
-                mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                            MarkerTag markerTag = dataSnapshot.getValue(MarkerTag.class);
-                            markerTag.setFim((Long)dataSnapshot.child("fim").getValue());
-                            if (dataSnapshot.child("fim").getValue() != null) {
-                                MarkerOptions markerOption = new MarkerOptions();
-                                markerOption.position(markerTag.getPosition());
-                                markerOption.title((String) dataSnapshot.child("street").getValue());
-                                if (getServerTime() > (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
-                                    if (dataSnapshot.child("idUser").getValue().equals(userId)) {
-                                        markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
-                                        Marker marker = mMap.addMarker(markerOption);
-                                        markerHashMap.put(marker, markerTag);
-                                    }
-                                    if (dataSnapshot.child("Validar").child(userId).exists()) {
-                                        markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
-                                        Marker marker = mMap.addMarker(markerOption);
-                                        markerHashMap.put(marker, markerTag);
-                                    }
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot != null && snapshot.getValue() != null) {
+                        Log.d(TAG, "onDataChange: "+snapshot.getValue());
+                        MarkerTag markerTag = new MarkerTag();
+                        markerTag.setIdUser((String)snapshot.child("id").getValue());
+                        markerTag.setId((String)snapshot.child("id").getValue());
+                        markerTag.setStreet((String)snapshot.child("street").getValue());
+                        markerTag.setFim((Long) snapshot.child("fim").getValue());
+                        markerTag.setLatitude((Double) snapshot.child("latitude").getValue());
+                        markerTag.setLongitude((Double) snapshot.child("longitude").getValue());
+
+                        if (snapshot.child("fim").getValue() != null) {
+                            MarkerOptions markerOption = new MarkerOptions();
+                            markerOption.position(new LatLng(((Double) snapshot.child("latitude").getValue()) ,((Double) snapshot.child("longitude").getValue())));
+                            markerOption.title((String) snapshot.child("street").getValue());
+                            if (getServerTime() > (Long) snapshot.child("fim").getValue() && !snapshot.child("Denunciar").child(userId).exists()) {
+                                if (snapshot.child("idUser").getValue().equals(userId)) {
+                                    markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
+                                    Marker marker = mMap.addMarker(markerOption);
+                                    markerHashMap.put(marker, markerTag);
+                                }
+                                if (snapshot.child("Validar").child(userId).exists()) {
+                                    markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
+                                    Marker marker = mMap.addMarker(markerOption);
+                                    markerHashMap.put(marker, markerTag);
                                 }
                             }
                         }
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                }
             }
 
             @Override
-            public void onKeyExited(String key) {
-
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
+
 
     }
 
@@ -250,11 +233,10 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
             mMap.getUiSettings().setMapToolbarEnabled(false);
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMap.setOnMarkerClickListener(this);
-            mMap.setOnMapClickListener(this);
 
             if (latString != null && lngString != null) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latPrefers, lngPrefers), 16.0f));
-                getRaioOldFirebase(latPrefers, lngPrefers, 50.0);
+                getOldFirebase();
             }
 
         /*Listener responsavel adicionar o botão da localização*/
@@ -283,13 +265,4 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
         return format.format(date);
     }
-
-//    public void hashMapClear() {
-//        HashMap<String, Marker> markerHashMapTemp = markerHashMap;
-//        for (Map.Entry<String, Marker> markerTemp : markerHashMapTemp.entrySet()) {
-//            MarkerTag markerTag = (MarkerTag) markerHashMapTemp.get(markerTemp.getKey()).getTag();
-//            markerTemp.getValue().remove();
-//            markerHashMapTemp.get(markerTemp.getKey()).remove();
-//        }
-//    }
 }
