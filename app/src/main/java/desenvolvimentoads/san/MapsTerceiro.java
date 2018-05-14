@@ -70,7 +70,7 @@ import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
 import desenvolvimentoads.san.Observer.SharedContext;
 
-public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ActionObserver {
+public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ActionObserver {
 
     private GoogleMap mMap;
     int RQS_GooglePlayServices = 0;
@@ -152,6 +152,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     boolean mapRebuildOk = false;
     boolean started = false;
 
+    LocationListener locationListenerGPS;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -211,6 +213,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             buildLocationSettingsRequest();
             if (checkPlayService()) {
 
+                createLocationListener();
                 checkLocationSettings();
                 displayLocation();
 
@@ -404,7 +407,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         //    recreateGoogleRefers();
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient,
-                this
+                locationListenerGPS
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(Status status) {
@@ -763,32 +766,44 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.i("teste", "Location changed markerhashmap size : " + markerHashMap.size());
+    /*3.7*/
+    public void createLocationListener() {
+        Log.i("teste", "------------------- METHOD 3.7 createLocationListener ---------------------");
+        locationListenerGPS = new LocationListener() {
+            @Override
+            public void onLocationChanged(android.location.Location location) {
+                Log.i("teste", "Location changed markerhashmap size : " + markerHashMap.size());
 
-        mLastLocation = location;
+                mLastLocation = location;
 
-        if (mLastLocation != null) {
-            Log.i("teste1", "->>>> Location Change " + keyFirebaseHashMap.size());
-            displayLocation();
-            //getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius);
-            getRaio(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius, true);
+                if (mLastLocation != null) {
+                    Log.i("teste1", "->>>> Location Change " + keyFirebaseHashMap.size());
+                    displayLocation();
+                    //getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius);
+                    getRaio(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius, true);
 
-            myLat = location.getLatitude();
-            myLong = location.getLongitude();
+                    myLat = location.getLatitude();
+                    myLong = location.getLongitude();
 
-            sharedContext.createPrefers("Location", "lat", String.valueOf(mLastLocation.getLatitude()));
-            sharedContext.createPrefers("Location", "lng", String.valueOf(mLastLocation.getLongitude()));
-
-
-        }
+                    sharedContext.createPrefers("Location", "lat", String.valueOf(mLastLocation.getLatitude()));
+                    sharedContext.createPrefers("Location", "lng", String.valueOf(mLastLocation.getLongitude()));
 
 
-        rebuildGeoQuery2();
+                }
+
+
+                rebuildGeoQuery2();
+
+
+
+
+            }
+
+        };
 
 
     }
+
 
 
     @Override
@@ -851,7 +866,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             //   recreateGoogleRefers();
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient,
-                    mLocationRequest, this
+                    mLocationRequest, locationListenerGPS
             ).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {

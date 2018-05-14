@@ -263,6 +263,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
         };
 
+
     }
 
 
