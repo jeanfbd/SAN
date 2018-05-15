@@ -476,6 +476,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
                                         if(foregroundHashMap.get(key) == null){
                                             Log.i("teste","dentro da query googleclient status "+mGoogleApiClient.isConnected());
+                                            Log.i("teste","add key notification "+key);
                                             notification();
                                             foregroundHashMap.put(key,key);
 
@@ -487,7 +488,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                                     } else {
 
                                         if(foregroundHashMap.get(key) != null){
-
+                                            Log.i("teste","remove key notification "+key);
                                             foregroundHashMap.remove(key);
 
 

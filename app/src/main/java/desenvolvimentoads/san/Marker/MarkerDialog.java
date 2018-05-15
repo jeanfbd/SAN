@@ -69,7 +69,6 @@ public class MarkerDialog {
     MenuInicial menuInicial = new MenuInicial();
     String userId = menuInicial.getUsers();
 
-    HashMap<String, Circle> circles = new HashMap<String, Circle>();
     Long creationDate;
 
 
@@ -137,7 +136,7 @@ public class MarkerDialog {
         //Persiste os dados sobre a chave itemId
 
 
-        circles.put(key, circle);
+
 
 
         action.setButtomAddMakerClickado(true);
@@ -424,7 +423,7 @@ public class MarkerDialog {
 
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-
+                alerta.dismiss();
 
                 image = R.mipmap.ic_maker_vermelho_star;
 
@@ -451,7 +450,7 @@ public class MarkerDialog {
 
                 final MarkerTag markerTag = (MarkerTag) marcador.getTag();
 
-                circles.put(itemId, circle);
+
 
 
                 GeoFire geoFire = new GeoFire(mDatabase.child("marker_location"));
@@ -497,14 +496,19 @@ public class MarkerDialog {
 
                 action.setButtomAddMakerClickado(true);
                 //zoomMarker(latLng, googleMapFinal);
-                m.put(itemId, marcador);
+                String teste1 ="";
+                teste1 = itemId;
+                m.put(teste1, marcador);
                 if (keyAppHash != null) {
-                    keyAppHash.put(itemId, itemId);
+                    String teste2 ="";
+                    teste2 = itemId;
+                    keyAppHash.put(teste2, teste2);
                 }
 
+                String teste3 ="";
+                teste3 = itemId;
+                action.setItemId(teste3);
 
-                action.setItemId(itemId);
-                alerta.dismiss();
 
             }
 
@@ -514,7 +518,7 @@ public class MarkerDialog {
 
         {
             public void onClick(View arg0) {
-
+                alerta.dismiss();
                 Log.i("teste", "cancel pressed !!!");
 
                 if (!Action.getInstance().getButtomAddMakerClickado()) {
@@ -522,7 +526,7 @@ public class MarkerDialog {
                     Action.getInstance().setButtomAddMakerClickado(true);
                 }
 
-                alerta.dismiss();
+
 
 
             }

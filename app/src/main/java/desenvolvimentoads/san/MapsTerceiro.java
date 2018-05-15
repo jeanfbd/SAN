@@ -1031,7 +1031,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     if (dataSnapshot.child("fim").getValue() != null) {
                         if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
                             if (insideMyRadius) {
-                                keyFirebaseHashMap.put(key, key);
+                                String temp1 = "";
+                                temp1 =key;
+                                keyFirebaseHashMap.put(temp1, temp1);
                             }
 
 
@@ -1040,7 +1042,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                             if (HashMap.get(key) == null) {
                                 Log.i(TAG, "Entrou Criar: " + key);
                                 if (insideMyRadius) {
-                                    keyAppHashMap.put(key, key);
+                                    String temp2 = "";
+                                    temp2 =key;
+                                    keyAppHashMap.put(temp2, temp2);
                                 }
 
                                 markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, HashMap, key, dataSnapshot.child("Validar").child(userId).exists());
