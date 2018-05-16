@@ -180,6 +180,7 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                             markerOption.position(new LatLng(((Double) snapshot.child("latitude").getValue()) ,((Double) snapshot.child("longitude").getValue())));
                             markerOption.title((String) snapshot.child("street").getValue());
                             if (getServerTime() > (Long) snapshot.child("fim").getValue() && !snapshot.child("Denunciar").child(userId).exists()) {
+                                Log.d(TAG, "onDataChange: add "+snapshot.child("id").getValue());
                                 if (snapshot.child("idUser").getValue().equals(userId)) {
                                     markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
                                     Marker marker = mMap.addMarker(markerOption);

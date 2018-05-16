@@ -102,6 +102,14 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     private GeoQuery geoQueryRaio;
     private GeoFire geoFireRaio;
 
+    //HashMap dos markers
+    public static HashMap<String, Marker> markerHashMap = new HashMap<>();
+    public static HashMap<String, Marker> tempMarkerHashMap = new HashMap<>();
+    public static HashMap<String, String> keyMarkerMap = new HashMap<>();
+
+    //User Geofire
+    private GeoFire geoFireUser;
+
     Context mContext;
 
     Geocoder geocoder2;
@@ -125,8 +133,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public static HashMap<String, String> keyAppHashMap = new HashMap<>();
 
 
-    public static HashMap<String, Marker> markerHashMap = new HashMap<>();
-    public static HashMap<String, Marker> tempMarkerHashMap = new HashMap<>();
     public static HashMap<String, GeoQueryEventListener> notificationHashMap = new HashMap<>();
     public static final int REQUEST_PERMISSION_LOCATION = 10;
     Double getRaioFirebaseRadius = 1.0;
@@ -780,8 +786,27 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 if (mLastLocation != null) {
                     Log.i("teste1", "->>>> Location Change " + keyFirebaseHashMap.size());
                     displayLocation();
+                    getUserListener(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     //getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius);
                     getRaio(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius, true);
+                    Log.d("GEOFIREKEYHASHMAP", "Size: " + keyAppHashMap.size());
+                    Log.d("GEOFIREHASHMAP", "Size: " + markerHashMap.size());
+
+                    HashMap<String, Marker> tempMarkerHashMap = (HashMap) markerHashMap.clone();
+
+                    for (Map.Entry<String, Marker> markerTemp : tempMarkerHashMap.entrySet()) {
+                        Log.d("GEOFIRECONDIÇÃO", "COMTEM: " + keyMarkerMap.containsKey(markerTemp.getKey()));
+                        Log.d("GEOFIRECONDIÇÃO", "KEY A: " + markerTemp.getKey());
+                        Log.d("GEOFIRECONDIÇÃO", "KEY B: " + keyMarkerMap.get(markerTemp.getKey()));
+                        if (keyMarkerMap.get(markerTemp.getKey()) == null) {
+                            Log.d("GEOFIREHASHMAP", "removeu a key: " + markerTemp.getKey());
+                            MarkerTag markerTag = (MarkerTag) markerHashMap.get(markerTemp.getKey()).getTag();
+                            markerTag.getCircle().remove();
+                            markerTemp.getValue().remove();
+                            markerHashMap.remove(markerTemp.getKey());
+                        }
+                    }
+                    keyMarkerMap.clear();
 
                     myLat = location.getLatitude();
                     myLong = location.getLongitude();
@@ -964,6 +989,32 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         HashMap.clear();
     }
 
+    public void getUserListener(Double lat, Double lng) {
+//        if (geoFireUser != null){
+//            geoFireUser.removeLocation(userId, new GeoFire.CompletionListener() {
+//                @Override
+//                public void onComplete(String key, DatabaseError error) {
+//                    Log.d("GEOFIREUSER", "Removeu User: "+key);
+//                }
+//            });
+//        }
+        userRadiusListener(lat, lng);
+    }
+
+    public void userRadiusListener(Double lat, Double lng) {
+        mDatabaseReference = ConfigFireBase.getFirebase();
+        firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
+
+        geoFireUser = new GeoFire(mDatabaseReference.child("user_location"));
+        geoFireUser.setLocation(userId, new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error == null) {
+                    //Log.d("GEOFIREUSER", "Criou User: " + key);
+                }
+            }
+        });
+    }
 
     public void getRaio(Double lat, Double lng, Double radius, boolean method) {
         if (geoQueryRaio != null) {
@@ -984,15 +1035,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             geoQueryRaio.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
                 public void onKeyEntered(String key, GeoLocation location) {
-                    Log.d("GEOFIRE", "onKeyEntered: " + key);
                     if (!method) {
                         if (!markerHashMap.containsKey(key)) {
-                            fetchData(key, tempMarkerHashMap, method);
+                            fetchData(key, tempMarkerHashMap);
                         }
                     } else {
-                        fetchData(key, markerHashMap, method);
+                        fetchData(key, markerHashMap);
+                        Log.d("GEOFIREKEYHASHMAP", "add: " + key);
+                        keyMarkerMap.put(key, key);
                     }
-
                 }
 
                 @Override
@@ -1003,12 +1054,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                 @Override
                 public void onKeyMoved(String key, GeoLocation location) {
-
+                    Log.d("GEOFIRE", "onKeyMoved: " + key);
                 }
 
                 @Override
                 public void onGeoQueryReady() {
-
+                    Log.d("GEOFIRE", "onGeoQueryReady: Carregou a query");
                 }
 
                 @Override
@@ -1019,7 +1070,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    public void fetchData(final String key, final HashMap<String, Marker> HashMap, final boolean insideMyRadius) {
+    public void fetchData(final String key, final HashMap<String, Marker> HashMap) {
         mDatabaseReference = ConfigFireBase.getFirebase();
         mDatabaseReference.child("Marker").child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -1030,22 +1081,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     LatLng latLng = new LatLng(latitude, longitude);
                     if (dataSnapshot.child("fim").getValue() != null) {
                         if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
-                            if (insideMyRadius) {
-                                String temp1 = "";
-                                temp1 =key;
-                                keyFirebaseHashMap.put(temp1, temp1);
-                            }
-
-
-                            Log.i("teste1", "->>>> key fire aadiciionou uma key " + key);
-
                             if (HashMap.get(key) == null) {
                                 Log.i(TAG, "Entrou Criar: " + key);
-                                if (insideMyRadius) {
-                                    String temp2 = "";
-                                    temp2 =key;
-                                    keyAppHashMap.put(temp2, temp2);
-                                }
 
                                 markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, HashMap, key, dataSnapshot.child("Validar").child(userId).exists());
                                 if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, closeToMeRadius)) {
@@ -1059,42 +1096,24 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                 @Override
                                 public void onComplete(String key, DatabaseError error) {
                                     Log.d("GEOFIRE", "REMOVEU LISTENER: " + key);
+                                    if (HashMap.get(key) != null) {
+                                        Log.i(TAG, "Entrou Remover: " + key);
+                                        MarkerDialog.deleteDataArrayFirebase(HashMap, key);
+                                        Log.d(TAG, "Notifications: " + notificationHashMap.size());
+
+                                        if (alertHashMap.containsKey(key)) {
+                                            alertHashMap.remove(key);
+                                            if (alertHashMap.size() == 0) {
+                                                if (mCurrent != null) {
+                                                    mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                                                }
+                                            }
+
+                                        }
+
+                                    }
                                 }
                             });
-
-                            if (insideMyRadius) {
-                                if (keyFirebaseHashMap.get(key) != null) {
-                                    keyFirebaseHashMap.remove(key);
-                                    Log.i("teste1", "->>>> key fire removeu uma key " + key);
-                                }
-
-                                if (keyAppHashMap.get(key) != null) {
-                                    keyAppHashMap.remove(key);
-                                }
-
-                            }
-
-
-                            if (HashMap.get(key) != null) {
-                                // Log.i("teste1", "->>>> key  markerhash tbm? " + keyFirebaseHashMap.size());
-                                Log.i(TAG, "Entrou Remover: " + key);
-                                MarkerDialog.deleteDataArrayFirebase(HashMap, key);
-                                Log.d(TAG, "Notifications: " + notificationHashMap.size());
-
-
-                                Log.i("teste", "key : " + key);
-
-                                if (alertHashMap.containsKey(key)) {
-                                    alertHashMap.remove(key);
-                                    if (alertHashMap.size() == 0) {
-                                        if (mCurrent != null) {
-                                            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
-                                        }
-                                    }
-
-                                }
-
-                            }
                         }
                     }
                 }
@@ -1106,103 +1125,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
             }
         });
-        Log.i("teste1", "- >>>>  INSIDE MY RADIUS???? " + insideMyRadius);
-        if (insideMyRadius) {
-
-            Log.i("teste1", "- >>>>  key fire base size " + keyFirebaseHashMap.size());
-
-            Log.i("teste1", "key app base size " + keyAppHashMap.size());
-            Set keysSetFirebase = keyFirebaseHashMap.keySet();
-
-            if (keyFirebaseHashMap.size() >= 1) {
-                //  Set keysSetFirebase = keyFirebaseHashMap.keySet();
-                Set keysSet = keyAppHashMap.keySet();
-                Iterator iterator = keysSet.iterator();
-                List<String> keyToRemove = new ArrayList<>();
-                while (iterator.hasNext()) {
-                    String keyApp = String.valueOf(iterator.next());
-                    if (!keyFirebaseHashMap.containsKey(keyApp)) {
-
-                        keyToRemove.add(keyApp);
-
-                    }
-
-                }
-
-                for (String keyApp : keyToRemove) {
-                    Log.i("teste1", "key app removed " + keyApp);
-                    keyAppHashMap.remove(keyApp);
-                    if (markerHashMap.containsKey(keyApp)) {
-                        MarkerTag markerTag = (MarkerTag) markerHashMap.get(keyApp).getTag();
-
-                        markerTag.getCircle().remove();
-                        markerHashMap.get(keyApp).remove();
-                        markerHashMap.remove(keyApp);
-
-
-                    }
-                    if (alertHashMap.containsKey(keyApp)) {
-                        alertHashMap.remove(keyApp);
-                        if (alertHashMap.size() == 0) {
-                            if (mCurrent != null) {
-                                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
-                            }
-                        }
-
-                    }
-
-                }
-
-
-            } else {
-                //  Set keysSetFirebase = keyFirebaseHashMap.keySet();
-                Set keysSet = keyAppHashMap.keySet();
-                Iterator iterator = keysSet.iterator();
-                List<String> keyToRemove = new ArrayList<>();
-                while (iterator.hasNext()) {
-                    String keyApp = String.valueOf(iterator.next());
-
-
-                    keyToRemove.add(keyApp);
-
-
-                }
-
-                for (String keyApp : keyToRemove) {
-                    Log.i("teste1", "key app removed " + keyApp);
-                    keyAppHashMap.remove(keyApp);
-                    if (markerHashMap.containsKey(keyApp)) {
-                        MarkerTag markerTag = (MarkerTag) markerHashMap.get(keyApp).getTag();
-
-                        markerTag.getCircle().remove();
-                        markerHashMap.get(keyApp).remove();
-                        markerHashMap.remove(keyApp);
-
-
-                    }
-                    if (alertHashMap.containsKey(keyApp)) {
-                        alertHashMap.remove(keyApp);
-                        if (alertHashMap.size() == 0) {
-                            if (mCurrent != null) {
-                                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
-                            }
-                        }
-
-                    }
-
-                }
-
-            }
-            while (keysSetFirebase.iterator().hasNext()) {
-                String keyFire = String.valueOf(keysSetFirebase.iterator().next());
-                if (keyFirebaseHashMap.containsKey(keyFire)) {
-                    Log.i("teste1", "key fire removed " + keyFire);
-                    keyFirebaseHashMap.remove(keyFire);
-                }
-
-            }
-
-        }
     }
 //GETIRAIOOLD
 //

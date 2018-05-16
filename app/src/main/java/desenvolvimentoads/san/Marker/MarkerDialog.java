@@ -69,6 +69,7 @@ public class MarkerDialog {
     MenuInicial menuInicial = new MenuInicial();
     String userId = menuInicial.getUsers();
 
+    HashMap<String, Circle> circles = new HashMap<String, Circle>();
     Long creationDate;
 
 
@@ -136,7 +137,7 @@ public class MarkerDialog {
         //Persiste os dados sobre a chave itemId
 
 
-
+        circles.put(key, circle);
 
 
         action.setButtomAddMakerClickado(true);
@@ -423,7 +424,7 @@ public class MarkerDialog {
 
         confirm.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                alerta.dismiss();
+
 
                 image = R.mipmap.ic_maker_vermelho_star;
 
@@ -450,7 +451,7 @@ public class MarkerDialog {
 
                 final MarkerTag markerTag = (MarkerTag) marcador.getTag();
 
-
+                circles.put(itemId, circle);
 
 
                 GeoFire geoFire = new GeoFire(mDatabase.child("marker_location"));
@@ -488,27 +489,22 @@ public class MarkerDialog {
                     }
                 });
 
-                GeoHash geoHash = new GeoHash(new GeoLocation(marcador.getPosition().latitude, marcador.getPosition().longitude));
-                Map<String, Object> updates = new HashMap<>();
-                updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
-                updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
+//                GeoHash geoHash = new GeoHash(new GeoLocation(marcador.getPosition().latitude, marcador.getPosition().longitude));
+//                Map<String, Object> updates = new HashMap<>();
+//                updates.put("marker_location/" + itemId + "/g", geoHash.getGeoHashString());
+//                updates.put("marker_location/" + itemId + "/l", Arrays.asList(marcador.getPosition().latitude, marcador.getPosition().longitude));
 
 
                 action.setButtomAddMakerClickado(true);
                 //zoomMarker(latLng, googleMapFinal);
-                String teste1 ="";
-                teste1 = itemId;
-                m.put(teste1, marcador);
+                m.put(itemId, marcador);
                 if (keyAppHash != null) {
-                    String teste2 ="";
-                    teste2 = itemId;
-                    keyAppHash.put(teste2, teste2);
+                    keyAppHash.put(itemId, itemId);
                 }
 
-                String teste3 ="";
-                teste3 = itemId;
-                action.setItemId(teste3);
 
+                action.setItemId(itemId);
+                alerta.dismiss();
 
             }
 
@@ -518,7 +514,7 @@ public class MarkerDialog {
 
         {
             public void onClick(View arg0) {
-                alerta.dismiss();
+
                 Log.i("teste", "cancel pressed !!!");
 
                 if (!Action.getInstance().getButtomAddMakerClickado()) {
@@ -526,7 +522,7 @@ public class MarkerDialog {
                     Action.getInstance().setButtomAddMakerClickado(true);
                 }
 
-
+                alerta.dismiss();
 
 
             }
