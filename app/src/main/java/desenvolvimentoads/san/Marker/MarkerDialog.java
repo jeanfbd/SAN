@@ -101,10 +101,9 @@ public class MarkerDialog {
 
     }
 
-    public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key, boolean validou) {
+    public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key, boolean validou, String idUser) {
 
-
-        if (key.equals(userId)) {
+        if (idUser.equals(userId)) {
             image = R.mipmap.ic_maker_vermelho_star;
         } else {
             image = R.mipmap.ic_maker_vermelho;
@@ -285,90 +284,83 @@ public class MarkerDialog {
     public void diagValidate2(final Marker marker, Context c, final HashMap<String, Marker> m) {
         final MarkerTag markerTag = (MarkerTag) marker.getTag();
 
-        if (markerTag.getIdUser() != userId) {
+        circle = markerTag.getCircle();
+        LayoutInflater li = LayoutInflater.from(c);
 
-            circle = markerTag.getCircle();
-            LayoutInflater li = LayoutInflater.from(c);
+        //inflamos o layout alerta.xml na view
+        final View view = li.inflate(R.layout.dialog_validar2, null);
 
-            //inflamos o layout alerta.xml na view
-            final View view = li.inflate(R.layout.dialog_validar2, null);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(c);
-            builder.setTitle("Validação");
-            final Button btDislike = (Button) view.findViewById(R.id.btDislike);
-            final Button btValidate = (Button) view.findViewById(R.id.btLike);
-            final Button btCancel = (Button) view.findViewById(R.id.btCancel);
-            final TextView street = (TextView) view.findViewById(R.id.street);
-            final TextView location = (TextView) view.findViewById(R.id.location);
-            final TextView datetime = (TextView) view.findViewById(R.id.datetime);
-            final ImageView markerimage = (ImageView) view.findViewById(R.id.markerimage);
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Validação");
+        final Button btDislike = (Button) view.findViewById(R.id.btDislike);
+        final Button btValidate = (Button) view.findViewById(R.id.btLike);
+        final Button btCancel = (Button) view.findViewById(R.id.btCancel);
+        final TextView street = (TextView) view.findViewById(R.id.street);
+        final TextView location = (TextView) view.findViewById(R.id.location);
+        final TextView datetime = (TextView) view.findViewById(R.id.datetime);
+        final ImageView markerimage = (ImageView) view.findViewById(R.id.markerimage);
 
 
-            markerimage.setImageResource(R.mipmap.ic_maker_vermelho);
-            street.setText(markerTag.getStreet());
-            location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
+        markerimage.setImageResource(R.mipmap.ic_maker_vermelho);
+        street.setText(markerTag.getStreet());
+        location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
 
-            try {
-                mDatabase.child("Marker").child(markerTag.getId()).child("inicio").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot != null) {
-                            long inicio = (long) dataSnapshot.getValue();
-                            datetime.setText(convertTime(inicio));
-                        }
+        try {
+            mDatabase.child("Marker").child(markerTag.getId()).child("inicio").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        long inicio = (long) dataSnapshot.getValue();
+                        datetime.setText(convertTime(inicio));
                     }
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        datetime.setText(convertTime(0));
-                    }
-                });
-            } catch (Exception ex) {
-                datetime.setText(convertTime(0));
-            }
-
-
-            btDislike.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View arg0) {
-
-
-                    insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, false, m);
-                    alerta.dismiss();
-
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    datetime.setText(convertTime(0));
                 }
             });
-
-
-            btValidate.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View arg0) {
-
-
-                    insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, true, m);
-
-
-                    alerta.dismiss();
-                }
-            });
-
-
-            btCancel.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View arg0) {
-
-                    Log.i("teste", "cancel pressed !!!");
-                    alerta.dismiss();
-
-
-                }
-            });
-
-            builder.setView(view);
-            alerta = builder.create();
-            alerta.show();
-        }else{
-            Toast.makeText(c, "Não é possível validar seu próprio maker!!!", Toast.LENGTH_SHORT).show();
-
+        } catch (Exception ex) {
+            datetime.setText(convertTime(0));
         }
 
+
+        btDislike.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+
+                insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, false, m);
+                alerta.dismiss();
+
+            }
+        });
+
+
+        btValidate.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+
+                insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, true, m);
+
+
+                alerta.dismiss();
+            }
+        });
+
+
+        btCancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+                Log.i("teste", "cancel pressed !!!");
+                alerta.dismiss();
+
+
+            }
+        });
+
+        builder.setView(view);
+        alerta = builder.create();
+        alerta.show();
 
     }
 
@@ -439,6 +431,8 @@ public class MarkerDialog {
 
                 MarkerTag tag = new MarkerTag(marcador.getPosition().latitude, marcador.getPosition().longitude, circle, false);
                 tag.setStreet(getStreet(latLng, c, g));
+                tag.setValidate(true);
+                tag.setIdUser(userId);
 
                 //Pega Referencia do Firebase
                 mDatabase = ConfigFireBase.getFirebase();
@@ -477,6 +471,7 @@ public class MarkerDialog {
                                         long inicio = (long) dataSnapshot.getValue();
                                         Log.d("TIMESTAMP", "" + inicio);
                                         mDatabase.child("Marker").child(itemId).child("fim").setValue(inicio + 120000);
+                                        mDatabase.child("Marker").child(itemId).child("Validar").child(userId).setValue(userId);
                                     }
                                 }
 

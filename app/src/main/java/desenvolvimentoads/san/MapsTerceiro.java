@@ -786,7 +786,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 if (mLastLocation != null) {
                     Log.i("teste1", "->>>> Location Change " + keyFirebaseHashMap.size());
                     displayLocation();
-                    getUserListener(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     //getRaioFirebase(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius);
                     getRaio(mLastLocation.getLatitude(), mLastLocation.getLongitude(), getRaioFirebaseRadius, true);
                     Log.d("GEOFIREKEYHASHMAP", "Size: " + keyAppHashMap.size());
@@ -989,32 +988,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         HashMap.clear();
     }
 
-    public void getUserListener(Double lat, Double lng) {
-//        if (geoFireUser != null){
-//            geoFireUser.removeLocation(userId, new GeoFire.CompletionListener() {
-//                @Override
-//                public void onComplete(String key, DatabaseError error) {
-//                    Log.d("GEOFIREUSER", "Removeu User: "+key);
-//                }
-//            });
-//        }
-        userRadiusListener(lat, lng);
-    }
 
-    public void userRadiusListener(Double lat, Double lng) {
-        mDatabaseReference = ConfigFireBase.getFirebase();
-        firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
-
-        geoFireUser = new GeoFire(mDatabaseReference.child("user_location"));
-        geoFireUser.setLocation(userId, new GeoLocation(lat, lng), new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                if (error == null) {
-                    //Log.d("GEOFIREUSER", "Criou User: " + key);
-                }
-            }
-        });
-    }
 
     public void getRaio(Double lat, Double lng, Double radius, boolean method) {
         if (geoQueryRaio != null) {
@@ -1080,15 +1054,34 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                     double longitude = (double) dataSnapshot.child("longitude").getValue();
                     LatLng latLng = new LatLng(latitude, longitude);
                     if (dataSnapshot.child("fim").getValue() != null) {
-                        if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
-                            if (HashMap.get(key) == null) {
-                                Log.i(TAG, "Entrou Criar: " + key);
+                        if (getServerTime() < (Long) dataSnapshot.child("fim").getValue()) {
+                            if (!dataSnapshot.child("Denunciar").child(userId).exists()){
+                                if (HashMap.get(key) == null) {
+                                    Log.i(TAG, "Entrou Criar: " + key);
 
-                                markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, HashMap, key, dataSnapshot.child("Validar").child(userId).exists());
-                                if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, closeToMeRadius)) {
-                                    if (mCurrent != null) {
-                                        mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
+                                    markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, HashMap, key, dataSnapshot.child("Validar").child(userId).exists(), userId);
+                                    if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, closeToMeRadius)) {
+                                        if (mCurrent != null) {
+                                            mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_danger));
+                                        }
                                     }
+                                }
+                            }else{
+                                if (HashMap.get(key) != null) {
+                                    Log.i(TAG, "Entrou Remover: " + key);
+                                    MarkerDialog.deleteDataArrayFirebase(HashMap, key);
+                                    Log.d(TAG, "Notifications: " + notificationHashMap.size());
+
+                                    if (alertHashMap.containsKey(key)) {
+                                        alertHashMap.remove(key);
+                                        if (alertHashMap.size() == 0) {
+                                            if (mCurrent != null) {
+                                                mCurrent.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_my_location_fine));
+                                            }
+                                        }
+
+                                    }
+
                                 }
                             }
                         } else {
