@@ -64,10 +64,10 @@ public class MarkerDialog {
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
-    //String userId = currentUser.getUid();
+    String userId = currentUser.getUid();
 
-    MenuInicial menuInicial = new MenuInicial();
-    String userId = menuInicial.getUsers();
+//    MenuInicial menuInicial = new MenuInicial();
+//    String userId = menuInicial.getUsers();
 
     HashMap<String, Circle> circles = new HashMap<String, Circle>();
     Long creationDate;
@@ -265,9 +265,9 @@ public class MarkerDialog {
 
                 } else {
                     action.setReportNotSelected(true);
-                    insertDenunciar((MarkerTag) m.get(markerTagMap.getId()).getTag(), userId, m);
-
-
+                    if(m.get(markerTagMap.getId()) != null){
+                        insertDenunciar((MarkerTag) m.get(markerTagMap.getId()).getTag(), userId, m);
+                    }
                 }
 
 

@@ -733,9 +733,9 @@ public class MenuInicial extends AppCompatActivity
     //    0 - jeanfelipe.brock@gmail.com
     //    1 - jeanbrock.felipe@gmail.com
     //    2 - felipemrk2e@gmail.com
-    public String getUsers() {
-        return users[2];
-    }
+//    public String getUsers() {
+//        return users[2];
+//    }
     @Override
     public void onDestroy() {
         super.onDestroy();

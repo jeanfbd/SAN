@@ -89,10 +89,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     //Login Firebase Auth
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
-    //private String userId = currentUser.getUid();
+    private String userId = currentUser.getUid();
 
-    MenuInicial menuInicial = new MenuInicial();
-    String userId = menuInicial.getUsers();
+//    MenuInicial menuInicial = new MenuInicial();
+//    String userId = menuInicial.getUsers();
 
     //Banco de Dados Firebase
     private DatabaseReference mDatabaseReference;

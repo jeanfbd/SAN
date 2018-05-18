@@ -53,10 +53,10 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
-    //private String userId = currentUser.getUid();
+    private String userId = currentUser.getUid();
 
-    MenuInicial menuInicial = new MenuInicial();
-    String userId = menuInicial.getUsers();
+//    MenuInicial menuInicial = new MenuInicial();
+//    String userId = menuInicial.getUsers();
 
     private DatabaseReference mDatabaseReference;
     private FirebaseDatabase firebaseDatabase;

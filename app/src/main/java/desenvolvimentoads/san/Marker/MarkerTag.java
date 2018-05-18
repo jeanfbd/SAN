@@ -30,8 +30,9 @@ public class MarkerTag {
     private FirebaseUser currentUser = mAuth.getCurrentUser();
     //String userId = currentUser.getUid();
 
-    MenuInicial menuInicial = new MenuInicial();
-    String userId = menuInicial.getUsers();
+
+//    MenuInicial menuInicial = new MenuInicial();
+//    String userId = menuInicial.getUsers();
 
     @Exclude
     private boolean validate = false;
@@ -50,7 +51,7 @@ public class MarkerTag {
         this.circle = circle;
         this.validate = validate;
         this.inicio = ServerValue.TIMESTAMP;
-        this.idUser = userId;
+        this.idUser = "pouNOiMFxgeDxOgn0GXquvvkH9G2";
     }
 
 
