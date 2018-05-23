@@ -30,8 +30,8 @@ public class MarkerTag {
     private FirebaseUser currentUser = mAuth.getCurrentUser();
     //String userId = currentUser.getUid();
 
-    MenuInicial menuInicial = new MenuInicial();
-    String userId = menuInicial.getUsers();
+
+    String userId ="123";
 
     @Exclude
     private boolean validate = false;

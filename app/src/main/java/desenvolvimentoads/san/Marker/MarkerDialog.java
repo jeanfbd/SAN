@@ -470,7 +470,7 @@ public class MarkerDialog {
                                     if (dataSnapshot != null) {
                                         long inicio = (long) dataSnapshot.getValue();
                                         Log.d("TIMESTAMP", "" + inicio);
-                                        mDatabase.child("Marker").child(itemId).child("fim").setValue(inicio + 120000);
+                                        mDatabase.child("Marker").child(itemId).child("fim").setValue(inicio + 20000);
                                         mDatabase.child("Marker").child(itemId).child("Validar").child(userId).setValue(userId);
                                     }
                                 }
