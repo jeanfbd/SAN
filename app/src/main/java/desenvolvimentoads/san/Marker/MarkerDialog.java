@@ -91,9 +91,7 @@ public class MarkerDialog {
 
     public static void deleteDataArrayFirebase(final HashMap<String, Marker> m, final String key) {
 
-
         MarkerTag markerTag = (MarkerTag) m.get(key).getTag();
-
         markerTag.getCircle().remove();
         m.get(key).remove();
         m.remove(key);
@@ -102,6 +100,7 @@ public class MarkerDialog {
     }
 
     public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key, boolean validou, String idUser) {
+
 
         if (idUser.equals(userId)) {
             image = R.mipmap.ic_maker_vermelho_star;
@@ -327,9 +326,9 @@ public class MarkerDialog {
 
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-
-
-                insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, false, m);
+                if (m.get(markerTag.getId()) != null){
+                    insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, false, m);
+                }
                 alerta.dismiss();
 
             }
@@ -338,11 +337,9 @@ public class MarkerDialog {
 
         btValidate.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-
-
-                insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, true, m);
-
-
+            if (m.get(markerTag.getId()) != null){
+                    insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, true, m);
+                }
                 alerta.dismiss();
             }
         });

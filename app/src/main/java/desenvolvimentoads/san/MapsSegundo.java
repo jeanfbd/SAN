@@ -89,10 +89,8 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
             Log.d(TAG, "onCreate: LAT: " + latPrefers);
             Log.d(TAG, "onCreate: LNG: " + lngString);
         }
-        markerHashMap.clear();
 
     }
-
 
 
     @Override
@@ -126,12 +124,11 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
                     ImageView markerimage = (ImageView) v.findViewById(R.id.markerimage);
 
-                    if (markerTag.getIdUser().equals(userId)){
+                    if (markerTag.getIdUser().equals(userId)) {
                         markerimage.setImageResource(R.mipmap.ic_maker_cinza);
-                    }else{
+                    } else {
                         markerimage.setImageResource(R.mipmap.ic_maker_cinza_star);
                     }
-
 
 
                     street.setText(markerTag.getStreet());
@@ -156,8 +153,7 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
     public void getOldFirebase() {
         getServerTime();
-        final AtomicInteger count = new AtomicInteger();
-
+        clearMarker();
         mDatabaseReference = ConfigFireBase.getFirebase();
 
         mDatabaseReference = ConfigFireBase.getFirebase();
@@ -166,21 +162,21 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     if (snapshot != null && snapshot.getValue() != null) {
-                        Log.d(TAG, "onDataChange: "+snapshot.getValue());
+                        Log.d(TAG, "onDataChange: " + snapshot.getValue());
                         MarkerTag markerTag = new MarkerTag();
-                        markerTag.setIdUser((String)snapshot.child("id").getValue());
-                        markerTag.setId((String)snapshot.child("id").getValue());
-                        markerTag.setStreet((String)snapshot.child("street").getValue());
+                        markerTag.setIdUser((String) snapshot.child("id").getValue());
+                        markerTag.setId((String) snapshot.child("id").getValue());
+                        markerTag.setStreet((String) snapshot.child("street").getValue());
                         markerTag.setFim((Long) snapshot.child("fim").getValue());
                         markerTag.setLatitude((Double) snapshot.child("latitude").getValue());
                         markerTag.setLongitude((Double) snapshot.child("longitude").getValue());
 
                         if (snapshot.child("fim").getValue() != null) {
                             MarkerOptions markerOption = new MarkerOptions();
-                            markerOption.position(new LatLng(((Double) snapshot.child("latitude").getValue()) ,((Double) snapshot.child("longitude").getValue())));
+                            markerOption.position(new LatLng(((Double) snapshot.child("latitude").getValue()), ((Double) snapshot.child("longitude").getValue())));
                             markerOption.title((String) snapshot.child("street").getValue());
                             if (getServerTime() > (Long) snapshot.child("fim").getValue() && !snapshot.child("Denunciar").child(userId).exists()) {
-                                Log.d(TAG, "onDataChange: add "+snapshot.child("id").getValue());
+                                Log.d(TAG, "onDataChange: add " + snapshot.child("id").getValue());
                                 if (snapshot.child("idUser").getValue().equals(userId)) {
                                     markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
                                     Marker marker = mMap.addMarker(markerOption);
@@ -204,6 +200,16 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
         });
 
 
+    }
+
+    public void clearMarker() {
+        HashMap<String, Marker> tempHashMap = (HashMap) markerHashMap.clone();
+        for (Map.Entry<String, Marker> markerTemp : tempHashMap.entrySet()) {
+            markerTemp.getValue().remove();
+            markerHashMap.remove(markerTemp.getKey());
+
+        }
+        markerHashMap.clear();
     }
 
     public Long getServerTime() {

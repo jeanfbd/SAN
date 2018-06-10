@@ -372,6 +372,13 @@ public class MenuInicial extends AppCompatActivity
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
 
+
+        //Apaga cache do app
+        if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
+            ((ActivityManager) this.getSystemService(ACTIVITY_SERVICE))
+                    .clearApplicationUserData();
+        }
+
     }
 
     private void showFragment(Fragment fragment, String name) {
