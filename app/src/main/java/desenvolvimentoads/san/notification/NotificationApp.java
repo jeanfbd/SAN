@@ -33,7 +33,7 @@ public class NotificationApp {
 
         if(this.descricaoLine ==null){
 
-          this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento proximos a você"};
+          this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento próximos a você"};
         }
 
         notification();
@@ -71,7 +71,7 @@ public class NotificationApp {
 
         if(this.descricaoLine ==null){
 
-            this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento proximos a você"};
+            this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento próximos a você."};
         }
 
         for (int i =0; i<descricaoLine.length; i++)

@@ -130,7 +130,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
 
         Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle("San ForegroundService")
+                .setContentTitle("San")
                 .setTicker("San")
                 .setContentText("Serviço de alerta SAN")
                 .setSmallIcon(R.mipmap.ic_maker_vermelho)
@@ -147,12 +147,22 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     public void onDestroy() {
         super.onDestroy();
         Log.i("teste", "In onDestroy");
-        Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
+    //    Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
         IS_SERVICE_RUNNING = false;
         if(geoQuery !=null){
             geoQuery.removeAllListeners();
 
         }
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(
+                    mGoogleApiClient,
+                    locationListenerGPS);
+            mGoogleApiClient.disconnect();
+            Log.i("teste", "stopLocationUpdates removed");
+        } else {
+
+        }
+
     }
 
     @Override
@@ -340,8 +350,8 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_maker_vermelho)
                         .setContentTitle("Alerta")
-                        .setTicker("Foram encontrados alertas proximos da sua localidade")
-                        .setContentText("Foram encontrados alertas proximos da sua localidade")
+                        .setTicker("Foram encontrados alertas próximos da sua localidade.")
+                        .setContentText("Foram encontrados alertas próximos da sua localidade")
                         .setSubText("Alerta!");
 
 
@@ -387,7 +397,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient,
                     locationListenerGPS);
-
+            mGoogleApiClient.disconnect();
             Log.i("teste", "stopLocationUpdates removed");
         } else {
 

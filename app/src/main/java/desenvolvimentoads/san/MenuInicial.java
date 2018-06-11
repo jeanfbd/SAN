@@ -93,8 +93,8 @@ public class MenuInicial extends AppCompatActivity
         }
 
 
-     //     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-    //     startActivity(intent);// step 6
+        //     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        //     startActivity(intent);// step 6
 
 
 /*
@@ -134,8 +134,6 @@ public class MenuInicial extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
 
 
-
-
         if (currentUser != null) {
             userName = currentUser.getDisplayName();
             userEmail = currentUser.getEmail();
@@ -169,19 +167,18 @@ public class MenuInicial extends AppCompatActivity
 
         if (Build.VERSION.SDK_INT <= 22) {
             permissionOk = true;
-            Log.i("teste", "------------------- BUILD VERSION ---------------------  " +Build.VERSION.SDK_INT);
+            Log.i("teste", "------------------- BUILD VERSION ---------------------  " + Build.VERSION.SDK_INT);
             menuStart();
 
-        }else{
+        } else {
             checkPermission();
 
         }
 
 
-
-
     }
-    public void checkPermission(){
+
+    public void checkPermission() {
 
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -190,21 +187,17 @@ public class MenuInicial extends AppCompatActivity
             ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_CODE);
 
 
-
-
-        }else{
+        } else {
 
             menuStart();
 
         }
 
 
-        }
+    }
 
-    public void menuStart(){
+    public void menuStart() {
         navigationView.setNavigationItemSelectedListener(this);
-
-
 
 
         btnAddMarker = (FloatingActionButton) findViewById(R.id.fab);
@@ -226,7 +219,7 @@ public class MenuInicial extends AppCompatActivity
                 }
 
 
-                Snackbar.make(view, "Clique no mapa para criar um marcador ou clique novamente para Cancelar", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Clique no mapa para criar um marcador ou clique novamente para Cancelar.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 addMarkerFloatButtom();
 
@@ -237,7 +230,7 @@ public class MenuInicial extends AppCompatActivity
             @Override
             public void onClick(View view) {
 
-                Snackbar.make(view, "Criação do novo marcador Cancelada", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Criação do novo marcador Cancelada.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 addMarkerFloatButtom();
 
@@ -249,7 +242,8 @@ public class MenuInicial extends AppCompatActivity
 
         startFragment();
     }
-    public void startFragment(){
+
+    public void startFragment() {
         fragmentManager = getSupportFragmentManager();
 
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -281,7 +275,7 @@ public class MenuInicial extends AppCompatActivity
             vDenunciar = false;
             Action.getInstance().setReportNotSelected(false);
             denunciar.setTitle("Cancel");
-            Snackbar.make(getCurrentFocus(), "Clique no marcador que deseja denunciar", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            Snackbar.make(getCurrentFocus(), "Clique no marcador que deseja denunciar.", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 
         } else {
 
@@ -346,10 +340,16 @@ public class MenuInicial extends AppCompatActivity
 
                 showFragment(new MapsTerceiro(), "Todos Marcadores");
                 setTitle("Todos Marcadores");
+                findViewById(R.id.denunciar).setVisibility(View.VISIBLE);
+                btnAddMarker = (FloatingActionButton) findViewById(R.id.fab);
+                btnAddMarker.setVisibility(View.VISIBLE);
                 break;
             case R.id.nav_user_marker:
                 showFragment(new MapsSegundo(), "Marcadores do Usuário");
                 setTitle("Marcadores do Usuário");
+                findViewById(R.id.denunciar).setVisibility(View.GONE);
+                btnAddMarker = (FloatingActionButton) findViewById(R.id.fab);
+                btnAddMarker.setVisibility(View.GONE);
                 break;
             case R.id.nav_tutorial:
                 tutorial();
@@ -371,7 +371,6 @@ public class MenuInicial extends AppCompatActivity
         Intent intent = new Intent(MenuInicial.this, TelaInicial.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-
 
         //Apaga cache do app
         if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
@@ -487,7 +486,7 @@ public class MenuInicial extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         Log.i("teste", "Permission called !!!");
-        Log.i("teste", "Permission called  code "+requestCode+" mycode "+MY_PERMISSION_REQUEST_CODE);
+        Log.i("teste", "Permission called  code " + requestCode + " mycode " + MY_PERMISSION_REQUEST_CODE);
         switch (requestCode) {
 
             case MY_PERMISSION_REQUEST_CODE:
@@ -495,7 +494,7 @@ public class MenuInicial extends AppCompatActivity
 
                     Log.i("teste", "permission terceiro accepted ");
                     permissionOk = true;
-                    if(!menuStarted){
+                    if (!menuStarted) {
                         menuStart();
 
                     }
@@ -513,13 +512,13 @@ public class MenuInicial extends AppCompatActivity
                         //
                         // User selected the Never Ask Again Option Change settings in app settings manually
                         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                        alertDialogBuilder.setTitle("   Olá    ");
+                        alertDialogBuilder.setTitle("   Olá.    ");
                         alertDialogBuilder
                                 .setMessage("" +
                                         "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
                                         "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
                                 .setCancelable(false)
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                .setPositiveButton("Ok.", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_CODE);
 
@@ -529,26 +528,26 @@ public class MenuInicial extends AppCompatActivity
                         AlertDialog alertDialog = alertDialogBuilder.create();
                         alertDialog.show();
                     } else {
-                        /*never asked selecionado...*/
+            /*never asked selecionado...*/
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                        alertDialogBuilder.setTitle("Permissão necessaria");
+                        alertDialogBuilder.setTitle("Permissão necessária.");
                         alertDialogBuilder
                                 .setMessage("" +
                                         "\n O App San utiliza de dados da localização para seu funcionamento." + "\n Ao selecionar para nunca mais ser requisitado permissão e negar o aplicativo deixa de funcionar."
-                                        + "\n Para que ele funcione agora será necessario mudar manualmente a permission do location nas configurações do App")
+                                        + "\n Para que ele funcione agora será necessário mudar manualmente a permissão do location nas configurações do App")
                                 .setCancelable(false)
-                                .setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                                .setNegativeButton("Não.", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         finishAffinity();
 
                                     }
                                 })
-                                .setPositiveButton("Configurações", new DialogInterface.OnClickListener() {
+                                .setPositiveButton("Configurações.", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                         Uri uri = Uri.fromParts("package", getBaseContext().getPackageName(), null);
                                         intent.setData(uri);
-                                        startActivityForResult(intent,1);// step 6
+                                        startActivityForResult(intent, 1);// step 6
 
                                     }
                                 });
@@ -569,16 +568,16 @@ public class MenuInicial extends AppCompatActivity
 
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Bem vindo !!");
+        alertDialogBuilder.setTitle("Bem vindo!.");
         alertDialogBuilder
                 .setMessage("" +
-                        "\n Gostaria de visualizar um breve tutorial ? \n " + "Ainda será possivel velo clicando na guia lateral a esquerda em 'Tutorial' .")
+                        "\nGostaria de visualizar um breve tutorial? \n " + "Ainda será possível velo clicando na guia lateral a esquerda em 'Tutorial'.")
                 .setCancelable(false)
-                .setPositiveButton("Sim, gostaria", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Sim, gostaria.", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         tutorial();
                     }
-                }).setNegativeButton("Não", new DialogInterface.OnClickListener() {
+                }).setNegativeButton("Não.", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 createPrefers("tutorial", "skip", true);
             }
@@ -592,17 +591,17 @@ public class MenuInicial extends AppCompatActivity
     public void tutorial() {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Criação de marcadores");
+        alertDialogBuilder.setTitle("Criação de marcadores.");
         alertDialogBuilder
                 .setMessage("" +
-                        "\n É possivel criar um marcador de alerta pressionado o dedo sobre o local por alguns segundos ou apertando no icone do marcador no lado direito da tela e clicando novamente no mapa. " +
-                        "\n " + "Só sera criado um marcador se sua ultima localização estiver proxima do ponto selecionado .")
+                        "\nÉ possível criar um marcador de alerta pressionado o dedo sobre o local por alguns segundos ou apertando no ícone do marcador no lado direito da tela e clicando novamente no mapa. " +
+                        "\n " + "Só seré criado um marcador se sua ultima localização estiver próxima do ponto selecionado.")
                 .setCancelable(false)
-                .setPositiveButton("Proximo", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Proximo.", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         messageOne();
                     }
-                }).setNegativeButton("Finalizar", new DialogInterface.OnClickListener() {
+                }).setNegativeButton("Finalizar.", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
 
             }
@@ -616,18 +615,18 @@ public class MenuInicial extends AppCompatActivity
     public void messageOne() {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Validação de marcadores");
+        alertDialogBuilder.setTitle("Validação de marcadores.");
         alertDialogBuilder
                 .setMessage("" +
-                        "\n É possivel validar marcadores criados pelos outros usuarios  clicando em cima deles assim aumentando o tempo de exposição do alerta ou diminuindo caso seja invalido" +
+                        "\nÉ possível validar marcadores criados pelos outros usuários  clicando em cima deles assim aumentando o tempo de exposição do alerta ou diminuindo caso seja invalido" +
                         "\n " + "Ao selecionar Valido, você esta dizendo que a informação esta correta." + "" +
-                        "\n Selecionando informação invalidar você esta dizendo que a informação não é mais valida.")
+                        "\nSelecionando informação invalidar você esta dizendo que a informação não é mais valida.")
                 .setCancelable(false)
-                .setPositiveButton("Proximo", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Próximo.", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         messageTwo();
                     }
-                }).setNegativeButton("Finalizar", new DialogInterface.OnClickListener() {
+                }).setNegativeButton("Finalizar.", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
 
             }
@@ -640,16 +639,16 @@ public class MenuInicial extends AppCompatActivity
     public void messageTwo() {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Denunciando marcadores");
+        alertDialogBuilder.setTitle("Denunciando marcadores.");
         alertDialogBuilder
                 .setMessage("" +
-                        "\n É possivel Denunciar os marcadores criados pelos outros usuarios, selecione a opção Denunciar no canto superior direito e clicando em cima do marcador a ser denunciado." + "\n Ao denunciar você esta dizendo ao sistema que aquela informação é uma tentativa de criar falsos alertas")
+                        "\nÉ possível Denunciar os marcadores criados pelos outros usuários, selecione a opção Denunciar no canto superior direito e clicando em cima do marcador a ser denunciado." + "\n Ao denunciar você está dizendo ao sistema que aquela informação é uma tentativa de criar falsos alertas.")
                 .setCancelable(false)
-                .setPositiveButton("Proximo", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Próximo.", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         messageThree();
                     }
-                }).setNegativeButton("Finalizar", new DialogInterface.OnClickListener() {
+                }).setNegativeButton("Finalizar.", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
 
             }
@@ -663,12 +662,12 @@ public class MenuInicial extends AppCompatActivity
     public void messageThree() {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Historico");
+        alertDialogBuilder.setTitle("Histórico.");
         alertDialogBuilder
                 .setMessage("" +
-                        "\n É possivel Visualizar o historico de marcadores adicionados e validados ao passar o dedo no canto esquerdo um menu sera exibido, ao selecionar historico será exibido um mapa com o seu historico.")
+                        "\n É possível Visualizar o histórico de marcadores adicionados e validados ao passar o dedo no canto esquerdo um menu sera exibido, ao selecionar histórico será exibido um mapa com o seu histórico.")
                 .setCancelable(false)
-                .setPositiveButton("Finalizar", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Finalizar.", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
                     }
