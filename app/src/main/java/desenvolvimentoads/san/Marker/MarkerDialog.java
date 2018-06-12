@@ -246,7 +246,7 @@ public class MarkerDialog {
     }
 
     /*Adicionando o listener dos marker para poder deletar e validar*/
-    public GoogleMap setMarkerClick(GoogleMap googleMap, Context c, final HashMap<String, Marker> m) {
+    public GoogleMap setMarkerClick(GoogleMap googleMap,final Context c, final HashMap<String, Marker> m) {
 
         this.context = c;
 
@@ -266,6 +266,7 @@ public class MarkerDialog {
                     action.setReportNotSelected(true);
                     if(m.get(markerTagMap.getId()) != null){
                         insertDenunciar((MarkerTag) m.get(markerTagMap.getId()).getTag(), userId, m);
+                        Toast.makeText(c, "O marcador foi denunciado com sucesso.", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -280,7 +281,7 @@ public class MarkerDialog {
     }
 
 
-    public void diagValidate2(final Marker marker, Context c, final HashMap<String, Marker> m) {
+    public void diagValidate2(final Marker marker,final Context c, final HashMap<String, Marker> m) {
         final MarkerTag markerTag = (MarkerTag) marker.getTag();
 
         circle = markerTag.getCircle();
@@ -328,6 +329,8 @@ public class MarkerDialog {
             public void onClick(View arg0) {
                 if (m.get(markerTag.getId()) != null){
                     insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, false, m);
+                    Toast.makeText(c, "O marcador foi invalidado com sucesso.", Toast.LENGTH_SHORT).show();
+
                 }
                 alerta.dismiss();
 
@@ -339,7 +342,9 @@ public class MarkerDialog {
             public void onClick(View arg0) {
             if (m.get(markerTag.getId()) != null){
                     insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, true, m);
-                }
+                Toast.makeText(c, "O marcador foi validado com sucesso.", Toast.LENGTH_SHORT).show();
+
+            }
                 alerta.dismiss();
             }
         });
