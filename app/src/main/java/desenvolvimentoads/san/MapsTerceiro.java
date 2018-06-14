@@ -320,13 +320,13 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                             // startLocationsUpdates();
                             // never asked selecionado
                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                            alertDialogBuilder.setTitle("Serviço de localização");
+                            alertDialogBuilder.setTitle("Serviço de localização.");
                             alertDialogBuilder
                                     .setMessage("" +
-                                            "\n O App San utiliza de dados de 'alta precisão' de localização para seu funcionamento." + "\n Atualmente não esta sendo encontrado o serviço de localização ou a alta precisão não esta ativada, possivelmente esteja desativado ou configurado a localização apenas para o dispositivo."
-                                            + "\n Por favor verifique as Configurações e o habilite a localização e selecione o modo ALTA PRECISÃO, caso já esteja habilitado desabilite e habilite novamente.")
+                                            "\nO App San utiliza de dados de 'alta precisão' de localização para seu funcionamento." + "\nAtualmente não esta sendo encontrado o serviço de localização ou a alta precisão não esta ativada, possivelmente esteja desativado ou configurado a localização apenas para o dispositivo."
+                                            + "\nPor favor verifique as Configurações e o habilite a localização e selecione o modo ALTA PRECISÃO, caso já esteja habilitado desabilite e habilite novamente.")
                                     .setCancelable(false)
-                                    .setPositiveButton("Configurações", new DialogInterface.OnClickListener() {
+                                    .setPositiveButton("Configurações.", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                             startActivityForResult(intent, 1);// step 6
@@ -353,13 +353,13 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                                     // User selected the Never Ask Again Option Change settings in app settings manually
                                     final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                                    alertDialogBuilder.setTitle("   Olá    ");
+                                    alertDialogBuilder.setTitle("   Olá.    ");
                                     alertDialogBuilder
                                             .setMessage("" +
-                                                    "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
-                                                    "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
+                                                    "\nO App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
+                                                    "\nPor isso pedimos para que aceite que ele utilize da permissão do Location.")
                                             .setCancelable(false)
-                                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                            .setPositiveButton("Ok.", new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int id) {
                                                     ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_LOCATION);
 
@@ -556,15 +556,15 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                             } else {
-                                Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Já existe um marcador na proximidade.", Toast.LENGTH_SHORT).show();
                             }
 
                         } else {
-                            Toast.makeText(getContext(), "Você precisa estar proximo do ponto a ser marcado", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Você precisa estar próximo do ponto a ser marcado.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 } else {
-                    Toast.makeText(getContext(), " Não foram encontrados os dados da ultima localização", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), " Não foram encontrados os dados da ultima localização.", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -598,6 +598,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         if (latString != null && lngString != null) {
             latPrefers = Double.valueOf(latString);
             lngPrefers = Double.valueOf(lngString);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latPrefers, lngPrefers), 16.0f));
             Log.i("teste", "Shared teste");
         }
 
@@ -760,12 +761,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                         Log.i("teste", "marker not nearby");
                         alertDialog(latLng, this.getContext(), mMap, geocoder2, markerHashMap);
                     } else {
-                        Toast.makeText(getContext(), "TEM MARCADOR AQUI PERTO!!!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Já existe um marcador na proximidade.", Toast.LENGTH_SHORT).show();
 
                     }
 
                 } else {
-                    Toast.makeText(getContext(), " É necessario estar proximo ao local a ser marcado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "É necessario estar próximo ao local a ser marcado.", Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -776,7 +777,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
         } else {
-            Toast.makeText(getContext(), " Não foram encontrados os dados da ultima localização", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Não foram encontrados os dados da ultima localização.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1339,11 +1340,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                 // User selected the Never Ask Again Option Change settings in app settings manually
                 // User selected the Never Ask Again Option Change settings in app settings manually
                 final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                alertDialogBuilder.setTitle("   Olá    ");
+                alertDialogBuilder.setTitle("   Olá.    ");
                 alertDialogBuilder
                         .setMessage("" +
-                                "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
-                                "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
+                                "\nO App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
+                                "\nPor isso pedimos para que aceite que ele utilize da permissão do Location.")
                         .setCancelable(false)
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -1628,6 +1629,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
         geoFireNewMarker(mDatabase, itemIdMarker, markerTag, marcadorCreated);
+        Toast.makeText(getContext(), "Marcador criado com sucesso.", Toast.LENGTH_SHORT).show();
+
 
     }
 

@@ -153,7 +153,6 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
     public void getOldFirebase() {
         getServerTime();
-        clearMarker();
         mDatabaseReference = ConfigFireBase.getFirebase();
 
         mDatabaseReference = ConfigFireBase.getFirebase();
@@ -201,16 +200,6 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
         });
 
 
-    }
-
-    public void clearMarker() {
-        HashMap<String, Marker> tempHashMap = (HashMap) markerHashMap.clone();
-        for (Map.Entry<String, Marker> markerTemp : tempHashMap.entrySet()) {
-            markerTemp.getValue().remove();
-            markerHashMap.remove(markerTemp.getKey());
-
-        }
-        markerHashMap.clear();
     }
 
     public Long getServerTime() {
