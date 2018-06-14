@@ -181,11 +181,12 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                                     markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza));
                                     Marker marker = mMap.addMarker(markerOption);
                                     markerHashMap.put(marker, markerTag);
-                                }
-                                if (snapshot.child("Validar").child(userId).exists()) {
-                                    markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
-                                    Marker marker = mMap.addMarker(markerOption);
-                                    markerHashMap.put(marker, markerTag);
+                                }else{
+                                    if (snapshot.child("Validar").child(userId).exists()) {
+                                        markerOption.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_maker_cinza_star));
+                                        Marker marker = mMap.addMarker(markerOption);
+                                        markerHashMap.put(marker, markerTag);
+                                    }
                                 }
                             }
                         }

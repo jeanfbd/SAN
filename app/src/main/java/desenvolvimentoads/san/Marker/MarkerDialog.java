@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,10 +47,12 @@ import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
 import desenvolvimentoads.san.MenuInicial;
@@ -99,7 +102,7 @@ public class MarkerDialog {
 
     }
 
-    public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key, boolean validou, String idUser) {
+    public void addDataArrayFirebase(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m, final String key, boolean validou, String idUser, Long inicio ) {
 
 
         if (idUser.equals(userId)) {
@@ -122,6 +125,10 @@ public class MarkerDialog {
         //Pega Referencia do Firebase
 
         tag.setId(key);
+        Log.d("TAG", "addDataArrayFirebase: "+inicio.toString());
+        Map<String, String> inicioMap = new HashMap<>();
+        inicioMap.put(key, inicio.toString());
+        tag.setInicio(inicioMap);
 
         if (validou) {
             tag.setValidate(true);
@@ -304,30 +311,33 @@ public class MarkerDialog {
         street.setText(markerTag.getStreet());
         location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
 
-        try {
-            mDatabase.child("Marker").child(markerTag.getId()).child("inicio").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
-                        long inicio = (long) dataSnapshot.getValue();
-                        datetime.setText(convertTime(inicio));
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    datetime.setText(convertTime(0));
-                }
-            });
-        } catch (Exception ex) {
-            datetime.setText(convertTime(0));
+        if (markerTag.getInicio() != null){
+            datetime.setText(convertTime(Long.parseLong(markerTag.getInicio().get(markerTag.getId()))));
         }
+//        try {
+//            mDatabase.child("Marker").child(markerTag.getId()).child("fim").addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    if (dataSnapshot != null) {
+//                        long inicio = (long) dataSnapshot.getValue();
+//                        datetime.setText(convertTime(inicio));
+//                    }
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//                    datetime.setText(convertTime(1));
+//                }
+//            });
+//        } catch (Exception ex) {
+//            datetime.setText(convertTime(0));
+//        }
 
 
         btDislike.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 if (m.get(markerTag.getId()) != null){
-                    insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd, false, m);
+                    insertValidar((MarkerTag) m.get(markerTag.getId()).getTag(), userId, timeAdd*=1.5, false, m);
                 }
                 alerta.dismiss();
 
@@ -659,11 +669,28 @@ public class MarkerDialog {
     }
 
 
-    public void insertDenunciar(MarkerTag markerTag, String
+    public void insertDenunciar(final MarkerTag markerTag, String
             idUser, HashMap<String, Marker> markerHashMap) {
         mDatabase = ConfigFireBase.getFirebase();
         mDatabase.child("Marker").child(markerTag.getId()).child("Denunciar").child(idUser).setValue(idUser);
         if (markerTag.getId() != null) {
+            mDatabase.child("Marker").child(markerTag.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    try {
+                        Long fim = (Long) snapshot.child("fim").getValue();
+                        fim -= timeAdd*=2;
+                        mDatabase.child("Marker").child(markerTag.getId()).child("fim").setValue(fim);
+                    }catch (Throwable e) {
+                        System.err.println("onCreate error: " + e);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                }
+            });
+
             markerHashMap.get(markerTag.getId()).remove();
             markerHashMap.remove(markerTag.getId());
             markerTag.getCircle().remove();

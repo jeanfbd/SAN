@@ -111,9 +111,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public static HashMap<String, Marker> tempMarkerHashMap = new HashMap<>();
     public static HashMap<String, String> keyMarkerMap = new HashMap<>();
 
-    //User Geofire
-    private GeoFire geoFireUser;
-
     Context mContext;
 
     Geocoder geocoder2;
@@ -135,15 +132,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public static HashMap<String, String> keyFirebaseHashMap = new HashMap<>();
 
-
-    public static HashMap<String, GeoQueryEventListener> notificationHashMap = new HashMap<>();
     public static final int REQUEST_PERMISSION_LOCATION = 10;
     Double getRaioFirebaseRadius = 1.0;
     /*Value in Meters*/
     Double closeToMeRadius = 1.0;
     Double circleRadius = 12.5;
 
-    GeoQueryEventListener notificationListener;
     public static HashMap<String, String> alertHashMap = new HashMap<>();
     /*SharedPrefers*/
     SharedPreferences myPreferences;
@@ -161,6 +155,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     boolean mRequestingLocationUpdates;
     boolean mapRebuildOk = false;
     boolean started = false;
+    boolean zoomActive = false;
 
     LocationListener locationListenerGPS;
 
@@ -480,6 +475,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                             .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                             .title("Você"));
 
+
                     if (alertHashMap != null) {
 
                         if (alertHashMap.size() == 0) {
@@ -500,7 +496,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                     //Move Camera to this Position
                     mCurrent.setTag(myCurrentLocationTag);
-                    //    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 16.0f));
+                    if (!zoomActive){
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 16.0f));
+                    }else{
+                        zoomActive = true;
+                    }
+
 
 
                 }
@@ -1068,7 +1069,9 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                 if (HashMap.get(key) == null) {
                                     Log.i(TAG, "Entrou Criar: " + key);
                                     String idUser = (String) dataSnapshot.child("idUser").getValue();
-                                    markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, HashMap, key, dataSnapshot.child("Validar").child(userId).exists(), idUser);
+                                    Long inicio = (Long) dataSnapshot.child("inicio").getValue();
+                                    Log.d(TAG, "onDataChange: "+inicio);
+                                    markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, HashMap, key, dataSnapshot.child("Validar").child(userId).exists(), idUser, inicio);
                                     keyMarkerMap.put(key, key);
                                     if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, closeToMeRadius)) {
                                         if (mCurrent != null) {
@@ -1080,7 +1083,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                 if (HashMap.get(key) != null) {
                                     Log.i(TAG, "Entrou Remover: " + key);
                                     MarkerDialog.deleteDataArrayFirebase(HashMap, key);
-                                    Log.d(TAG, "Notifications: " + notificationHashMap.size());
                                     if (alertHashMap.containsKey(key)) {
                                         alertHashMap.remove(key);
                                         if (alertHashMap.size() == 0) {
@@ -1101,7 +1103,6 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                     if (HashMap.get(key) != null) {
                                         Log.i(TAG, "Entrou Remover: " + key);
                                         MarkerDialog.deleteDataArrayFirebase(HashMap, key);
-                                        Log.d(TAG, "Notifications: " + notificationHashMap.size());
                                         if (alertHashMap.containsKey(key)) {
                                             alertHashMap.remove(key);
                                             if (alertHashMap.size() == 0) {
@@ -1524,7 +1525,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     final double RADIUS = 12.5;
     private int image;
     boolean alertOn = false;
-    long markerDuration = 120000;
+    long markerDuration = 1200000;
 
     public void alertDialog(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m) {
         if (!alertOn) {
