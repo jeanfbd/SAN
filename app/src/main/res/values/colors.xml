@@ -13,8 +13,8 @@
 
     <color name="menu_blue">#236C9C</color>
 
-    <color name="first_slide_background">#E91E63</color>
-    <color name="first_slide_buttons">#880E4F</color>
+    <color name="first_slide_background">#B0A8B9</color>
+    <color name="first_slide_buttons">#4B4453</color>
 
     <color name="second_slide_background">#9C27B0</color>
     <color name="second_slide_buttons">#4A148C</color>
@@ -30,4 +30,7 @@
 
     <color name="custom2_slide_background">#FF8066</color>
     <color name="custom2_slide_buttons">#D43725</color>
+
+    <color name="custom3_slide_background">#ADC5CF</color>
+    <color name="custom3_slide_buttons">#009EFA</color>
 </resources>

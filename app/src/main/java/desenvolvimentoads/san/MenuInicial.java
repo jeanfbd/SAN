@@ -22,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -589,93 +590,10 @@ public class MenuInicial extends AppCompatActivity
     }
 
     public void tutorial() {
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Criação de marcadores.");
-        alertDialogBuilder
-                .setMessage("" +
-                        "\nÉ possível criar um marcador de alerta pressionado o dedo sobre o local por alguns segundos ou apertando no ícone do marcador no lado direito da tela e clicando novamente no mapa. " +
-                        "\n " + "Só seré criado um marcador se sua ultima localização estiver próxima do ponto selecionado.")
-                .setCancelable(false)
-                .setPositiveButton("Proximo.", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        messageOne();
-                    }
-                }).setNegativeButton("Finalizar.", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-    }
-
-    public void messageOne() {
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Validação de marcadores.");
-        alertDialogBuilder
-                .setMessage("" +
-                        "\nÉ possível validar marcadores criados pelos outros usuários  clicando em cima deles assim aumentando o tempo de exposição do alerta ou diminuindo caso seja invalido" +
-                        "\n " + "Ao selecionar Valido, você esta dizendo que a informação esta correta." + "" +
-                        "\nSelecionando informação invalidar você esta dizendo que a informação não é mais valida.")
-                .setCancelable(false)
-                .setPositiveButton("Próximo.", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        messageTwo();
-                    }
-                }).setNegativeButton("Finalizar.", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-    }
-
-    public void messageTwo() {
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Denunciando marcadores.");
-        alertDialogBuilder
-                .setMessage("" +
-                        "\nÉ possível Denunciar os marcadores criados pelos outros usuários, selecione a opção Denunciar no canto superior direito e clicando em cima do marcador a ser denunciado." + "\n Ao denunciar você está dizendo ao sistema que aquela informação é uma tentativa de criar falsos alertas.")
-                .setCancelable(false)
-                .setPositiveButton("Próximo.", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        messageThree();
-                    }
-                }).setNegativeButton("Finalizar.", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-    }
-
-    public void messageThree() {
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Histórico.");
-        alertDialogBuilder
-                .setMessage("" +
-                        "\n É possível Visualizar o histórico de marcadores adicionados e validados ao passar o dedo no canto esquerdo um menu sera exibido, ao selecionar histórico será exibido um mapa com o seu histórico.")
-                .setCancelable(false)
-                .setPositiveButton("Finalizar.", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-
-                    }
-                });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
+        TaskStackBuilder.create(getApplicationContext())
+                .addNextIntentWithParentStack(new Intent(MenuInicial.this, MenuInicial.class))
+                .addNextIntent(new Intent(MenuInicial.this, IntroActivity.class))
+                .startActivities();
     }
 
 

@@ -32,6 +32,33 @@ public class IntroActivity extends MaterialIntroActivity {
                 });
 
         addSlide(new SlideFragmentBuilder()
+                        .backgroundColor(R.color.third_slide_background)
+                        .buttonsColor(R.color.third_slide_buttons)
+                        .neededPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
+                        .image(R.mipmap.ic_logo_san)
+                        .title("Bem Vindo! Ao SAN")
+                        .description("O SAN irá te acompanhar apartir de agora!\nFique atento aos alertas de alagamentos!")
+                        .build());
+
+        addSlide(new SlideFragmentBuilder()
+                .backgroundColor(R.color.first_slide_background)
+                .buttonsColor(R.color.first_slide_buttons)
+                .neededPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
+                .image(R.drawable.status)
+                .title("Atenção aos Status")
+                .description("O seu avatar indicará se há um alagamento próximo!\nVermelho fique atento!")
+                .build());
+
+        addSlide(new SlideFragmentBuilder()
+                .backgroundColor(R.color.custom3_slide_background)
+                .buttonsColor(R.color.custom3_slide_buttons)
+                .neededPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
+                .image(R.drawable.ferramentas)
+                .title("Ferramentas de Zoom")
+                .description("Utilize as ferramentas do Maps!\nElas facilitam a navegação!")
+                .build());
+
+        addSlide(new SlideFragmentBuilder()
                         .backgroundColor(R.color.custom_slide_background)
                         .buttonsColor(R.color.custom_slide_buttons)
                         .image(R.drawable.cadastrar)
@@ -77,21 +104,7 @@ public class IntroActivity extends MaterialIntroActivity {
                 .build());
 
 
-        addSlide(new SlideFragmentBuilder()
-                        .backgroundColor(R.color.third_slide_background)
-                        .buttonsColor(R.color.third_slide_buttons)
-                        .possiblePermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
-                        .neededPermissions(new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION})
-                        .image(R.mipmap.ic_logo_san)
-                        .title("Permissões Necessárias")
-                        .description("A aplicação utiliza dados de sua localização!\nPara isso precisamos que ative as permissões!")
-                        .build(),
-                new MessageButtonBehaviour(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showMessage("Suas permissões estão ativadas!");
-                    }
-                }, "Permissões"));
+
 
         //Exemplo de Termos de Uso
         //addSlide(new CustomSlide());
