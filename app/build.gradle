@@ -42,6 +42,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:10.2.0'
     //compile 'com.h6ah4i.android.widget.verticalseekbar:0.7.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'agency.tango.android:material-intro-screen:0.0.5'
 
 }
 apply plugin: 'com.google.gms.google-services'

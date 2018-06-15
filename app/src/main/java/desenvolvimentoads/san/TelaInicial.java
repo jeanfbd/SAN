@@ -16,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -179,10 +180,15 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
                         } else {
                             Toast.makeText(TelaInicial.this, "Login efetuado com Sucesso!",
                                     Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+//                            Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                            startActivity(intent);
+//                            finish();
+
+                            TaskStackBuilder.create(getApplicationContext())
+                                    .addNextIntentWithParentStack(new Intent(TelaInicial.this, MenuInicial.class))
+                                    .addNextIntent(new Intent(TelaInicial.this, IntroActivity.class))
+                                    .startActivities();
                         }
 //                        hideProgressDialog();
                     }
