@@ -89,7 +89,6 @@ public class MenuInicial extends AppCompatActivity
         sharedContext.setContext(this.getBaseContext());
         SharedPreferences mySharedPrefers = getSharedPreferences("tutorial", Context.MODE_PRIVATE);
         if (!mySharedPrefers.getBoolean("skip", false)) {
-            firstTutorial();
 
         }
 
@@ -378,6 +377,7 @@ public class MenuInicial extends AppCompatActivity
             ((ActivityManager) this.getSystemService(ACTIVITY_SERVICE))
                     .clearApplicationUserData();
         }
+        Toast.makeText(getApplicationContext(), "Logout efetuado com sucesso!", Toast.LENGTH_SHORT).show();
 
     }
 
@@ -512,50 +512,9 @@ public class MenuInicial extends AppCompatActivity
 
                         //
                         // User selected the Never Ask Again Option Change settings in app settings manually
-                        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                        alertDialogBuilder.setTitle("   Olá.    ");
-                        alertDialogBuilder
-                                .setMessage("" +
-                                        "\n O App San utiliza de dados da localização para seu funcionamento, ao negar a permissão o aplicativo deixa de funcionar." + "" +
-                                        "\n Por isso pedimos para que aceite que ele utilize da permissão do Location.")
-                                .setCancelable(false)
-                                .setPositiveButton("Ok.", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_CODE);
 
-                                    }
-                                });
-
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
-                    } else {
-            /*never asked selecionado...*/
-                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                        alertDialogBuilder.setTitle("Permissão necessária.");
-                        alertDialogBuilder
-                                .setMessage("" +
-                                        "\n O App San utiliza de dados da localização para seu funcionamento." + "\n Ao selecionar para nunca mais ser requisitado permissão e negar o aplicativo deixa de funcionar."
-                                        + "\n Para que ele funcione agora será necessário mudar manualmente a permissão do location nas configurações do App")
-                                .setCancelable(false)
-                                .setNegativeButton("Não.", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        finishAffinity();
-
-                                    }
-                                })
-                                .setPositiveButton("Configurações.", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                        Uri uri = Uri.fromParts("package", getBaseContext().getPackageName(), null);
-                                        intent.setData(uri);
-                                        startActivityForResult(intent, 1);// step 6
-
-                                    }
-                                });
-
-                        AlertDialog alertDialog = alertDialogBuilder.create();
-                        alertDialog.show();
                     }
+
                 }
                 break;
 
@@ -565,29 +524,7 @@ public class MenuInicial extends AppCompatActivity
         }
     }
 
-    public void firstTutorial() {
 
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Bem vindo!.");
-        alertDialogBuilder
-                .setMessage("" +
-                        "\nGostaria de visualizar um breve tutorial? \n " + "Ainda será possível velo clicando na guia lateral a esquerda em 'Tutorial'.")
-                .setCancelable(false)
-                .setPositiveButton("Sim, gostaria.", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        tutorial();
-                    }
-                }).setNegativeButton("Não.", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                createPrefers("tutorial", "skip", true);
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-    }
 
     public void tutorial() {
         TaskStackBuilder.create(getApplicationContext())
