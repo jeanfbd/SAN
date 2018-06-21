@@ -123,7 +123,6 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                     TextView datetime = (TextView) v.findViewById(R.id.datetime);
 
                     ImageView markerimage = (ImageView) v.findViewById(R.id.markerimage);
-
                     if (markerTag.getIdUser().equals(userId)) {
                         markerimage.setImageResource(R.mipmap.ic_maker_cinza);
                     } else {
@@ -163,13 +162,13 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                     if (snapshot != null && snapshot.getValue() != null) {
                         Log.d(TAG, "onDataChange: " + snapshot.getValue());
                         MarkerTag markerTag = new MarkerTag();
-                        markerTag.setIdUser((String) snapshot.child("id").getValue());
+                        markerTag.setIdUser((String) snapshot.child("idUser").getValue());
                         markerTag.setId((String) snapshot.child("id").getValue());
                         markerTag.setStreet((String) snapshot.child("street").getValue());
                         markerTag.setFim((Long) snapshot.child("fim").getValue());
                         markerTag.setLatitude((Double) snapshot.child("latitude").getValue());
                         markerTag.setLongitude((Double) snapshot.child("longitude").getValue());
-
+                        Log.d(TAG, "onDataChange: CountValida: "+snapshot.child("Validar").getChildrenCount());
                         if (snapshot.child("fim").getValue() != null) {
                             MarkerOptions markerOption = new MarkerOptions();
                             markerOption.position(new LatLng(((Double) snapshot.child("latitude").getValue()), ((Double) snapshot.child("longitude").getValue())));

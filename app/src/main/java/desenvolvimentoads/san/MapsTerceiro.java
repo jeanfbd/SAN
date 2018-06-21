@@ -14,6 +14,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -496,12 +497,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
                     //Move Camera to this Position
                     mCurrent.setTag(myCurrentLocationTag);
-                    if (!zoomActive){
+                    if (!zoomActive) {
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 16.0f));
-                    }else{
+                    } else {
                         zoomActive = true;
                     }
-
 
 
                 }
@@ -1071,7 +1071,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                     Log.i(TAG, "Entrou Criar: " + key);
                                     String idUser = (String) dataSnapshot.child("idUser").getValue();
                                     Long inicio = (Long) dataSnapshot.child("inicio").getValue();
-                                    Log.d(TAG, "onDataChange: "+inicio);
+                                    Log.d(TAG, "onDataChange: " + inicio);
                                     markerDialog.addDataArrayFirebase(latLng, getContext(), mMap, geocoder2, HashMap, key, dataSnapshot.child("Validar").child(userId).exists(), idUser, inicio);
                                     keyMarkerMap.put(key, key);
                                     if (markerDialog.closeToMeToHash(newLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), latLng, alertHashMap, key, closeToMeRadius)) {
@@ -1545,10 +1545,10 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             builder.setView(view);
 
 
-            final TextView street = (TextView) view.findViewById(R.id.street);
-            street.setText(
+            final String streetText = getStreet(latLng, c, g);
 
-                    getStreet(latLng, c, g));
+            final TextView street = (TextView) view.findViewById(R.id.street);
+            street.setText(streetText);
 
             final ImageView vermelho = (ImageView) view.findViewById(R.id.markerimage);
             vermelho.setImageResource(R.mipmap.ic_maker_vermelho_star);
@@ -1562,7 +1562,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
             confirm.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View arg0) {
                     alerta.dismiss();
-                    markerCreate(latLng, c, googleMapFinal, g, m);
+                    markerCreate(latLng, c, googleMapFinal, m, streetText);
                     alertOn = false;
                 }
 
@@ -1584,13 +1584,13 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
             alerta.show();
-
+            Vibrar();
         }
 
 
     }
 
-    public void markerCreate(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final Geocoder g, final HashMap<String, Marker> m) {
+    public void markerCreate(final LatLng latLng, final Context c, final GoogleMap googleMapFinal, final HashMap<String, Marker> m, String street) {
         image = R.mipmap.ic_maker_vermelho_star;
 
 
@@ -1601,7 +1601,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
         MarkerTag tag = new MarkerTag(marcadorCreated.getPosition().latitude, marcadorCreated.getPosition().longitude, createCircle(latLng, googleMapFinal), false);
-        tag.setStreet(getStreet(latLng, c, g));
+        tag.setStreet(street);
 
         //Pega Referencia do Firebase
         DatabaseReference mDatabase = ConfigFireBase.getFirebase();
@@ -1717,5 +1717,11 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
         }
 
         return street;
+    }
+
+    private void Vibrar() {
+        Vibrator rr = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+        long milliseconds = 30;
+        rr.vibrate(milliseconds);
     }
 }

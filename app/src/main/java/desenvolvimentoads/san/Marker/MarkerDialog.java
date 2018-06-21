@@ -14,6 +14,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.support.design.widget.Snackbar;
@@ -267,6 +268,8 @@ public class MarkerDialog {
                     if (!markerTagMap.getValidate()) {
 
                         diagValidate2(marker, context, m);
+                    }else{
+                        diagInfo(marker, context, m);
                     }
 
                 } else {
@@ -375,6 +378,47 @@ public class MarkerDialog {
 
     }
 
+    public void diagInfo(final Marker marker,final Context c, final HashMap<String, Marker> m) {
+        final MarkerTag markerTag = (MarkerTag) marker.getTag();
+
+        circle = markerTag.getCircle();
+        LayoutInflater li = LayoutInflater.from(c);
+
+        //inflamos o layout alerta.xml na view
+        final View view = li.inflate(R.layout.dialog_info, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        builder.setTitle("Informações");
+        final Button btCancel = (Button) view.findViewById(R.id.btCancel);
+        final TextView street = (TextView) view.findViewById(R.id.street);
+        final TextView location = (TextView) view.findViewById(R.id.location);
+        final TextView datetime = (TextView) view.findViewById(R.id.datetime);
+        final ImageView markerimage = (ImageView) view.findViewById(R.id.markerimage);
+
+
+        markerimage.setImageResource(R.mipmap.ic_maker_vermelho);
+        street.setText(markerTag.getStreet());
+        location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
+
+        if (markerTag.getInicio() != null){
+            datetime.setText(convertTime(Long.parseLong(markerTag.getInicio().get(markerTag.getId()))));
+        }
+
+        btCancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+                Log.i("teste", "cancel pressed !!!");
+                alerta.dismiss();
+
+
+            }
+        });
+
+        builder.setView(view);
+        alerta = builder.create();
+        alerta.show();
+
+    }
 
     public GoogleMap setListenerDragDiag(GoogleMap googleMap, final Marker marker, final Context c, final View v) {
 

@@ -144,6 +144,9 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
             if (result.isSuccess()) {
                 // Google Sign In was successful, save Token and a state then authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
+                if(account!=null) {
+                    mGoogleApiClient.clearDefaultAccountAndReconnect();
+                }
 
                 idToken = account.getIdToken();
 
@@ -158,7 +161,7 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
                 // Google Sign In failed, update UI appropriately
                 Log.e(TAG, "Login Unsuccessful. ");
 
-                Toast.makeText(this, "Login Unsuccessful", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Houve algum problema ao logar.", Toast.LENGTH_SHORT)
                         .show();
             }
         }

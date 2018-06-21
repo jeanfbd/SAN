@@ -98,7 +98,7 @@ public class NotificationApp {
         }*/
 
 
-        mNotificationManager.notify(NotificationID.getID(),n);
+        mNotificationManager.notify(2,n);
 
 
     }

@@ -38,9 +38,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
+
+import java.io.File;
 
 import desenvolvimentoads.san.Observer.Action;
 import desenvolvimentoads.san.Observer.ActionObserver;
@@ -219,7 +223,7 @@ public class MenuInicial extends AppCompatActivity
                 }
 
 
-                Snackbar.make(view, "Clique no mapa para criar um marcador ou clique novamente para Cancelar.", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Pressione no mapa para criar um marcador ou pressione novamente para Cancelar.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 addMarkerFloatButtom();
 
@@ -275,7 +279,7 @@ public class MenuInicial extends AppCompatActivity
             vDenunciar = false;
             Action.getInstance().setReportNotSelected(false);
             denunciar.setTitle("Cancel");
-            Snackbar.make(getCurrentFocus(), "Clique no marcador que deseja denunciar.", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+            Snackbar.make(getCurrentFocus(), "Selecione o marcador que deseja denunciar.", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 
         } else {
 
@@ -368,17 +372,18 @@ public class MenuInicial extends AppCompatActivity
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseAuth.signOut();
 
+        //Apaga cache do app
+//        if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
+//            ((ActivityManager) this.getSystemService(ACTIVITY_SERVICE))
+//                    .clearApplicationUserData();
+//        }
+        Toast.makeText(getApplicationContext(), "Logout efetuado com sucesso!", Toast.LENGTH_SHORT).show();
+        clearApplicationData();
+
         Intent intent = new Intent(MenuInicial.this, TelaInicial.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-
-        //Apaga cache do app
-        if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
-            ((ActivityManager) this.getSystemService(ACTIVITY_SERVICE))
-                    .clearApplicationUserData();
-        }
-        Toast.makeText(getApplicationContext(), "Logout efetuado com sucesso!", Toast.LENGTH_SHORT).show();
-
+        this.finish();
     }
 
     private void showFragment(Fragment fragment, String name) {
@@ -525,7 +530,6 @@ public class MenuInicial extends AppCompatActivity
     }
 
 
-
     public void tutorial() {
         TaskStackBuilder.create(getApplicationContext())
                 .addNextIntentWithParentStack(new Intent(MenuInicial.this, MenuInicial.class))
@@ -618,6 +622,87 @@ public class MenuInicial extends AppCompatActivity
 
     }
 
+//    public static void deleteCache(Context context) {
+//        try {
+//            File dir = context.getCacheDir();
+//            deleteDir(dir);
+//        } catch (Exception e) {
+//        }
+//    }
+//
+//    public static boolean deleteDir(File dir) {
+//        if (dir != null && dir.isDirectory()) {
+//            String[] children = dir.list();
+//            for (int i = 0; i < children.length; i++) {
+//                boolean success = deleteDir(new File(dir, children[i]));
+//                if (!success) {
+//                    return false;
+//                }
+//            }
+//            return dir.delete();
+//        } else if (dir != null && dir.isFile()) {
+//            return dir.delete();
+//        } else {
+//            return false;
+//        }
+//    }
+
+//    public void clearApplicationData() {
+//
+//        File cacheDirectory = getCacheDir();
+//        File applicationDirectory = new File(cacheDirectory.getParent());
+//        if (applicationDirectory.exists()) {
+//            String[] fileNames = applicationDirectory.list();
+//            for (String fileName : fileNames) {
+//                if (!fileName.equals("lib")) {
+//                    deleteFile(new File(applicationDirectory, fileName));
+//                }
+//            }
+//        }
+//    }
+//
+//    public static boolean deleteFile(File file) {
+//        boolean deletedAll = true;
+//        if (file != null) {
+//            if (file.isDirectory()) {
+//                String[] children = file.list();
+//                for (int i = 0; i < children.length; i++) {
+//                    deletedAll = deleteFile(new File(file, children[i])) && deletedAll;
+//                }
+//            } else {
+//                deletedAll = file.delete();
+//            }
+//        }
+//        return deletedAll;
+//    }
+
+    public void clearApplicationData() {
+        File cache = getCacheDir();
+        File appDir = new File(cache.getParent());
+        if (appDir.exists()) {
+            String[] children = appDir.list();
+            for (String s : children) {
+                if (!s.equals("lib")) {
+                    deleteDir(new File(appDir, s));
+                    Log.i("TAG", "**************** File /data/data/APP_PACKAGE/" + s + " DELETED *******************");
+                }
+            }
+        }
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+
+        return dir.delete();
+    }
 }
 
 

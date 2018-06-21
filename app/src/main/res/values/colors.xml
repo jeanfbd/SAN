@@ -13,24 +13,24 @@
 
     <color name="menu_blue">#236C9C</color>
 
-    <color name="first_slide_background">#A6AE9D</color>
-    <color name="first_slide_buttons">#2F8300</color>
+    <color name="first_slide_background">#5e35b1</color>
+    <color name="first_slide_buttons">#311b92</color>
 
-    <color name="second_slide_background">#9C27B0</color>
-    <color name="second_slide_buttons">#4A148C</color>
+    <color name="second_slide_background">#8e24aa</color>
+    <color name="second_slide_buttons">#4a148c</color>
 
-    <color name="third_slide_background">#009688</color>
-    <color name="third_slide_buttons">#004D40</color>
+    <color name="third_slide_background">#3949ab</color>
+    <color name="third_slide_buttons">#1a237e</color>
 
-    <color name="fourth_slide_background">#795548</color>
-    <color name="fourth_slide_buttons">#3E2723</color>
+    <color name="fourth_slide_background">#00897b</color>
+    <color name="fourth_slide_buttons">#004d40</color>
 
-    <color name="custom_slide_background">#3F51B5</color>
-    <color name="custom_slide_buttons">#1A237E</color>
+    <color name="fifth_slide_background">#3F51B5</color>
+    <color name="fifth_slide_buttons">#1A237E</color>
 
-    <color name="custom2_slide_background">#FFA784</color>
-    <color name="custom2_slide_buttons">#D43725</color>
+    <color name="sixth_slide_background">#546e7a</color>
+    <color name="sixth_slide_buttons">#263238</color>
 
-    <color name="custom3_slide_background">#C493FF</color>
-    <color name="custom3_slide_buttons">#845EC2</color>
+    <color name="seventh_slide_background">#7cb342</color>
+    <color name="seventh_slide_buttons">#33691e</color>
 </resources>

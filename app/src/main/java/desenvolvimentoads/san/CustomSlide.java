@@ -26,12 +26,12 @@ public class CustomSlide extends SlideFragment {
 
     @Override
     public int backgroundColor() {
-        return R.color.custom_slide_background;
+        return R.color.first_slide_background;
     }
 
     @Override
     public int buttonsColor() {
-        return R.color.custom_slide_buttons;
+        return R.color.first_slide_buttons;
     }
 
     @Override

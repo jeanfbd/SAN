@@ -41,6 +41,8 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -51,7 +53,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 
 import desenvolvimentoads.san.DAO.ConfigFireBase;
-import desenvolvimentoads.san.notification.NotificationID;
 
 public class ForegroundService extends Service implements GoogleApiClient.ConnectionCallbacks {
     public static boolean IS_SERVICE_RUNNING = false;
@@ -71,15 +72,20 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     private DatabaseReference mDatabaseReference;
     private FirebaseDatabase firebaseDatabase;
     GeoFire geoFire;
-    String userId = "123";
+
+    //Login Firebase Auth
+    private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
+    private FirebaseUser currentUser = mAuth.getCurrentUser();
+
     HashMap<String, String> foregroundHashMap = new HashMap<>();
     LocationListener locationListenerGPS;
     GeoQuery geoQuery;
+    NotificationManager mNotificationManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
@@ -134,7 +140,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                 .setTicker("San")
                 .setContentText("Serviço de alerta SAN")
                 .setSmallIcon(R.mipmap.ic_maker_vermelho)
-                .setOngoing(true)
+                .setOngoing(false)
                 .addAction(android.R.drawable.ic_media_play, "Click aqui para Desativar",
                         pStopIntent).build();
         startForeground(ID_FOREGROUND_SERVICE,
@@ -162,6 +168,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         } else {
 
         }
+        mNotificationManager.cancelAll();
 
     }
 
@@ -198,7 +205,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             createLocationListener();
             checkLocationSettings();
             started = true;
-            showNotification();
+           // showNotification();
         }
 
     }
@@ -356,13 +363,13 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
 
 
         mBuilder.setAutoCancel(true);
-        NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
         android.app.Notification n = mBuilder.build();
         //Frescura de vibrar.
         n.vibrate = new long[]{150, 300, 150, 600};
 
 
-        mNotificationManager.notify(NotificationID.getID(), n);
+        mNotificationManager.notify(2, n);
 
 
     }
@@ -479,7 +486,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                                 LatLng latLng = new LatLng(latitude, longitude);
                                 if (dataSnapshot.child("fim").getValue() != null) {
 
-                                    if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(userId).exists()) {
+                                    if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(currentUser.getUid()).exists()) {
 
 
                                         Log.i("teste","Marker found");
