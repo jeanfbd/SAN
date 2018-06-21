@@ -156,10 +156,12 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     boolean zoomActive = false;
 
     LocationListener locationListenerGPS;
+    Context pContext;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        pContext = getActivity().getBaseContext();
         getMapAsync(this);
 
         mContext = getContext();
@@ -202,7 +204,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     /*0*/
     private void setUpLocation() {
         Log.i("teste", "------------------- METHOD 0 setUpLocation ---------------------");
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(pContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //Request runtime permission
             ActivityCompat.requestPermissions(getActivity(), new String[]{
@@ -333,7 +335,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
 
                         } else {
-                            if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            if (ActivityCompat.checkSelfPermission(pContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                 Log.i("teste", "LocationSettingsResult permission not granted");
 
                                 /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
@@ -414,8 +416,8 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     /*5*/
     private void displayLocation() {
         Log.i("teste", "------------------- METHOD 5 displayLocation ---------------------");
-        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(pContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(pContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             //Request runtime permission
             ActivityCompat.requestPermissions(getActivity(), new String[]{
@@ -825,7 +827,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     /*Em teoria se voce da stop seria aqui que daria o start, é bem melhor que o outro metodo que esta tem quase o mesmo nome sem o S*/
     private void startLocationsUpdates() {
         Log.i("teste", "startLocationsUpdates ");
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(pContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.i("teste", "startLocationsUpdates PERMISSION NEEDED");
             /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
@@ -1127,7 +1129,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     public void checkGpsPermission() {
         Log.i("teste", "checkGpsPermission >.< ");
-        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(pContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.i("teste", "checkGpsPermission permission needed");
 
             /*Aqui só é chamado quando o user nega a primeira vez, nessa segunda vez o android deixa lançar uma mensagem para o user.*/
@@ -1214,7 +1216,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
     public void mapConfig() {
         Log.i("teste", " MAP CONFIG ");
         /*Checkando a permissão dos acessos, vulgo frescura do Android..*/
-        if (ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+        if (ContextCompat.checkSelfPermission(pContext, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
