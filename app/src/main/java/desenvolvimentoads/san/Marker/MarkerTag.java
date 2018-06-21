@@ -10,7 +10,6 @@ import com.google.firebase.database.ServerValue;
 
 import java.util.Map;
 
-import desenvolvimentoads.san.MenuInicial;
 
 /**
  * Created by master on 22/07/2017.
@@ -26,13 +25,8 @@ public class MarkerTag {
     private Long fim;
     private Map<String, String> inicio;
 
-    private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
-    private FirebaseUser currentUser = mAuth.getCurrentUser();
-    //String userId = currentUser.getUid();
-
-
-//    MenuInicial menuInicial = new MenuInicial();
-//    String userId = menuInicial.getUsers();
+    @Exclude
+    private long validaram;
 
     @Exclude
     private boolean validate = false;
@@ -52,6 +46,7 @@ public class MarkerTag {
         this.validate = validate;
         this.inicio = ServerValue.TIMESTAMP;
         this.idUser = "pouNOiMFxgeDxOgn0GXquvvkH9G2";
+        this.validaram = 0;
     }
 
 
@@ -132,5 +127,14 @@ public class MarkerTag {
 
     public void setValidate(Boolean validate) {
         this.validate = validate;
+    }
+
+    @Exclude
+    public long getValidaram() {
+        return validaram;
+    }
+
+    public void setValidaram(long validaram) {
+        this.validaram = validaram;
     }
 }

@@ -17,34 +17,35 @@ import desenvolvimentoads.san.TelaInicial;
  */
 
 public class NotificationApp {
-  String title = "San";
-  String ticker = "Alerta sobre pontos de alagamento";
-  String text ="Notificação!";
-  String[] descricaoLine;
+    String title = "San";
+    String ticker = "Alerta sobre pontos de alagamento";
+    String text = "Notificação!";
+    String[] descricaoLine;
     View v;
-  public NotificationApp(View view){
 
-      this.v = view;
-  }
+    public NotificationApp(View view) {
+
+        this.v = view;
+    }
 
 
-    public void newNotification(String[] descricaoLine){
+    public void newNotification(String[] descricaoLine) {
         this.descricaoLine = descricaoLine;
 
-        if(this.descricaoLine ==null){
+        if (this.descricaoLine == null) {
 
-          this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento próximos a você"};
+            this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento próximos a você"};
         }
 
         notification();
 
     }
 
-    public void notification(){
+    public void notification() {
 
 
         Intent resultIntent = new Intent(v.getContext(), TelaInicial.class);
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(v.getContext(),0,resultIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(v.getContext(), 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(v.getContext());
 // Adds the back stack for the Intent (but not the Intent itself)
@@ -69,37 +70,21 @@ public class NotificationApp {
 
         NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
 
-        if(this.descricaoLine ==null){
+        if (this.descricaoLine == null) {
 
             this.descricaoLine = new String[]{"Foram encontrados novos pontos de alagamento próximos a você."};
         }
 
-        for (int i =0; i<descricaoLine.length; i++)
-        {
+        for (int i = 0; i < descricaoLine.length; i++) {
             style.addLine(descricaoLine[i]);
         }
-
 
 
         mBuilder.setAutoCancel(true);
         mBuilder.setStyle(style);
         NotificationManager mNotificationManager = (NotificationManager) v.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         android.app.Notification n = mBuilder.build();
-       //Frescura de vibrar.
-      /*  n.vibrate = new long[]{150,300,150,600};
 
-        try{
-            Uri som =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            Ringtone toque = RingtoneManager.getRingtone(this, som);
-            toque.play();
-
-        }catch(Exception e) {
-
-        }*/
-
-
-        mNotificationManager.notify(2,n);
-
-
+        mNotificationManager.notify(2, n);
     }
 }

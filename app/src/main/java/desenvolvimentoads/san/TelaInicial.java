@@ -1,9 +1,7 @@
 package desenvolvimentoads.san;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -14,8 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -30,8 +26,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -39,8 +33,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
-import desenvolvimentoads.san.DAO.ConfigFireBase;
 
 /**
  * Created by jeanf on 10/07/2017.
@@ -97,11 +89,6 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
                 }
             }
         };
-////
-//            Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//            startActivity(intent);
-//            finish();
     }
 
     public String getIdToken() {
@@ -144,7 +131,7 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
             if (result.isSuccess()) {
                 // Google Sign In was successful, save Token and a state then authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
-                if(account!=null) {
+                if (account != null) {
                     mGoogleApiClient.clearDefaultAccountAndReconnect();
                 }
 
@@ -183,17 +170,13 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
                         } else {
                             Toast.makeText(TelaInicial.this, "Login efetuado com Sucesso!",
                                     Toast.LENGTH_LONG).show();
-//                            Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                            startActivity(intent);
-//                            finish();
 
                             TaskStackBuilder.create(getApplicationContext())
                                     .addNextIntentWithParentStack(new Intent(TelaInicial.this, MenuInicial.class))
                                     .addNextIntent(new Intent(TelaInicial.this, IntroActivity.class))
                                     .startActivities();
                         }
-//                        hideProgressDialog();
+
                     }
                 });
     }
@@ -201,19 +184,15 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
     @Override
     protected void onStart() {
         super.onStart();
-//        if (mAuthListener != null) {
-//            FirebaseAuth.getInstance().signOut();
-//        }
-//        mAuth.addAuthStateListener(mAuthListener);
-
-       FirebaseUser currentUser = mAuth.getCurrentUser();
 
 
-        if (currentUser != null){
-          mSignInButton.setVisibility(View.GONE);
-//            threadTelaInicial();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+
+        if (currentUser != null) {
+            mSignInButton.setVisibility(View.GONE);
             progressBar();
-      }
+        }
     }
 
     @Override
@@ -260,7 +239,7 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
 
     }
 
-    public void progressBar(){
+    public void progressBar() {
         final Handler handler = new Handler();
         final ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar);
         Drawable progressDrawable = bar.getProgressDrawable().mutate();
@@ -292,6 +271,7 @@ public class TelaInicial extends AppCompatActivity implements GoogleApiClient.On
                 Intent intent = new Intent(TelaInicial.this, MenuInicial.class);
                 startActivity(intent);
             }
+
             private int doWork() {
 
                 return i * 3;

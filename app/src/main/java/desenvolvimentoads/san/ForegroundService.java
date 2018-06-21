@@ -153,9 +153,9 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     public void onDestroy() {
         super.onDestroy();
         Log.i("teste", "In onDestroy");
-    //    Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
+        //    Toast.makeText(this, "Service Detroyed!", Toast.LENGTH_SHORT).show();
         IS_SERVICE_RUNNING = false;
-        if(geoQuery !=null){
+        if (geoQuery != null) {
             geoQuery.removeAllListeners();
 
         }
@@ -163,7 +163,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient,
                     locationListenerGPS);
-            mGoogleApiClient.disconnect();
+            //mGoogleApiClient.disconnect();
             Log.i("teste", "stopLocationUpdates removed");
         } else {
 
@@ -205,7 +205,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             createLocationListener();
             checkLocationSettings();
             started = true;
-           // showNotification();
+            // showNotification();
         }
 
     }
@@ -404,7 +404,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
             LocationServices.FusedLocationApi.removeLocationUpdates(
                     mGoogleApiClient,
                     locationListenerGPS);
-            mGoogleApiClient.disconnect();
+            //mGoogleApiClient.disconnect();
             Log.i("teste", "stopLocationUpdates removed");
         } else {
 
@@ -425,31 +425,28 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
 
-            if (mLastLocation != null) {
-                final double latitude = mLastLocation.getLatitude();
-                final double longitude = mLastLocation.getLongitude();
+        if (mLastLocation != null) {
+            final double latitude = mLastLocation.getLatitude();
+            final double longitude = mLastLocation.getLongitude();
 
 
-            }
+        }
 
     }
 
-    public void recreateGoogleRefers(){
-        Log.i("teste","recreateGoogleRefers ");
-        if(mGoogleApiClient == null){
+    public void recreateGoogleRefers() {
+        Log.i("teste", "recreateGoogleRefers ");
+        if (mGoogleApiClient == null) {
             buildGoogleApiClient();
             checkPlayService();
         }
 
-        if(mLocationSettingsRequest == null){
+        if (mLocationSettingsRequest == null) {
             createLocationRequest();
             buildLocationSettingsRequest();
         }
 
     }
-
-
-
 
 
     @Override
@@ -463,15 +460,15 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     }
 
     public void getRaioFirebase(Double lat, Double lng, Double radius) {
-        Log.i("teste","called here");
+        Log.i("teste", "called here");
         getServerTime();
-        Log.i("teste","googleclient status "+mGoogleApiClient.isConnected());
+        Log.i("teste", "googleclient status " + mGoogleApiClient.isConnected());
         mDatabaseReference = ConfigFireBase.getFirebase();
         firebaseDatabase = ConfigFireBase.getFirebaseDatabase();
 
         geoQuery = geoFire.queryAtLocation(new GeoLocation(lat, lng), radius);
         if (mLastLocation != null) {
-            Log.i("teste","not null");
+            Log.i("teste", "not null");
             geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
                 @Override
                 public void onKeyEntered(final String key, GeoLocation location) {
@@ -480,38 +477,37 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot != null && dataSnapshot.getValue() != null) {
-                                Log.i("teste","teste here");
+                                Log.i("teste", "teste here");
                                 double latitude = (double) dataSnapshot.child("latitude").getValue();
                                 double longitude = (double) dataSnapshot.child("longitude").getValue();
                                 LatLng latLng = new LatLng(latitude, longitude);
                                 if (dataSnapshot.child("fim").getValue() != null) {
 
-                                    if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child(currentUser.getUid()).exists()) {
+                                    if (getServerTime() < (Long) dataSnapshot.child("fim").getValue() && !dataSnapshot.child("Denunciar").child("").exists()) {
 
 
-                                        Log.i("teste","Marker found");
+                                        Log.i("teste", "Marker found");
 
-                                        if(foregroundHashMap.get(key) == null){
-                                            Log.i("teste","dentro da query googleclient status "+mGoogleApiClient.isConnected());
-                                            Log.i("teste","add key notification "+key);
+                                        if (foregroundHashMap.get(key) == null) {
+                                            Log.i("teste", "dentro da query googleclient status " + mGoogleApiClient.isConnected());
+                                            Log.i("teste", "add key notification " + key);
                                             notification();
-                                            foregroundHashMap.put(key,key);
+                                            foregroundHashMap.put(key, key);
 
 
                                         }
 
 
-
                                     } else {
 
-                                        if(foregroundHashMap.get(key) != null){
-                                            Log.i("teste","remove key notification "+key);
+                                        if (foregroundHashMap.get(key) != null) {
+                                            Log.i("teste", "remove key notification " + key);
                                             foregroundHashMap.remove(key);
 
 
                                         }
 
-                                        Log.i("teste","Marker removed");
+                                        Log.i("teste", "Marker removed");
                                     }
                                 }
                             }
@@ -567,7 +563,6 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         });
         return timestamp;
     }
-
 
 
 }

@@ -54,10 +54,6 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
     private FirebaseAuth mAuth = com.google.firebase.auth.FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
     private String userId = currentUser.getUid();
-
-//    MenuInicial menuInicial = new MenuInicial();
-//    String userId = menuInicial.getUsers();
-
     private DatabaseReference mDatabaseReference;
     private FirebaseDatabase firebaseDatabase;
     public static HashMap<Marker, MarkerTag> markerHashMap = new HashMap<>();
@@ -122,6 +118,8 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
 
                     TextView datetime = (TextView) v.findViewById(R.id.datetime);
 
+                    TextView validaram = (TextView) v.findViewById(R.id.validaram);
+
                     ImageView markerimage = (ImageView) v.findViewById(R.id.markerimage);
                     if (markerTag.getIdUser().equals(userId)) {
                         markerimage.setImageResource(R.mipmap.ic_maker_cinza);
@@ -135,6 +133,8 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                     location.setText("Latitude: " + markerTag.getPosition().latitude + "\nLongitude: " + markerTag.getPosition().longitude);
 
                     datetime.setText(convertTime(markerTag.getFim()));
+
+                    validaram.setText(""+(markerTag.getValidaram()-1));
                 }
                 return v;
 
@@ -168,6 +168,8 @@ public class MapsSegundo extends SupportMapFragment implements OnMapReadyCallbac
                         markerTag.setFim((Long) snapshot.child("fim").getValue());
                         markerTag.setLatitude((Double) snapshot.child("latitude").getValue());
                         markerTag.setLongitude((Double) snapshot.child("longitude").getValue());
+                        markerTag.setValidaram(snapshot.child("Validar").getChildrenCount());
+
                         Log.d(TAG, "onDataChange: CountValida: "+snapshot.child("Validar").getChildrenCount());
                         if (snapshot.child("fim").getValue() != null) {
                             MarkerOptions markerOption = new MarkerOptions();

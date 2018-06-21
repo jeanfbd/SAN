@@ -1,13 +1,11 @@
 package desenvolvimentoads.san;
 
-import android.*;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.FloatRange;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.view.View;
-import android.widget.Toast;
 
 import agency.tango.materialintroscreen.MaterialIntroActivity;
 import agency.tango.materialintroscreen.MessageButtonBehaviour;
@@ -26,7 +24,6 @@ public class IntroActivity extends MaterialIntroActivity {
         enableLastSlideAlphaExitTransition(true);
 
 
-
         getBackButtonTranslationWrapper()
                 .setEnterTranslation(new IViewTranslation() {
                     @Override
@@ -36,12 +33,12 @@ public class IntroActivity extends MaterialIntroActivity {
                 });
 
         addSlide(new SlideFragmentBuilder()
-                .backgroundColor(R.color.first_slide_background)
-                .buttonsColor(R.color.first_slide_buttons)
-                .image(R.mipmap.ic_logo_san)
-                .title("BEM VINDO AO SAN!")
-                .description("O SAN irá te acompanhar a partir de agora.\nFique atento aos alertas de alagamentos!")
-                .build(),
+                        .backgroundColor(R.color.first_slide_background)
+                        .buttonsColor(R.color.first_slide_buttons)
+                        .image(R.mipmap.ic_logo_san)
+                        .title("BEM VINDO AO SAN!")
+                        .description("O SAN irá te acompanhar a partir de agora.\nFique atento aos alertas de alagamentos!")
+                        .build(),
                 new MessageButtonBehaviour(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

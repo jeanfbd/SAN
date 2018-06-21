@@ -3,17 +3,13 @@ package desenvolvimentoads.san;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -38,8 +34,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
@@ -64,15 +58,8 @@ public class MenuInicial extends AppCompatActivity
     private String userName;
     private String userEmail;
     private String userId;
-    private Uri photourl;
-
-    //    0 - jeanfelipe.brock@gmail.com
-//    1 - jeanbrock.felipe@gmail.com
-//    2 - felipemrk2e@gmail.com
-    private String[] users = {"Pi02YW9d7NYgPvhjmeaB1m27Aiy2", "Wpk4eUKu53hsUg9tEFAXkbuEgeg2", "pouNOiMFxgeDxOgn0GXquvvkH9G2"};
 
     private boolean buttomAddMarkerVisivel;
-    private static final String TAG = "MenuInicial";
 
     private FragmentManager fragmentManager;
     public static FloatingActionButton btnAddMarker;
@@ -95,35 +82,6 @@ public class MenuInicial extends AppCompatActivity
         if (!mySharedPrefers.getBoolean("skip", false)) {
 
         }
-
-
-        //     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        //     startActivity(intent);// step 6
-
-
-/*
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();*/
-/*
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    setUserData(user);
-                } else {
-                    goLogInScreen();
-                }
-            }
-        };*/
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -372,11 +330,6 @@ public class MenuInicial extends AppCompatActivity
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseAuth.signOut();
 
-        //Apaga cache do app
-//        if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
-//            ((ActivityManager) this.getSystemService(ACTIVITY_SERVICE))
-//                    .clearApplicationUserData();
-//        }
         Toast.makeText(getApplicationContext(), "Logout efetuado com sucesso!", Toast.LENGTH_SHORT).show();
         clearApplicationData();
 
@@ -393,69 +346,11 @@ public class MenuInicial extends AppCompatActivity
 
         fragmentTransaction.commit();
     }
-/*
-    private void setUserData(FirebaseUser user) {
-        userName = user.getDisplayName();
-        userEmail = user.getEmail();
-        userId = user.getUid();
-
-        Log.i(TAG, "setUserData: Nome "+userName+", Email: "+userEmail+", ID: "+userId);
-//        Glide.with(this).load(user.getPhotoUrl()).into(photoImageView);
-    }*/
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        //  firebaseAuth.addAuthStateListener(firebaseAuthListener);
     }
-
-    private void goLogInScreen() {
-        Intent intent = new Intent(this, TelaInicial.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
-
-  /*  public void logOut(View view) {
-        firebaseAuth.signOut();
-
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(@NonNull Status status) {
-                if (status.isSuccess()) {
-                    goLogInScreen();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Não foi possível encerrar a sessão", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }*/
-
-   /* public void revoke(View view) {
-        firebaseAuth.signOut();
-
-        Auth.GoogleSignInApi.revokeAccess(googleApiClient).setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(@NonNull Status status) {
-                if (status.isSuccess()) {
-                    goLogInScreen();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Não foi possível revokar a sessão", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }*/
-/*
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (firebaseAuthListener != null) {
-            firebaseAuth.removeAuthStateListener(firebaseAuthListener);
-        }
-    }
-*/
 
 
     @Override
@@ -467,7 +362,6 @@ public class MenuInicial extends AppCompatActivity
     public void notificaticarInteressados(Action action) {
         buttomAddMarkerVisivel = action.getButtomAddMakerClickado();
         if (!buttomAddMarkerVisivel) {
-            // if(btnAddMarker.isShown()){
             btnAddMarker.setVisibility(View.GONE);
             btnCancelAddMarker.setVisibility(View.VISIBLE);
 
@@ -595,12 +489,6 @@ public class MenuInicial extends AppCompatActivity
 
     }
 
-    //    0 - jeanfelipe.brock@gmail.com
-    //    1 - jeanbrock.felipe@gmail.com
-    //    2 - felipemrk2e@gmail.com
-//    public String getUsers() {
-//        return users[2];
-//    }
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -621,60 +509,6 @@ public class MenuInicial extends AppCompatActivity
         finish();
 
     }
-
-//    public static void deleteCache(Context context) {
-//        try {
-//            File dir = context.getCacheDir();
-//            deleteDir(dir);
-//        } catch (Exception e) {
-//        }
-//    }
-//
-//    public static boolean deleteDir(File dir) {
-//        if (dir != null && dir.isDirectory()) {
-//            String[] children = dir.list();
-//            for (int i = 0; i < children.length; i++) {
-//                boolean success = deleteDir(new File(dir, children[i]));
-//                if (!success) {
-//                    return false;
-//                }
-//            }
-//            return dir.delete();
-//        } else if (dir != null && dir.isFile()) {
-//            return dir.delete();
-//        } else {
-//            return false;
-//        }
-//    }
-
-//    public void clearApplicationData() {
-//
-//        File cacheDirectory = getCacheDir();
-//        File applicationDirectory = new File(cacheDirectory.getParent());
-//        if (applicationDirectory.exists()) {
-//            String[] fileNames = applicationDirectory.list();
-//            for (String fileName : fileNames) {
-//                if (!fileName.equals("lib")) {
-//                    deleteFile(new File(applicationDirectory, fileName));
-//                }
-//            }
-//        }
-//    }
-//
-//    public static boolean deleteFile(File file) {
-//        boolean deletedAll = true;
-//        if (file != null) {
-//            if (file.isDirectory()) {
-//                String[] children = file.list();
-//                for (int i = 0; i < children.length; i++) {
-//                    deletedAll = deleteFile(new File(file, children[i])) && deletedAll;
-//                }
-//            } else {
-//                deletedAll = file.delete();
-//            }
-//        }
-//        return deletedAll;
-//    }
 
     public void clearApplicationData() {
         File cache = getCacheDir();
