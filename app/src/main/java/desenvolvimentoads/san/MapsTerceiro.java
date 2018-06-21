@@ -556,7 +556,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
                                   /* Verifico se existe algum marcador proximo */
                             if (!markerDialog.hasNearby(markerHashMap, arg0)) {
                                 alertDialog(arg0, getContext(), mMap, geocoder2, markerHashMap, keyAppHashMap);
-//                                itemId = action.getItemId();
+///                               itemId = action.getItemId();//
                                 Log.d(TAG, "Action ID: " + itemId);
 
 
