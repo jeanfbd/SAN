@@ -384,27 +384,6 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
         mNotificationManager.notify(NOTIFICATION_ID, n);
     }
 
-//    public void notification() {
-//        NotificationCompat.Builder mBuilder =
-//                new NotificationCompat.Builder(this)
-//                        .setSmallIcon(R.mipmap.ic_maker_vermelho)
-//                        .setContentTitle("Alerta")
-//                        .setTicker("Foram encontrados alertas próximos da sua localidade.")
-//                        .setContentText("Foram encontrados alertas próximos da sua localidade")
-//                        .setSubText("Alerta!");
-//
-//
-//        mBuilder.setAutoCancel(true);
-//
-//        android.app.Notification n = mBuilder.build();
-//        //Frescura de vibrar.
-//        n.vibrate = new long[]{150, 300, 150, 600};
-//
-//
-//        mNotificationManager.notify(2, n);
-//
-//
-//    }
 
     public void goAndDetectLocation() {
         Log.i("teste", "goAndDetectLocation called");

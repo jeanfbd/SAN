@@ -109,11 +109,6 @@ public class IntroActivity extends MaterialIntroActivity {
                 .title("HISTÓRICO DE MARCADORES")
                 .description("Veja os históricos de seus marcadores.\nAqui fica os marcadores inativos!")
                 .build());
-
-
-        //Exemplo de Termos de Uso
-        //addSlide(new CustomSlide());
-
     }
 
     @Override
