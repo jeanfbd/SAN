@@ -84,7 +84,7 @@ public class IntroActivity extends MaterialIntroActivity {
                         .buttonsColor(R.color.fifth_slide_buttons)
                         .image(R.drawable.validar)
                         .title("VALIDANDO MARCADORES")
-                        .description("Para validar marcadores de outros usuários.\nÉ só clicar com dedo sobre ele!")
+                        .description("Para validar marcadores de outros usuários.\nÉ só selecioná-lo!")
                         .build(),
                 new MessageButtonBehaviour(new View.OnClickListener() {
                     @Override
@@ -99,7 +99,7 @@ public class IntroActivity extends MaterialIntroActivity {
                 .buttonsColor(R.color.sixth_slide_buttons)
                 .image(R.drawable.denunciar)
                 .title("DENUNCIANDO MARCADORES")
-                .description("Denunciar marcadores para sinalizar um falso alerta.\nÉ só clicar sobre Denunciar e depois no marcador!")
+                .description("Denunciar marcadores para sinalizar um falso alerta.\nÉ só selecionar Denunciar e depois no marcador!")
                 .build());
 
         addSlide(new SlideFragmentBuilder()

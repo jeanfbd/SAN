@@ -1525,7 +1525,7 @@ public class MapsTerceiro extends SupportMapFragment implements OnMapReadyCallba
 
     private void Vibrar() {
         Vibrator rr = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
-        long milliseconds = 30;
+        long milliseconds = 200;
         rr.vibrate(milliseconds);
     }
 }

@@ -14,6 +14,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -64,6 +67,7 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     private static int UPDATE_INTERVAL = 40000;
     private static int FATEST_INTERVAL = 20000;
     private static int DISPLACEMENT = 0;
+    private static int NOTIFICATION_ID = 2;
     protected LocationSettingsRequest mLocationSettingsRequest;
     private Location mLastLocation;
     Context context = this;
@@ -350,29 +354,57 @@ public class ForegroundService extends Service implements GoogleApiClient.Connec
     }
 
 
-    public void notification() {
+    private void notification() {
+        String msg = "Foram encontrados alertas próximos da sua localidade.";
 
-
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_maker_vermelho)
-                        .setContentTitle("Alerta")
-                        .setTicker("Foram encontrados alertas próximos da sua localidade.")
-                        .setContentText("Foram encontrados alertas próximos da sua localidade")
-                        .setSubText("Alerta!");
-
-
+        Intent intent = new Intent(this, TelaInicial.class);
+        intent.putExtra("desenvolvimentosan.notifyId", NOTIFICATION_ID);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                .setContentTitle("Alerta")
+                .setSmallIcon(R.mipmap.ic_maker_vermelho)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(msg))
+                .setContentIntent(pIntent)
+                .setContentText(msg)
+                .setTicker(msg);
         mBuilder.setAutoCancel(true);
-
         android.app.Notification n = mBuilder.build();
-        //Frescura de vibrar.
+//        //Frescura de vibrar.
         n.vibrate = new long[]{150, 300, 150, 600};
 
+        try {
+            Uri som = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Ringtone toque = RingtoneManager.getRingtone(context, som);
+            toque.play();
+        } catch (Exception e) {
+        }
 
-        mNotificationManager.notify(2, n);
-
-
+        mNotificationManager.notify(NOTIFICATION_ID, n);
     }
+
+//    public void notification() {
+//        NotificationCompat.Builder mBuilder =
+//                new NotificationCompat.Builder(this)
+//                        .setSmallIcon(R.mipmap.ic_maker_vermelho)
+//                        .setContentTitle("Alerta")
+//                        .setTicker("Foram encontrados alertas próximos da sua localidade.")
+//                        .setContentText("Foram encontrados alertas próximos da sua localidade")
+//                        .setSubText("Alerta!");
+//
+//
+//        mBuilder.setAutoCancel(true);
+//
+//        android.app.Notification n = mBuilder.build();
+//        //Frescura de vibrar.
+//        n.vibrate = new long[]{150, 300, 150, 600};
+//
+//
+//        mNotificationManager.notify(2, n);
+//
+//
+//    }
 
     public void goAndDetectLocation() {
         Log.i("teste", "goAndDetectLocation called");
